@@ -15,8 +15,8 @@ async function bootstrap() {
   });
 
   const options = new DocumentBuilder()
-    .setTitle('Monopolon API')
-    .setDescription('The Monopolon API')
+    .setTitle('MonopolonBoard API')
+    .setDescription('The MonopolonBoard API')
     .setVersion('2.5')
     .addBearerAuth()
     .build();
