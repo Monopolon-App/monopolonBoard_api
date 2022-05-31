@@ -14,19 +14,19 @@ import {
   TreeRepository,
   Like,
 } from 'typeorm';
-import { UsersProfile } from './usersprofile.entity';
-import { UpdateUserDto } from './dto/update-user-profile.dto';
+import { EnterGame } from './entergame.entity';
+import { UpdateEnterGameDto } from './dto/update-entergame.dto';
 
 @Injectable()
-export class UsersProfileService {
+export class EnterGameService {
   constructor(
-    @InjectRepository(UsersProfile)
-    private readonly usersRepository: Repository<UsersProfile>
+    @InjectRepository(EnterGame)
+    private readonly EnterGameRepository: Repository<EnterGame>
   ) {}
 
   async getById(userId: number): Promise<any> {
     try {
-      const user = await this.usersRepository.findOne({ id: userId });
+      const user = await this.EnterGameRepository.findOne({ id: userId });
 
       if (user) {
         return 'data';
@@ -38,13 +38,12 @@ export class UsersProfileService {
     }
   }
 
-  async createUser(
-    userprofile: UsersProfile,
+  async createEnterGame(
+    userprofile: EnterGame,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      console.log('files services=======', files);
-      const userProfile = await this.usersRepository.save(userprofile);
+      const userProfile = await this.EnterGameRepository.save(userprofile);
       return {
         success: true,
         message: 'UserProfile created successfully.',
@@ -57,7 +56,7 @@ export class UsersProfileService {
 
   async getUserById(id: number): Promise<any> {
     try {
-      const [user, count] = await this.usersRepository.findAndCount({
+      const [user, count] = await this.EnterGameRepository.findAndCount({
         where: { id },
       });
 
@@ -77,16 +76,18 @@ export class UsersProfileService {
     }
   }
 
-  async updateUserProfile(
+  async updateEnterGame(
     userId: number,
-    userData: UpdateUserDto
+    EnterGameData: UpdateEnterGameDto
   ): Promise<any> {
     try {
-      const user = new UsersProfile();
+      const user = new EnterGame();
       user.id = userId;
-      await this.usersRepository.update({ id: userId }, userData);
+      await this.EnterGameRepository.update({ id: userId }, EnterGameData);
 
-      const updatesRecord = await this.usersRepository.findOne({ id: userId });
+      const updatesRecord = await this.EnterGameRepository.findOne({
+        id: userId,
+      });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },

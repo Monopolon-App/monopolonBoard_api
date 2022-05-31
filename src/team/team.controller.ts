@@ -15,39 +15,39 @@ import {
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
-import { UsersProfile } from './usersprofile.entity';
-import { UpdateUserDto } from './dto/update-user-profile.dto';
+import { Team } from './team.entity';
+import { UpdateTeamDto } from './dto/update-team.dto';
 
-import { UsersProfileService } from './usersprofile.service';
+import { TeamService } from './team.service';
 
-@ApiTags('usersprofile')
-@Controller('usersprofile')
+@ApiTags('Team')
+@Controller('Team')
 export class UsersProfileController {
-  constructor(private readonly usersService: UsersProfileService) {}
+  constructor(private readonly teamService: TeamService) {}
 
   // @UseGuards(JwtAuthGuard)
-  @Get('/getUserById')
-  getUserById(@Query('id') id: number): Promise<any> {
-    return this.usersService.getUserById(id);
+  @Get('/getTeamById')
+  getTeamById(@Query('id') id: number): Promise<any> {
+    return this.teamService.getTeamById(id);
   }
 
   // @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
-  createUser(
-    @Body() userprofile: UsersProfile,
+  createTeam(
+    @Body() userprofile: Team,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
     console.log('files==========', files);
-    return this.usersService.createUser(userprofile, files);
+    return this.teamService.createTeam(userprofile, files);
   }
 
   @Patch(':id')
-  updateUserProfile(
+  updateTeam(
     @Param('id') userId: number,
-    @Body() updateUserDto: UpdateUserDto
+    @Body() updategridDto: UpdateTeamDto
   ) {
-    return this.usersService.updateUserProfile(userId, updateUserDto);
+    return this.teamService.updateTeam(userId, updategridDto);
   }
 }

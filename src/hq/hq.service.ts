@@ -14,19 +14,22 @@ import {
   TreeRepository,
   Like,
 } from 'typeorm';
-import { UsersProfile } from './usersprofile.entity';
-import { UpdateUserDto } from './dto/update-user-profile.dto';
+import { Hq } from './hq.entity';
+import { UpdateHqDto } from './dto/update-hq.dto';
 
 @Injectable()
-export class UsersProfileService {
+export class HqService {
+  monthToDays(arg0: number) {
+    throw new Error('Method not implemented.');
+  }
   constructor(
-    @InjectRepository(UsersProfile)
-    private readonly usersRepository: Repository<UsersProfile>
+    @InjectRepository(Hq)
+    private readonly HqRepository: Repository<Hq>
   ) {}
 
   async getById(userId: number): Promise<any> {
     try {
-      const user = await this.usersRepository.findOne({ id: userId });
+      const user = await this.HqRepository.findOne({ id: userId });
 
       if (user) {
         return 'data';
@@ -38,13 +41,10 @@ export class UsersProfileService {
     }
   }
 
-  async createUser(
-    userprofile: UsersProfile,
-    files: Array<Express.Multer.File>
-  ): Promise<any> {
+  async createHq(grid: Hq, files: Array<Express.Multer.File>): Promise<any> {
     try {
       console.log('files services=======', files);
-      const userProfile = await this.usersRepository.save(userprofile);
+      const userProfile = await this.HqRepository.save(grid);
       return {
         success: true,
         message: 'UserProfile created successfully.',
@@ -55,9 +55,9 @@ export class UsersProfileService {
     }
   }
 
-  async getUserById(id: number): Promise<any> {
+  async getHqById(id: number): Promise<any> {
     try {
-      const [user, count] = await this.usersRepository.findAndCount({
+      const [user, count] = await this.HqRepository.findAndCount({
         where: { id },
       });
 
@@ -77,16 +77,13 @@ export class UsersProfileService {
     }
   }
 
-  async updateUserProfile(
-    userId: number,
-    userData: UpdateUserDto
-  ): Promise<any> {
+  async updateHq(userId: number, hqData: UpdateHqDto): Promise<any> {
     try {
-      const user = new UsersProfile();
+      const user = new Hq();
       user.id = userId;
-      await this.usersRepository.update({ id: userId }, userData);
+      await this.HqRepository.update({ id: userId }, hqData);
 
-      const updatesRecord = await this.usersRepository.findOne({ id: userId });
+      const updatesRecord = await this.HqRepository.findOne({ id: userId });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },

@@ -15,39 +15,39 @@ import {
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
-import { UsersProfile } from './usersprofile.entity';
-import { UpdateUserDto } from './dto/update-user-profile.dto';
+import { Transaction } from './transaction.entity';
+import { UpdateTransactionDto } from './dto/update-transaction.dto';
 
-import { UsersProfileService } from './usersprofile.service';
+import { TeamService } from './transaction.service';
 
-@ApiTags('usersprofile')
-@Controller('usersprofile')
-export class UsersProfileController {
-  constructor(private readonly usersService: UsersProfileService) {}
+@ApiTags('transaction')
+@Controller('transaction')
+export class TransactionController {
+  constructor(private readonly hqService: TeamService) {}
 
   // @UseGuards(JwtAuthGuard)
-  @Get('/getUserById')
+  @Get('/geTransactionById')
   getUserById(@Query('id') id: number): Promise<any> {
-    return this.usersService.getUserById(id);
+    return this.hqService.getTransactionById(id);
   }
 
   // @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
-  createUser(
-    @Body() userprofile: UsersProfile,
+  createTransaction(
+    @Body() userprofile: Transaction,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
     console.log('files==========', files);
-    return this.usersService.createUser(userprofile, files);
+    return this.hqService.createTransaction(userprofile, files);
   }
 
   @Patch(':id')
-  updateUserProfile(
+  updateTransaction(
     @Param('id') userId: number,
-    @Body() updateUserDto: UpdateUserDto
+    @Body() updatetransactionDto: UpdateTransactionDto
   ) {
-    return this.usersService.updateUserProfile(userId, updateUserDto);
+    return this.hqService.updateTransaction(userId, updatetransactionDto);
   }
 }

@@ -15,39 +15,39 @@ import {
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
-import { UsersProfile } from './usersprofile.entity';
-import { UpdateUserDto } from './dto/update-user-profile.dto';
+import { Fortune } from './fortune-card.entity';
+import { UpdateFortuneDto } from './dto/update-fortune-card.dto';
 
-import { UsersProfileService } from './usersprofile.service';
+import { FortuneService } from './fortune-card.service';
 
-@ApiTags('usersprofile')
-@Controller('usersprofile')
+@ApiTags('hq')
+@Controller('hq')
 export class UsersProfileController {
-  constructor(private readonly usersService: UsersProfileService) {}
+  constructor(private readonly FortuneService: FortuneService) {}
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getUserById(@Query('id') id: number): Promise<any> {
-    return this.usersService.getUserById(id);
+    return this.FortuneService.getUserById(id);
   }
 
   // @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
-  createUser(
-    @Body() userprofile: UsersProfile,
+  createFortune(
+    @Body() userprofile: Fortune,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
     console.log('files==========', files);
-    return this.usersService.createUser(userprofile, files);
+    return this.FortuneService.createFortune(userprofile, files);
   }
 
   @Patch(':id')
-  updateUserProfile(
+  updateFortune(
     @Param('id') userId: number,
-    @Body() updateUserDto: UpdateUserDto
+    @Body() updategridDto: UpdateFortuneDto
   ) {
-    return this.usersService.updateUserProfile(userId, updateUserDto);
+    return this.FortuneService.updateFortune(userId, updategridDto);
   }
 }

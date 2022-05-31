@@ -14,19 +14,22 @@ import {
   TreeRepository,
   Like,
 } from 'typeorm';
-import { UsersProfile } from './usersprofile.entity';
-import { UpdateUserDto } from './dto/update-user-profile.dto';
+import { Team } from './team.entity';
+import { UpdateTeamDto } from './dto/update-team.dto';
 
 @Injectable()
-export class UsersProfileService {
+export class TeamService {
+  monthToDays(arg0: number) {
+    throw new Error('Method not implemented.');
+  }
   constructor(
-    @InjectRepository(UsersProfile)
-    private readonly usersRepository: Repository<UsersProfile>
+    @InjectRepository(Team)
+    private readonly TeamRepository: Repository<Team>
   ) {}
 
   async getById(userId: number): Promise<any> {
     try {
-      const user = await this.usersRepository.findOne({ id: userId });
+      const user = await this.TeamRepository.findOne({ id: userId });
 
       if (user) {
         return 'data';
@@ -38,13 +41,13 @@ export class UsersProfileService {
     }
   }
 
-  async createUser(
-    userprofile: UsersProfile,
+  async createTeam(
+    grid: Team,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
       console.log('files services=======', files);
-      const userProfile = await this.usersRepository.save(userprofile);
+      const userProfile = await this.TeamRepository.save(grid);
       return {
         success: true,
         message: 'UserProfile created successfully.',
@@ -55,9 +58,9 @@ export class UsersProfileService {
     }
   }
 
-  async getUserById(id: number): Promise<any> {
+  async getTeamById(id: number): Promise<any> {
     try {
-      const [user, count] = await this.usersRepository.findAndCount({
+      const [user, count] = await this.TeamRepository.findAndCount({
         where: { id },
       });
 
@@ -77,16 +80,13 @@ export class UsersProfileService {
     }
   }
 
-  async updateUserProfile(
-    userId: number,
-    userData: UpdateUserDto
-  ): Promise<any> {
+  async updateTeam(userId: number, teamData: UpdateTeamDto): Promise<any> {
     try {
-      const user = new UsersProfile();
+      const user = new Team();
       user.id = userId;
-      await this.usersRepository.update({ id: userId }, userData);
+      await this.TeamRepository.update({ id: userId }, teamData);
 
-      const updatesRecord = await this.usersRepository.findOne({ id: userId });
+      const updatesRecord = await this.TeamRepository.findOne({ id: userId });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },

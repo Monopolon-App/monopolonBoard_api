@@ -14,19 +14,22 @@ import {
   TreeRepository,
   Like,
 } from 'typeorm';
-import { UsersProfile } from './usersprofile.entity';
-import { UpdateUserDto } from './dto/update-user-profile.dto';
+import { Transaction } from './transaction.entity';
+import { UpdateTransactionDto } from './dto/update-transaction.dto';
 
 @Injectable()
-export class UsersProfileService {
+export class TeamService {
+  monthToDays(arg0: number) {
+    throw new Error('Method not implemented.');
+  }
   constructor(
-    @InjectRepository(UsersProfile)
-    private readonly usersRepository: Repository<UsersProfile>
+    @InjectRepository(Transaction)
+    private readonly transactionRepository: Repository<Transaction>
   ) {}
 
   async getById(userId: number): Promise<any> {
     try {
-      const user = await this.usersRepository.findOne({ id: userId });
+      const user = await this.transactionRepository.findOne({ id: userId });
 
       if (user) {
         return 'data';
@@ -38,13 +41,13 @@ export class UsersProfileService {
     }
   }
 
-  async createUser(
-    userprofile: UsersProfile,
+  async createTransaction(
+    grid: Transaction,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
       console.log('files services=======', files);
-      const userProfile = await this.usersRepository.save(userprofile);
+      const userProfile = await this.transactionRepository.save(grid);
       return {
         success: true,
         message: 'UserProfile created successfully.',
@@ -55,9 +58,9 @@ export class UsersProfileService {
     }
   }
 
-  async getUserById(id: number): Promise<any> {
+  async getTransactionById(id: number): Promise<any> {
     try {
-      const [user, count] = await this.usersRepository.findAndCount({
+      const [user, count] = await this.transactionRepository.findAndCount({
         where: { id },
       });
 
@@ -77,16 +80,18 @@ export class UsersProfileService {
     }
   }
 
-  async updateUserProfile(
+  async updateTransaction(
     userId: number,
-    userData: UpdateUserDto
+    TransactionData: UpdateTransactionDto
   ): Promise<any> {
     try {
-      const user = new UsersProfile();
+      const user = new Transaction();
       user.id = userId;
-      await this.usersRepository.update({ id: userId }, userData);
+      await this.transactionRepository.update({ id: userId }, TransactionData);
 
-      const updatesRecord = await this.usersRepository.findOne({ id: userId });
+      const updatesRecord = await this.transactionRepository.findOne({
+        id: userId,
+      });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },

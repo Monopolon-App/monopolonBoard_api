@@ -15,39 +15,38 @@ import {
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
-import { UsersProfile } from './usersprofile.entity';
-import { UpdateUserDto } from './dto/update-user-profile.dto';
+import { EnterGame } from './entergame.entity';
+import { UpdateEnterGameDto } from './dto/update-entergame.dto';
 
-import { UsersProfileService } from './usersprofile.service';
+import { EnterGameService } from './entergame.service';
 
-@ApiTags('usersprofile')
-@Controller('usersprofile')
+@ApiTags('enterGame')
+@Controller('enterGame')
 export class UsersProfileController {
-  constructor(private readonly usersService: UsersProfileService) {}
+  constructor(private readonly entergameService: EnterGameService) {}
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getUserById(@Query('id') id: number): Promise<any> {
-    return this.usersService.getUserById(id);
+    return this.entergameService.getUserById(id);
   }
 
   // @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
-  createUser(
-    @Body() userprofile: UsersProfile,
+  createEnterGame(
+    @Body() userprofile: EnterGame,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
-    console.log('files==========', files);
-    return this.usersService.createUser(userprofile, files);
+    return this.entergameService.createEnterGame(userprofile, files);
   }
 
   @Patch(':id')
-  updateUserProfile(
+  updateEnterGame(
     @Param('id') userId: number,
-    @Body() updateUserDto: UpdateUserDto
+    @Body() updateEnterGameDto: UpdateEnterGameDto
   ) {
-    return this.usersService.updateUserProfile(userId, updateUserDto);
+    return this.entergameService.updateEnterGame(userId, updateEnterGameDto);
   }
 }

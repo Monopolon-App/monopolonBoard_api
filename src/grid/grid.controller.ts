@@ -15,15 +15,15 @@ import {
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
-import { UsersProfile } from './usersprofile.entity';
-import { UpdateUserDto } from './dto/update-user-profile.dto';
+import { Grid } from './grid.entity';
+import { UpdateGridDto } from './dto/update-grid.dto';
 
-import { UsersProfileService } from './usersprofile.service';
+import { GridService } from './grid.service';
 
-@ApiTags('usersprofile')
-@Controller('usersprofile')
+@ApiTags('grid')
+@Controller('grid')
 export class UsersProfileController {
-  constructor(private readonly usersService: UsersProfileService) {}
+  constructor(private readonly usersService: GridService) {}
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
@@ -36,7 +36,7 @@ export class UsersProfileController {
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
   createUser(
-    @Body() userprofile: UsersProfile,
+    @Body() userprofile: Grid,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
     console.log('files==========', files);
@@ -46,8 +46,8 @@ export class UsersProfileController {
   @Patch(':id')
   updateUserProfile(
     @Param('id') userId: number,
-    @Body() updateUserDto: UpdateUserDto
+    @Body() updategridDto: UpdateGridDto
   ) {
-    return this.usersService.updateUserProfile(userId, updateUserDto);
+    return this.usersService.updateUserProfile(userId, updategridDto);
   }
 }

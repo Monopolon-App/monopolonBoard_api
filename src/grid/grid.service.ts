@@ -14,14 +14,17 @@ import {
   TreeRepository,
   Like,
 } from 'typeorm';
-import { UsersProfile } from './usersprofile.entity';
-import { UpdateUserDto } from './dto/update-user-profile.dto';
+import { Grid } from './grid.entity';
+import { UpdateGridDto } from './dto/update-grid.dto';
 
 @Injectable()
-export class UsersProfileService {
+export class GridService {
+  monthToDays(arg0: number) {
+    throw new Error('Method not implemented.');
+  }
   constructor(
-    @InjectRepository(UsersProfile)
-    private readonly usersRepository: Repository<UsersProfile>
+    @InjectRepository(Grid)
+    private readonly usersRepository: Repository<Grid>
   ) {}
 
   async getById(userId: number): Promise<any> {
@@ -39,12 +42,12 @@ export class UsersProfileService {
   }
 
   async createUser(
-    userprofile: UsersProfile,
+    grid: Grid,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
       console.log('files services=======', files);
-      const userProfile = await this.usersRepository.save(userprofile);
+      const userProfile = await this.usersRepository.save(grid);
       return {
         success: true,
         message: 'UserProfile created successfully.',
@@ -79,12 +82,12 @@ export class UsersProfileService {
 
   async updateUserProfile(
     userId: number,
-    userData: UpdateUserDto
+    gridData: UpdateGridDto
   ): Promise<any> {
     try {
-      const user = new UsersProfile();
+      const user = new Grid();
       user.id = userId;
-      await this.usersRepository.update({ id: userId }, userData);
+      await this.usersRepository.update({ id: userId }, gridData);
 
       const updatesRecord = await this.usersRepository.findOne({ id: userId });
 
