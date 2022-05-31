@@ -12,7 +12,8 @@ describe('', () => {
       imports: [PlayEarningModule, TypeOrmModule.forFeature([PlayerEarning])],
     }).compile();
 
-    playseearningService = moduleRef.get<PlayerEarningService>(PlayerEarningService);
+    playseearningService =
+      moduleRef.get<PlayerEarningService>(PlayerEarningService);
   });
 
   it('monthToDays', () => {

@@ -17,7 +17,6 @@ import {
 import { PlayerEarning } from './playerearning.entity';
 import { UpdatePlayerEarningDto } from './dto/update-player-earning.dto';
 
-
 @Injectable()
 export class PlayerEarningService {
   monthToDays(arg0: number) {
@@ -25,7 +24,7 @@ export class PlayerEarningService {
   }
   constructor(
     @InjectRepository(PlayerEarning)
-    private readonly PlayearningRepository: Repository<PlayerEarning>,
+    private readonly PlayearningRepository: Repository<PlayerEarning>
   ) {}
 
   async getPlayearningById(userId: number): Promise<any> {
@@ -33,7 +32,7 @@ export class PlayerEarningService {
       const user = await this.PlayearningRepository.findOne({ id: userId });
 
       if (user) {
-        return "data";
+        return 'data';
       }
 
       return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
@@ -42,21 +41,24 @@ export class PlayerEarningService {
     }
   }
 
-  async createPlayearning(playerEarning:PlayerEarning,files: Array<Express.Multer.File>, ): Promise<any> {
+  async createPlayearning(
+    playerEarning: PlayerEarning,
+    files: Array<Express.Multer.File>
+  ): Promise<any> {
     try {
-      const playearEarning = await this.PlayearningRepository.save(playerEarning);
+      const playearEarning = await this.PlayearningRepository.save(
+        playerEarning
+      );
       return {
         success: true,
         message: 'playearEarning created successfully.',
-        result:playearEarning
+        result: playearEarning,
       };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
-    
   }
 
-  
   async getUserById(id: number): Promise<any> {
     try {
       const [user, count] = await this.PlayearningRepository.findAndCount({
@@ -68,7 +70,7 @@ export class PlayerEarningService {
           {
             status: HttpStatus.OK,
             message: 'Success',
-            data:user
+            data: user,
           },
           HttpStatus.OK
         );
@@ -79,17 +81,21 @@ export class PlayerEarningService {
     }
   }
 
-
-
-
-
-  async updatPlayseEarning(userId: number, udatePlayerEarningDto: UpdatePlayerEarningDto): Promise<any> {
+  async updatPlayseEarning(
+    userId: number,
+    udatePlayerEarningDto: UpdatePlayerEarningDto
+  ): Promise<any> {
     try {
       const user = new PlayerEarning();
       user.id = userId;
-      await this.PlayearningRepository.update({ id: userId }, udatePlayerEarningDto);
+      await this.PlayearningRepository.update(
+        { id: userId },
+        udatePlayerEarningDto
+      );
 
-      const updatesRecord = await this.PlayearningRepository.findOne({ id: userId });
+      const updatesRecord = await this.PlayearningRepository.findOne({
+        id: userId,
+      });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },
@@ -98,6 +104,5 @@ export class PlayerEarningService {
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
-  } 
-
+  }
 }

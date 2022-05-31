@@ -35,16 +35,21 @@ export class UsersController {
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
-  createPlayEarning(@Body() userprofile: PlayerEarning,@UploadedFiles() files: Array<Express.Multer.File>,): Promise<any> {
-    return this.playerearningService.createPlayearning(userprofile,files);
+  createPlayEarning(
+    @Body() userprofile: PlayerEarning,
+    @UploadedFiles() files: Array<Express.Multer.File>
+  ): Promise<any> {
+    return this.playerearningService.createPlayearning(userprofile, files);
   }
 
   @Patch(':id')
   updatPlayseEarning(
     @Param('id') userId: number,
-    @Body() updateplayerEarningDto: UpdatePlayerEarningDto,
+    @Body() updateplayerEarningDto: UpdatePlayerEarningDto
   ) {
-    return this.playerearningService.updatPlayseEarning(userId, updateplayerEarningDto);
+    return this.playerearningService.updatPlayseEarning(
+      userId,
+      updateplayerEarningDto
+    );
   }
- 
 }

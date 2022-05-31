@@ -44,7 +44,7 @@ import { MulterModule } from '@nestjs/platform-express';
         username: configService.get('DATABASE_USER'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [UsersProfile,PlayerEarning],
+        entities: [UsersProfile, PlayerEarning],
         synchronize: true,
       }),
     }),
@@ -52,7 +52,7 @@ import { MulterModule } from '@nestjs/platform-express';
     PlayEarningModule,
     MulterModule.register({
       dest: './uploads',
-   }),
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

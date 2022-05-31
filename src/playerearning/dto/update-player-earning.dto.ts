@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdatePlayerEarningDto {
-
   @ApiProperty({ default: null })
   goldcoins?: string;
 
@@ -25,6 +24,4 @@ export class UpdatePlayerEarningDto {
 
   @ApiProperty({ default: null })
   invadedcoins?: string;
-
-
 }

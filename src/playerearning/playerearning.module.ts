@@ -7,10 +7,7 @@ import { UsersController } from './playerearning.controller';
 import { PlayerEarningService } from './playerearning.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([PlayerEarning]),
-    ConfigModule,
-  ],
+  imports: [TypeOrmModule.forFeature([PlayerEarning]), ConfigModule],
   providers: [PlayerEarningService, ConfigService],
   controllers: [UsersController],
 })
