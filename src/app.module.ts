@@ -7,6 +7,13 @@ import * as Joi from 'joi';
 // Entities
 import { UsersProfile } from './usersprofile/usersprofile.entity';
 import { PlayerEarning } from './playerearning/playerearning.entity';
+import { EnterGame } from './entergame/entergame.entity';
+import { Transaction } from './transaction/transaction.entity';
+import { Team } from './team/team.entity';
+import { Hq } from './hq/hq.entity';
+import { Grid } from './grid/grid.entity';
+import { Character } from './character/character.entity';
+import { Community } from './communitychest/community.entity';
 
 // Modules
 import { UsersModule } from './usersprofile/usersprofile.module';
@@ -51,7 +58,17 @@ import { MulterModule } from '@nestjs/platform-express';
         username: configService.get('DATABASE_USER'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [UsersProfile, PlayerEarning],
+        entities: [
+          UsersProfile,
+          PlayerEarning,
+          EnterGame,
+          Transaction,
+          Team,
+          Hq,
+          Grid,
+          Character,
+          Community,
+        ],
         synchronize: true,
       }),
     }),
