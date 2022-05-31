@@ -11,4 +11,4 @@ import { CharacterService } from './character.service';
   providers: [CharacterService, ConfigService],
   controllers: [UsersProfileController],
 })
-export class UsersModule {}
+export class CharacterModule {}

@@ -11,4 +11,4 @@ import { CommunityService } from './community.service';
   providers: [CommunityService, ConfigService],
   controllers: [UsersProfileController],
 })
-export class UsersModule {}
+export class CommunityModule {}

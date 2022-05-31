@@ -11,4 +11,4 @@ import { HqService } from './hq.service';
   providers: [HqService, ConfigService],
   controllers: [UsersProfileController],
 })
-export class UsersModule {}
+export class HqModule {}

@@ -11,6 +11,13 @@ import { PlayerEarning } from './playerearning/playerearning.entity';
 // Modules
 import { UsersModule } from './usersprofile/usersprofile.module';
 import { PlayEarningModule } from './playerearning/playerearning.module';
+import { EnterGameModule } from './entergame/entergame.module';
+import { TransactionModule } from './transaction/transaction.module';
+import { TeamModule } from './team/team.module';
+import { HqModule } from './hq/hq.module';
+import { GridModule } from './grid/grid.module';
+import { CharacterModule } from './character/character.module';
+import { CommunityModule } from './communitychest/community.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -50,6 +57,13 @@ import { MulterModule } from '@nestjs/platform-express';
     }),
     UsersModule,
     PlayEarningModule,
+    EnterGameModule,
+    TransactionModule,
+    TeamModule,
+    HqModule,
+    GridModule,
+    CharacterModule,
+    CommunityModule,
     MulterModule.register({
       dest: './uploads',
     }),

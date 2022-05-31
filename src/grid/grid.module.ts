@@ -11,4 +11,4 @@ import { GridService } from './grid.service';
   providers: [GridService, ConfigService],
   controllers: [UsersProfileController],
 })
-export class UsersModule {}
+export class GridModule {}

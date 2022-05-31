@@ -11,4 +11,4 @@ import { EnterGameService } from './entergame.service';
   providers: [EnterGameService, ConfigService],
   controllers: [UsersProfileController],
 })
-export class UsersModule {}
+export class EnterGameModule {}

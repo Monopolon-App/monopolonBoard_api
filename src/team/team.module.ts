@@ -11,4 +11,4 @@ import { TeamService } from './team.service';
   providers: [TeamService, ConfigService],
   controllers: [UsersProfileController],
 })
-export class UsersModule {}
+export class TeamModule {}

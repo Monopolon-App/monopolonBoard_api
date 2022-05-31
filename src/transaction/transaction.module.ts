@@ -11,4 +11,4 @@ import { TeamService } from './transaction.service';
   providers: [TeamService, ConfigService],
   controllers: [TransactionController],
 })
-export class UsersModule {}
+export class TransactionModule {}
