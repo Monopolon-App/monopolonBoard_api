@@ -22,32 +22,31 @@ import { GridService } from './grid.service';
 
 @ApiTags('grid')
 @Controller('grid')
-export class UsersProfileController {
-  constructor(private readonly usersService: GridService) {}
+export class GridController {
+  constructor(private readonly gridService: GridService) {}
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getUserById(@Query('id') id: number): Promise<any> {
-    return this.usersService.getUserById(id);
+    return this.gridService.getUserById(id);
   }
 
   // @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
-  createUser(
-    @Body() userprofile: Grid,
+  createGrid(
+    @Body() grid: Grid,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
-    console.log('files==========', files);
-    return this.usersService.createUser(userprofile, files);
+    return this.gridService.createGrid(grid, files);
   }
 
   @Patch(':id')
-  updateUserProfile(
+  updateGrid(
     @Param('id') userId: number,
     @Body() updategridDto: UpdateGridDto
   ) {
-    return this.usersService.updateUserProfile(userId, updategridDto);
+    return this.gridService.updateGrid(userId, updategridDto);
   }
 }

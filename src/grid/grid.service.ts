@@ -41,7 +41,7 @@ export class GridService {
     }
   }
 
-  async createUser(
+  async createGrid(
     grid: Grid,
     files: Array<Express.Multer.File>
   ): Promise<any> {
@@ -79,10 +79,7 @@ export class GridService {
     }
   }
 
-  async updateUserProfile(
-    userId: number,
-    gridData: UpdateGridDto
-  ): Promise<any> {
+  async updateGrid(userId: number, gridData: UpdateGridDto): Promise<any> {
     try {
       const user = new Grid();
       user.id = userId;

@@ -15,7 +15,7 @@ import {
   Like,
 } from 'typeorm';
 import { Character } from './character.entity';
-import { UpdateHqDto } from './dto/update-character.dto';
+import { UpdateCharacterDto } from './dto/update-character.dto';
 
 @Injectable()
 export class CharacterService {
@@ -44,7 +44,7 @@ export class CharacterService {
     }
   }
 
-  async createUser(
+  async createCharacter(
     characters: Character,
     files: Array<Express.Multer.File>
   ): Promise<any> {
@@ -82,11 +82,14 @@ export class CharacterService {
     }
   }
 
-  async updateUserProfile(userId: number, hqData: UpdateHqDto): Promise<any> {
+  async updateCharacter(
+    userId: number,
+    characterData: UpdateCharacterDto
+  ): Promise<any> {
     try {
       const user = new Character();
       user.id = userId;
-      await this.usersRepository.update({ id: userId }, hqData);
+      await this.usersRepository.update({ id: userId }, characterData);
 
       const updatesRecord = await this.usersRepository.findOne({ id: userId });
 

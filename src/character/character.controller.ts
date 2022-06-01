@@ -16,13 +16,13 @@ import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
 import { Character } from './character.entity';
-import { UpdateHqDto } from './dto/update-character.dto';
+import { UpdateCharacterDto } from './dto/update-character.dto';
 
 import { CharacterService } from './character.service';
 
 @ApiTags('hq')
 @Controller('hq')
-export class UsersProfileController {
+export class CharacterController {
   constructor(private readonly hqService: CharacterService) {}
 
   // @UseGuards(JwtAuthGuard)
@@ -35,19 +35,18 @@ export class UsersProfileController {
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
-  createUser(
-    @Body() userprofile: Character,
+  createCharacter(
+    @Body() character: Character,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
-    console.log('files==========', files);
-    return this.hqService.createUser(userprofile, files);
+    return this.hqService.createCharacter(character, files);
   }
 
   @Patch(':id')
-  updateUserProfile(
+  updateCharacter(
     @Param('id') userId: number,
-    @Body() updategridDto: UpdateHqDto
+    @Body() updategridDto: UpdateCharacterDto
   ) {
-    return this.hqService.updateUserProfile(userId, updategridDto);
+    return this.hqService.updateCharacter(userId, updategridDto);
   }
 }

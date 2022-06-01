@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Double } from 'typeorm';
 
-export class UpdateHqDto {
+export class UpdateCharacterDto {
   @ApiProperty({ required: false })
   erc721?: string;
 

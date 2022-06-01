@@ -22,7 +22,7 @@ import { HqService } from './hq.service';
 
 @ApiTags('hq')
 @Controller('hq')
-export class UsersProfileController {
+export class HqController {
   constructor(private readonly hqService: HqService) {}
 
   // @UseGuards(JwtAuthGuard)
