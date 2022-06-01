@@ -46,12 +46,11 @@ export class GridService {
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      console.log('files services=======', files);
-      const userProfile = await this.usersRepository.save(grid);
+      const Grid = await this.usersRepository.save(grid);
       return {
         success: true,
-        message: 'UserProfile created successfully.',
-        result: userProfile,
+        message: 'Grid created successfully.',
+        result: Grid,
       };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -74,7 +73,7 @@ export class GridService {
           HttpStatus.OK
         );
       }
-      return new HttpException('User not found', HttpStatus.NOT_FOUND);
+      return new HttpException('Grid not found', HttpStatus.NOT_FOUND);
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

@@ -35,23 +35,25 @@ export class CharacterService {
         return 'data';
       }
 
-      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+      return new HttpException(
+        'character does not exist',
+        HttpStatus.NOT_FOUND
+      );
     } catch (error) {
       throw error;
     }
   }
 
   async createUser(
-    grid: Character,
+    characters: Character,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      console.log('files services=======', files);
-      const userProfile = await this.usersRepository.save(grid);
+      const char = await this.usersRepository.save(characters);
       return {
         success: true,
-        message: 'UserProfile created successfully.',
-        result: userProfile,
+        message: 'Character created successfully.',
+        result: char,
       };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);

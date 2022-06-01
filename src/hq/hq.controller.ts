@@ -39,7 +39,6 @@ export class UsersProfileController {
     @Body() userprofile: Hq,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
-    console.log('files==========', files);
     return this.hqService.createHq(userprofile, files);
   }
 
