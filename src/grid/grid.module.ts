@@ -3,12 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { Grid } from './grid.entity';
-import { UsersProfileController } from './grid.controller';
+import { GridController } from './grid.controller';
 import { GridService } from './grid.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Grid]), ConfigModule],
   providers: [GridService, ConfigService],
-  controllers: [UsersProfileController],
+  controllers: [GridController],
 })
-export class UsersModule {}
+export class GridModule {}

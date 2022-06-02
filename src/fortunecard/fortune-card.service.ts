@@ -35,7 +35,10 @@ export class FortuneService {
         return 'data';
       }
 
-      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+      return new HttpException(
+        'fortunecard does not exist',
+        HttpStatus.NOT_FOUND
+      );
     } catch (error) {
       throw error;
     }
@@ -46,12 +49,11 @@ export class FortuneService {
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      console.log('files services=======', files);
-      const userProfile = await this.fortuneRepository.save(fortune);
+      const fortunecard = await this.fortuneRepository.save(fortune);
       return {
         success: true,
-        message: 'UserProfile created successfully.',
-        result: userProfile,
+        message: 'fortunecard created successfully.',
+        result: fortunecard,
       };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);

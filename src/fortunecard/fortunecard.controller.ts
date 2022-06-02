@@ -22,7 +22,7 @@ import { FortuneService } from './fortune-card.service';
 
 @ApiTags('hq')
 @Controller('hq')
-export class UsersProfileController {
+export class FortuneCardController {
   constructor(private readonly FortuneService: FortuneService) {}
 
   // @UseGuards(JwtAuthGuard)
@@ -39,15 +39,14 @@ export class UsersProfileController {
     @Body() userprofile: Fortune,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
-    console.log('files==========', files);
     return this.FortuneService.createFortune(userprofile, files);
   }
 
   @Patch(':id')
   updateFortune(
     @Param('id') userId: number,
-    @Body() updategridDto: UpdateFortuneDto
+    @Body() updatefortuneDto: UpdateFortuneDto
   ) {
-    return this.FortuneService.updateFortune(userId, updategridDto);
+    return this.FortuneService.updateFortune(userId, updatefortuneDto);
   }
 }

@@ -42,16 +42,15 @@ export class TeamService {
   }
 
   async createTransaction(
-    grid: Transaction,
+    transactions: Transaction,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      console.log('files services=======', files);
-      const userProfile = await this.transactionRepository.save(grid);
+      const transaction = await this.transactionRepository.save(transactions);
       return {
         success: true,
-        message: 'UserProfile created successfully.',
-        result: userProfile,
+        message: 'Transaction created successfully.',
+        result: transaction,
       };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);

@@ -22,7 +22,7 @@ import { CommunityService } from './community.service';
 
 @ApiTags('community')
 @Controller('community')
-export class UsersProfileController {
+export class CommunityController {
   constructor(private readonly communityService: CommunityService) {}
 
   // @UseGuards(JwtAuthGuard)
@@ -39,7 +39,6 @@ export class UsersProfileController {
     @Body() userprofile: Community,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
-    console.log('files==========', files);
     return this.communityService.createCommunity(userprofile, files);
   }
 

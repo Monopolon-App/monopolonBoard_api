@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Double } from 'typeorm';
 
-export class UpdateHqDto {
+export class UpdateCharacterDto {
   @ApiProperty({ required: false })
   erc721?: string;
 
@@ -24,20 +24,20 @@ export class UpdateHqDto {
   wings?: number;
 
   @ApiProperty({ required: false })
-  str?: Double;
+  str?: string;
 
   @ApiProperty({ required: false })
-  dex?: Double;
+  dex?: string;
 
   @ApiProperty({ required: false })
-  Luk?: Double;
+  Luk?: string;
 
   @ApiProperty({ required: false })
-  prep?: Double;
+  prep?: string;
 
   @ApiProperty({ required: false })
-  hp?: Double;
+  hp?: string;
 
   @ApiProperty({ required: false })
-  mp?: Double;
+  mp?: string;
 }

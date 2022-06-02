@@ -39,15 +39,15 @@ export class EnterGameService {
   }
 
   async createEnterGame(
-    userprofile: EnterGame,
+    enterGames: EnterGame,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      const userProfile = await this.EnterGameRepository.save(userprofile);
+      const game = await this.EnterGameRepository.save(enterGames);
       return {
         success: true,
-        message: 'UserProfile created successfully.',
-        result: userProfile,
+        message: 'EnterGame created successfully.',
+        result: game,
       };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);

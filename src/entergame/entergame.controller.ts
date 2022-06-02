@@ -22,7 +22,7 @@ import { EnterGameService } from './entergame.service';
 
 @ApiTags('enterGame')
 @Controller('enterGame')
-export class UsersProfileController {
+export class EnterGameController {
   constructor(private readonly entergameService: EnterGameService) {}
 
   // @UseGuards(JwtAuthGuard)

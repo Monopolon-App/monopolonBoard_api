@@ -15,7 +15,7 @@ import {
   Like,
 } from 'typeorm';
 import { Character } from './character.entity';
-import { UpdateHqDto } from './dto/update-character.dto';
+import { UpdateCharacterDto } from './dto/update-character.dto';
 
 @Injectable()
 export class CharacterService {
@@ -35,23 +35,25 @@ export class CharacterService {
         return 'data';
       }
 
-      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+      return new HttpException(
+        'character does not exist',
+        HttpStatus.NOT_FOUND
+      );
     } catch (error) {
       throw error;
     }
   }
 
-  async createUser(
-    grid: Character,
+  async createCharacter(
+    characters: Character,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      console.log('files services=======', files);
-      const userProfile = await this.usersRepository.save(grid);
+      const char = await this.usersRepository.save(characters);
       return {
         success: true,
-        message: 'UserProfile created successfully.',
-        result: userProfile,
+        message: 'Character created successfully.',
+        result: char,
       };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -80,11 +82,14 @@ export class CharacterService {
     }
   }
 
-  async updateUserProfile(userId: number, hqData: UpdateHqDto): Promise<any> {
+  async updateCharacter(
+    userId: number,
+    characterData: UpdateCharacterDto
+  ): Promise<any> {
     try {
       const user = new Character();
       user.id = userId;
-      await this.usersRepository.update({ id: userId }, hqData);
+      await this.usersRepository.update({ id: userId }, characterData);
 
       const updatesRecord = await this.usersRepository.findOne({ id: userId });
 

@@ -35,22 +35,25 @@ export class CommunityService {
         return 'data';
       }
 
-      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+      return new HttpException(
+        'community does not exist',
+        HttpStatus.NOT_FOUND
+      );
     } catch (error) {
       throw error;
     }
   }
 
   async createCommunity(
-    grid: Community,
+    community: Community,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      const userProfile = await this.communityRepository.save(grid);
+      const communities = await this.communityRepository.save(community);
       return {
         success: true,
-        message: 'UserProfile created successfully.',
-        result: userProfile,
+        message: 'community created successfully.',
+        result: communities,
       };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -73,7 +76,7 @@ export class CommunityService {
           HttpStatus.OK
         );
       }
-      return new HttpException('User not found', HttpStatus.NOT_FOUND);
+      return new HttpException('community not found', HttpStatus.NOT_FOUND);
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

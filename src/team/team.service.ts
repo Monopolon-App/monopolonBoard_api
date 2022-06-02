@@ -35,23 +35,22 @@ export class TeamService {
         return 'data';
       }
 
-      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+      return new HttpException('Team does not exist', HttpStatus.NOT_FOUND);
     } catch (error) {
       throw error;
     }
   }
 
   async createTeam(
-    grid: Team,
+    teams: Team,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      console.log('files services=======', files);
-      const userProfile = await this.TeamRepository.save(grid);
+      const Team = await this.TeamRepository.save(teams);
       return {
         success: true,
-        message: 'UserProfile created successfully.',
-        result: userProfile,
+        message: 'Team created successfully.',
+        result: Team,
       };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -74,7 +73,7 @@ export class TeamService {
           HttpStatus.OK
         );
       }
-      return new HttpException('User not found', HttpStatus.NOT_FOUND);
+      return new HttpException('Team not found', HttpStatus.NOT_FOUND);
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

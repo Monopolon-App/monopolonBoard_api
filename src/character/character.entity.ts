@@ -4,7 +4,6 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  Double,
 } from 'typeorm';
 // this is need to be relative since after compile it will have different path: https://stackoverflow.com/questions/63865678/nestjs-test-suite-failed-to-run-cannot-find-module-src-article-article-entity
 
@@ -35,20 +34,20 @@ export class Character {
   wings?: number;
 
   @Column({ default: null })
-  str?: Double;
+  str?: string;
 
   @Column({ default: null })
-  dex?: Double;
+  dex?: string;
 
   @Column({ default: null })
-  Luk?: Double;
+  Luk?: string;
 
   @Column({ default: null })
-  prep?: Double;
+  prep?: string;
 
   @Column({ default: null })
-  hp?: Double;
+  hp?: string;
 
   @Column({ default: null })
-  mp?: Double;
+  mp?: string;
 }

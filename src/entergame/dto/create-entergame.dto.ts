@@ -9,7 +9,7 @@ export class createEnterGameDto {
   teamID?: number;
 
   @ApiProperty({ required: false })
-  mgmRewardsAccumulated?: Double;
+  mgmRewardsAccumulated?: string;
 
   @ApiProperty({ required: false })
   lastRollTimeStamp?: Date;

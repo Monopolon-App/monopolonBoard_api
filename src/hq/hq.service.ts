@@ -41,14 +41,13 @@ export class HqService {
     }
   }
 
-  async createHq(grid: Hq, files: Array<Express.Multer.File>): Promise<any> {
+  async createHq(hq: Hq, files: Array<Express.Multer.File>): Promise<any> {
     try {
-      console.log('files services=======', files);
-      const userProfile = await this.HqRepository.save(grid);
+      const hQ = await this.HqRepository.save(hq);
       return {
         success: true,
-        message: 'UserProfile created successfully.',
-        result: userProfile,
+        message: 'HQ created successfully.',
+        result: hQ,
       };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);

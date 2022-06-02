@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Double } from 'typeorm';
 
 export class UpdateTeamDto {
   @ApiProperty({ required: false })
@@ -21,20 +20,20 @@ export class UpdateTeamDto {
   slot5?: number;
 
   @ApiProperty({ required: false })
-  totalStr?: Double;
+  totalStr?: string;
 
   @ApiProperty({ required: false })
-  totalDex?: Double;
+  totalDex?: string;
 
   @ApiProperty({ required: false })
-  totalLuk?: Double;
+  totalLuk?: string;
 
   @ApiProperty({ required: false })
-  totalPrep?: Double;
+  totalPrep?: string;
 
   @ApiProperty({ required: false })
-  totalHp?: Double;
+  totalHp?: string;
 
   @ApiProperty({ required: false })
-  totalMp?: Double;
+  totalMp?: string;
 }

@@ -6,7 +6,7 @@ export class UpdateTransactionDto {
   description?: string;
 
   @ApiProperty({ required: false })
-  amount?: Double;
+  amount?: string;
 
   @ApiProperty({ required: false })
   userId?: number;

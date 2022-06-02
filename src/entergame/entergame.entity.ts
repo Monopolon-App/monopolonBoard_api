@@ -20,7 +20,7 @@ export class EnterGame {
   teamID?: number;
 
   @Column({ default: null })
-  mgmRewardsAccumulated?: Double;
+  mgmRewardsAccumulated?: string;
 
   @Column({ type: 'timestamp' })
   lastRollTimeStamp?: Date;

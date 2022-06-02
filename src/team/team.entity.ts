@@ -32,20 +32,20 @@ export class Team {
   slot5?: number;
 
   @Column({ default: null })
-  totalStr?: Double;
+  totalStr?: string;
 
   @Column({ default: null })
-  totalDex?: Double;
+  totalDex?: string;
 
   @Column({ default: null })
-  totalLuk?: Double;
+  totalLuk?: string;
 
   @Column({ default: null })
-  totalPrep?: Double;
+  totalPrep?: string;
 
   @Column({ default: null })
-  totalHp?: Double;
+  totalHp?: string;
 
   @Column({ default: null })
-  totalMp?: Double;
+  totalMp?: string;
 }

@@ -18,7 +18,7 @@ const config: ConnectionOptions = {
   password: env.DATABASE_PASSWORD,
   database: env.DATABASE_NAME,
   entities: [__dirname + '/**/*.entity{.ts,.js}'],
-  migrationsTableName: 'migrations_monopolon',
+  migrationsTableName: 'migrations_monopolonBoard',
 
   // We are using migrations, synchronize should be set to false.
   synchronize: false,

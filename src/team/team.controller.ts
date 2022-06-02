@@ -22,7 +22,7 @@ import { TeamService } from './team.service';
 
 @ApiTags('Team')
 @Controller('Team')
-export class UsersProfileController {
+export class TeamController {
   constructor(private readonly teamService: TeamService) {}
 
   // @UseGuards(JwtAuthGuard)
@@ -36,18 +36,17 @@ export class UsersProfileController {
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
   createTeam(
-    @Body() userprofile: Team,
+    @Body() team: Team,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
-    console.log('files==========', files);
-    return this.teamService.createTeam(userprofile, files);
+    return this.teamService.createTeam(team, files);
   }
 
   @Patch(':id')
   updateTeam(
     @Param('id') userId: number,
-    @Body() updategridDto: UpdateTeamDto
+    @Body() updateteamDto: UpdateTeamDto
   ) {
-    return this.teamService.updateTeam(userId, updategridDto);
+    return this.teamService.updateTeam(userId, updateteamDto);
   }
 }

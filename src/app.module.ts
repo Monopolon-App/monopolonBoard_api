@@ -7,10 +7,24 @@ import * as Joi from 'joi';
 // Entities
 import { UsersProfile } from './usersprofile/usersprofile.entity';
 import { PlayerEarning } from './playerearning/playerearning.entity';
+import { EnterGame } from './entergame/entergame.entity';
+import { Transaction } from './transaction/transaction.entity';
+import { Team } from './team/team.entity';
+import { Hq } from './hq/hq.entity';
+import { Grid } from './grid/grid.entity';
+import { Character } from './character/character.entity';
+import { Community } from './communitychest/community.entity';
 
 // Modules
 import { UsersModule } from './usersprofile/usersprofile.module';
 import { PlayEarningModule } from './playerearning/playerearning.module';
+import { EnterGameModule } from './entergame/entergame.module';
+import { TransactionModule } from './transaction/transaction.module';
+import { TeamModule } from './team/team.module';
+import { HqModule } from './hq/hq.module';
+import { GridModule } from './grid/grid.module';
+import { CharacterModule } from './character/character.module';
+import { CommunityModule } from './communitychest/community.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -44,12 +58,29 @@ import { MulterModule } from '@nestjs/platform-express';
         username: configService.get('DATABASE_USER'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
-        entities: [UsersProfile, PlayerEarning],
+        entities: [
+          UsersProfile,
+          PlayerEarning,
+          EnterGame,
+          Transaction,
+          Team,
+          Hq,
+          Grid,
+          Character,
+          Community,
+        ],
         synchronize: true,
       }),
     }),
     UsersModule,
     PlayEarningModule,
+    EnterGameModule,
+    TransactionModule,
+    TeamModule,
+    HqModule,
+    GridModule,
+    CharacterModule,
+    CommunityModule,
     MulterModule.register({
       dest: './uploads',
     }),

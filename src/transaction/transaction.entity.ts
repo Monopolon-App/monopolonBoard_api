@@ -17,7 +17,7 @@ export class Transaction {
   description?: string;
 
   @Column({ default: null })
-  amount?: Double;
+  amount?: string;
 
   @Column({ default: null })
   userId?: number;

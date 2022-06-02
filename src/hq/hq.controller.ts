@@ -22,7 +22,7 @@ import { HqService } from './hq.service';
 
 @ApiTags('hq')
 @Controller('hq')
-export class UsersProfileController {
+export class HqController {
   constructor(private readonly hqService: HqService) {}
 
   // @UseGuards(JwtAuthGuard)
@@ -39,7 +39,6 @@ export class UsersProfileController {
     @Body() userprofile: Hq,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
-    console.log('files==========', files);
     return this.hqService.createHq(userprofile, files);
   }
 
