@@ -33,9 +33,11 @@ export class PlayerEarningService {
         walletAddress: walletAddress,
       });
 
-      if (user) {
-        return 'data';
-      }
+      return {
+        success: true,
+        message: 'playearEarning Listed.',
+        result: user,
+      };
 
       return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
     } catch (error) {
