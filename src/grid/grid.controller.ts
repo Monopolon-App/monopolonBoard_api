@@ -27,8 +27,8 @@ export class GridController {
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
-  getUserById(@Query('id') id: number): Promise<any> {
-    return this.gridService.getUserById(id);
+  getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
+    return this.gridService.getUserById(walletAddress);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -42,11 +42,11 @@ export class GridController {
     return this.gridService.createGrid(grid, files);
   }
 
-  @Patch(':id')
+  @Patch(':walletAddress')
   updateGrid(
-    @Param('id') userId: number,
+    @Param('walletAddress') walletAddress: string,
     @Body() updategridDto: UpdateGridDto
   ) {
-    return this.gridService.updateGrid(userId, updategridDto);
+    return this.gridService.updateGrid(walletAddress, updategridDto);
   }
 }

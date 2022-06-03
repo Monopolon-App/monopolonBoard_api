@@ -27,11 +27,9 @@ export class UsersProfileService {
   async getById(userId: number): Promise<any> {
     try {
       const user = await this.usersRepository.findOne({ id: userId });
-
       if (user) {
         return 'data';
       }
-
       return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
     } catch (error) {
       throw error;
@@ -43,7 +41,6 @@ export class UsersProfileService {
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      console.log('files services=======', files);
       const userProfile = await this.usersRepository.save(userprofile);
       return {
         success: true,
@@ -55,38 +52,40 @@ export class UsersProfileService {
     }
   }
 
-  async getUserById(id: number): Promise<any> {
+  async getUserById(walletAddress: string): Promise<any> {
     try {
-      const [user, count] = await this.usersRepository.findAndCount({
-        where: { id },
+      const user = await this.usersRepository.findOne({
+        relations: ['character'],
+        where: { walletAddress },
       });
-
-      if (count > 0) {
-        return new HttpException(
-          {
-            status: HttpStatus.OK,
-            message: 'Success',
-            data: user,
-          },
-          HttpStatus.OK
-        );
-      }
-      return new HttpException('User not found', HttpStatus.NOT_FOUND);
+      return new HttpException(
+        {
+          status: HttpStatus.OK,
+          message: 'Success',
+          data: user,
+        },
+        HttpStatus.OK
+      );
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
   async updateUserProfile(
-    userId: number,
+    walletAddress: string,
     userData: UpdateUserDto
   ): Promise<any> {
     try {
       const user = new UsersProfile();
-      user.id = userId;
-      await this.usersRepository.update({ id: userId }, userData);
+      user.walletAddress = walletAddress;
+      await this.usersRepository.update(
+        { walletAddress: walletAddress },
+        userData
+      );
 
-      const updatesRecord = await this.usersRepository.findOne({ id: userId });
+      const updatesRecord = await this.usersRepository.findOne({
+        walletAddress: walletAddress,
+      });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },

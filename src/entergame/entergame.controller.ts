@@ -27,8 +27,8 @@ export class EnterGameController {
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
-  getUserById(@Query('id') id: number): Promise<any> {
-    return this.entergameService.getUserById(id);
+  getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
+    return this.entergameService.getUserById(walletAddress);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -42,11 +42,14 @@ export class EnterGameController {
     return this.entergameService.createEnterGame(userprofile, files);
   }
 
-  @Patch(':id')
+  @Patch(':walletAddress')
   updateEnterGame(
-    @Param('id') userId: number,
+    @Param('walletAddress') walletAddress: string,
     @Body() updateEnterGameDto: UpdateEnterGameDto
   ) {
-    return this.entergameService.updateEnterGame(userId, updateEnterGameDto);
+    return this.entergameService.updateEnterGame(
+      walletAddress,
+      updateEnterGameDto
+    );
   }
 }

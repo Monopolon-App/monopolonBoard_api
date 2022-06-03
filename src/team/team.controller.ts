@@ -27,8 +27,8 @@ export class TeamController {
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getTeamById')
-  getTeamById(@Query('id') id: number): Promise<any> {
-    return this.teamService.getTeamById(id);
+  getTeamById(@Query('walletAddress') walletAddress: string): Promise<any> {
+    return this.teamService.getTeamById(walletAddress);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -42,11 +42,11 @@ export class TeamController {
     return this.teamService.createTeam(team, files);
   }
 
-  @Patch(':id')
+  @Patch(':walletAddress')
   updateTeam(
-    @Param('id') userId: number,
+    @Param('walletAddress') walletAddress: string,
     @Body() updateteamDto: UpdateTeamDto
   ) {
-    return this.teamService.updateTeam(userId, updateteamDto);
+    return this.teamService.updateTeam(walletAddress, updateteamDto);
   }
 }

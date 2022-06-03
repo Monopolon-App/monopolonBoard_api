@@ -10,4 +10,7 @@ export class hqDto {
 
   @ApiProperty({ required: false })
   status?: number;
+
+  @ApiProperty({ required: false })
+  walletAddress?: string;
 }

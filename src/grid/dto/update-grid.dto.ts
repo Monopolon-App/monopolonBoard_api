@@ -7,4 +7,7 @@ export class UpdateGridDto {
 
   @ApiProperty({ required: false })
   description?: string;
+
+  @ApiProperty({ required: false })
+  walletAddress?: string;
 }

@@ -60,10 +60,10 @@ export class FortuneService {
     }
   }
 
-  async getUserById(id: number): Promise<any> {
+  async getUserById(walletAddress: string): Promise<any> {
     try {
       const [user, count] = await this.fortuneRepository.findAndCount({
-        where: { id },
+        where: { walletAddress },
       });
 
       if (count > 0) {
@@ -82,13 +82,21 @@ export class FortuneService {
     }
   }
 
-  async updateFortune(Id: number, fortuneData: UpdateFortuneDto): Promise<any> {
+  async updateFortune(
+    walletAddress: string,
+    fortuneData: UpdateFortuneDto
+  ): Promise<any> {
     try {
       const user = new Fortune();
-      user.id = Id;
-      await this.fortuneRepository.update({ id: Id }, fortuneData);
+      user.walletAddress = walletAddress;
+      await this.fortuneRepository.update(
+        { walletAddress: walletAddress },
+        fortuneData
+      );
 
-      const updatesRecord = await this.fortuneRepository.findOne({ id: Id });
+      const updatesRecord = await this.fortuneRepository.findOne({
+        walletAddress: walletAddress,
+      });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },

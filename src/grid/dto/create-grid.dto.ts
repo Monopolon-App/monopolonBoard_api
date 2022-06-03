@@ -7,4 +7,7 @@ export class gridDto {
 
   @ApiProperty({ required: false })
   description?: string;
+
+  @ApiProperty({ required: false })
+  walletAddress?: string;
 }

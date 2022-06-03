@@ -4,4 +4,7 @@ import { Double } from 'typeorm';
 export class TeamDto {
   @ApiProperty({ required: false })
   description?: string;
+
+  @ApiProperty({ required: false })
+  walletAddress?: string;
 }

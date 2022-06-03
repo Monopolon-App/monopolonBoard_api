@@ -24,9 +24,11 @@ export class EnterGameService {
     private readonly EnterGameRepository: Repository<EnterGame>
   ) {}
 
-  async getById(userId: number): Promise<any> {
+  async getById(walletAddress: string): Promise<any> {
     try {
-      const user = await this.EnterGameRepository.findOne({ id: userId });
+      const user = await this.EnterGameRepository.findOne({
+        walletAddress: walletAddress,
+      });
 
       if (user) {
         return 'data';
@@ -54,10 +56,10 @@ export class EnterGameService {
     }
   }
 
-  async getUserById(id: number): Promise<any> {
+  async getUserById(walletAddress: string): Promise<any> {
     try {
       const [user, count] = await this.EnterGameRepository.findAndCount({
-        where: { id },
+        where: { walletAddress },
       });
 
       if (count > 0) {
@@ -77,16 +79,19 @@ export class EnterGameService {
   }
 
   async updateEnterGame(
-    userId: number,
+    walletAddress: string,
     EnterGameData: UpdateEnterGameDto
   ): Promise<any> {
     try {
       const user = new EnterGame();
-      user.id = userId;
-      await this.EnterGameRepository.update({ id: userId }, EnterGameData);
+      user.walletAddress = walletAddress;
+      await this.EnterGameRepository.update(
+        { walletAddress: walletAddress },
+        EnterGameData
+      );
 
       const updatesRecord = await this.EnterGameRepository.findOne({
-        id: userId,
+        walletAddress: walletAddress,
       });
 
       return new HttpException(

@@ -20,15 +20,15 @@ import { UpdateCharacterDto } from './dto/update-character.dto';
 
 import { CharacterService } from './character.service';
 
-@ApiTags('hq')
-@Controller('hq')
+@ApiTags('Character')
+@Controller('Character')
 export class CharacterController {
   constructor(private readonly hqService: CharacterService) {}
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
-  getUserById(@Query('id') id: number): Promise<any> {
-    return this.hqService.getUserById(id);
+  getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
+    return this.hqService.getUserById(walletAddress);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -42,11 +42,11 @@ export class CharacterController {
     return this.hqService.createCharacter(character, files);
   }
 
-  @Patch(':id')
+  @Patch(':walletAddress')
   updateCharacter(
-    @Param('id') userId: number,
+    @Param('walletAddress') walletAddress: string,
     @Body() updategridDto: UpdateCharacterDto
   ) {
-    return this.hqService.updateCharacter(userId, updategridDto);
+    return this.hqService.updateCharacter(walletAddress, updategridDto);
   }
 }

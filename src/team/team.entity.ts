@@ -17,6 +17,9 @@ export class Team {
   userId?: number;
 
   @Column({ default: null })
+  walletAddress?: string;
+
+  @Column({ default: null })
   slot1?: number;
 
   @Column({ default: null })

@@ -27,9 +27,11 @@ export class HqService {
     private readonly HqRepository: Repository<Hq>
   ) {}
 
-  async getById(userId: number): Promise<any> {
+  async getById(walletAddress: string): Promise<any> {
     try {
-      const user = await this.HqRepository.findOne({ id: userId });
+      const user = await this.HqRepository.findOne({
+        walletAddress: walletAddress,
+      });
 
       if (user) {
         return 'data';
@@ -54,10 +56,10 @@ export class HqService {
     }
   }
 
-  async getHqById(id: number): Promise<any> {
+  async getHqById(walletAddress: string): Promise<any> {
     try {
       const [user, count] = await this.HqRepository.findAndCount({
-        where: { id },
+        where: { walletAddress },
       });
 
       if (count > 0) {
@@ -76,13 +78,15 @@ export class HqService {
     }
   }
 
-  async updateHq(userId: number, hqData: UpdateHqDto): Promise<any> {
+  async updateHq(walletAddress: string, hqData: UpdateHqDto): Promise<any> {
     try {
       const user = new Hq();
-      user.id = userId;
-      await this.HqRepository.update({ id: userId }, hqData);
+      user.walletAddress = walletAddress;
+      await this.HqRepository.update({ walletAddress: walletAddress }, hqData);
 
-      const updatesRecord = await this.HqRepository.findOne({ id: userId });
+      const updatesRecord = await this.HqRepository.findOne({
+        walletAddress: walletAddress,
+      });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },

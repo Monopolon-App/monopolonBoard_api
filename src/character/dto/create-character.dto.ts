@@ -40,4 +40,10 @@ export class hqDto {
 
   @ApiProperty({ required: false })
   mp?: string;
+
+  @ApiProperty({ required: false })
+  walletAddress?: string;
+
+  @ApiProperty({ required: false })
+  usersProfileId?: string;
 }

@@ -27,9 +27,11 @@ export class TeamService {
     private readonly transactionRepository: Repository<Transaction>
   ) {}
 
-  async getById(userId: number): Promise<any> {
+  async getById(walletAddress: string): Promise<any> {
     try {
-      const user = await this.transactionRepository.findOne({ id: userId });
+      const user = await this.transactionRepository.findOne({
+        walletAddress: walletAddress,
+      });
 
       if (user) {
         return 'data';
@@ -57,10 +59,10 @@ export class TeamService {
     }
   }
 
-  async getTransactionById(id: number): Promise<any> {
+  async getTransactionById(walletAddress: string): Promise<any> {
     try {
       const [user, count] = await this.transactionRepository.findAndCount({
-        where: { id },
+        where: { walletAddress },
       });
 
       if (count > 0) {
@@ -80,16 +82,19 @@ export class TeamService {
   }
 
   async updateTransaction(
-    userId: number,
+    walletAddress: string,
     TransactionData: UpdateTransactionDto
   ): Promise<any> {
     try {
       const user = new Transaction();
-      user.id = userId;
-      await this.transactionRepository.update({ id: userId }, TransactionData);
+      user.walletAddress = walletAddress;
+      await this.transactionRepository.update(
+        { walletAddress: walletAddress },
+        TransactionData
+      );
 
       const updatesRecord = await this.transactionRepository.findOne({
-        id: userId,
+        walletAddress: walletAddress,
       });
 
       return new HttpException(

@@ -27,8 +27,8 @@ export class TransactionController {
 
   // @UseGuards(JwtAuthGuard)
   @Get('/geTransactionById')
-  getUserById(@Query('id') id: number): Promise<any> {
-    return this.hqService.getTransactionById(id);
+  getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
+    return this.hqService.getTransactionById(walletAddress);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -39,15 +39,17 @@ export class TransactionController {
     @Body() userprofile: Transaction,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
-    console.log('files==========', files);
     return this.hqService.createTransaction(userprofile, files);
   }
 
-  @Patch(':id')
+  @Patch(':walletAddress')
   updateTransaction(
-    @Param('id') userId: number,
+    @Param('walletAddress') walletAddress: string,
     @Body() updatetransactionDto: UpdateTransactionDto
   ) {
-    return this.hqService.updateTransaction(userId, updatetransactionDto);
+    return this.hqService.updateTransaction(
+      walletAddress,
+      updatetransactionDto
+    );
   }
 }

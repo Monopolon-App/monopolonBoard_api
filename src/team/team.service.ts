@@ -27,9 +27,11 @@ export class TeamService {
     private readonly TeamRepository: Repository<Team>
   ) {}
 
-  async getById(userId: number): Promise<any> {
+  async getById(walletAddress: string): Promise<any> {
     try {
-      const user = await this.TeamRepository.findOne({ id: userId });
+      const user = await this.TeamRepository.findOne({
+        walletAddress: walletAddress,
+      });
 
       if (user) {
         return 'data';
@@ -57,10 +59,10 @@ export class TeamService {
     }
   }
 
-  async getTeamById(id: number): Promise<any> {
+  async getTeamById(walletAddress: string): Promise<any> {
     try {
       const [user, count] = await this.TeamRepository.findAndCount({
-        where: { id },
+        where: { walletAddress },
       });
 
       if (count > 0) {
@@ -79,13 +81,21 @@ export class TeamService {
     }
   }
 
-  async updateTeam(userId: number, teamData: UpdateTeamDto): Promise<any> {
+  async updateTeam(
+    walletAddress: string,
+    teamData: UpdateTeamDto
+  ): Promise<any> {
     try {
       const user = new Team();
-      user.id = userId;
-      await this.TeamRepository.update({ id: userId }, teamData);
+      user.walletAddress = walletAddress;
+      await this.TeamRepository.update(
+        { walletAddress: walletAddress },
+        teamData
+      );
 
-      const updatesRecord = await this.TeamRepository.findOne({ id: userId });
+      const updatesRecord = await this.TeamRepository.findOne({
+        walletAddress: walletAddress,
+      });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },

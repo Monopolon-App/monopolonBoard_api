@@ -57,10 +57,10 @@ export class GridService {
     }
   }
 
-  async getUserById(id: number): Promise<any> {
+  async getUserById(walletAddress: string): Promise<any> {
     try {
       const [user, count] = await this.usersRepository.findAndCount({
-        where: { id },
+        where: { walletAddress },
       });
 
       if (count > 0) {
@@ -79,13 +79,21 @@ export class GridService {
     }
   }
 
-  async updateGrid(userId: number, gridData: UpdateGridDto): Promise<any> {
+  async updateGrid(
+    walletAddress: string,
+    gridData: UpdateGridDto
+  ): Promise<any> {
     try {
       const user = new Grid();
-      user.id = userId;
-      await this.usersRepository.update({ id: userId }, gridData);
+      user.walletAddress = walletAddress;
+      await this.usersRepository.update(
+        { walletAddress: walletAddress },
+        gridData
+      );
 
-      const updatesRecord = await this.usersRepository.findOne({ id: userId });
+      const updatesRecord = await this.usersRepository.findOne({
+        walletAddress: walletAddress,
+      });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },

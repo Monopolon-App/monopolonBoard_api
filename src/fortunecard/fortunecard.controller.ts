@@ -27,8 +27,8 @@ export class FortuneCardController {
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
-  getUserById(@Query('id') id: number): Promise<any> {
-    return this.FortuneService.getUserById(id);
+  getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
+    return this.FortuneService.getUserById(walletAddress);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -42,11 +42,11 @@ export class FortuneCardController {
     return this.FortuneService.createFortune(userprofile, files);
   }
 
-  @Patch(':id')
+  @Patch(':walletAddress')
   updateFortune(
-    @Param('id') userId: number,
+    @Param('walletAddress') walletAddress: string,
     @Body() updatefortuneDto: UpdateFortuneDto
   ) {
-    return this.FortuneService.updateFortune(userId, updatefortuneDto);
+    return this.FortuneService.updateFortune(walletAddress, updatefortuneDto);
   }
 }

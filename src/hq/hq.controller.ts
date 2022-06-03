@@ -27,8 +27,8 @@ export class HqController {
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
-  getHqById(@Query('id') id: number): Promise<any> {
-    return this.hqService.getHqById(id);
+  getHqById(@Query('wallwtAddress') wallwtAddress: string): Promise<any> {
+    return this.hqService.getHqById(wallwtAddress);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -42,8 +42,11 @@ export class HqController {
     return this.hqService.createHq(userprofile, files);
   }
 
-  @Patch(':id')
-  updateHq(@Param('id') userId: number, @Body() updategridDto: UpdateHqDto) {
-    return this.hqService.updateHq(userId, updategridDto);
+  @Patch(':wallwtAddress')
+  updateHq(
+    @Param('wallwtAddress') wallwtAddress: string,
+    @Body() updategridDto: UpdateHqDto
+  ) {
+    return this.hqService.updateHq(wallwtAddress, updategridDto);
   }
 }

@@ -4,6 +4,9 @@ export class UpdateTeamDto {
   @ApiProperty({ required: false })
   userId?: number;
 
+  @ApiProperty({ default: null })
+  walletAddress?: string;
+
   @ApiProperty({ required: false })
   slot1?: number;
 

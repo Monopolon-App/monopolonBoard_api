@@ -27,8 +27,10 @@ export class UsersController {
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
-  getPlayearningById(@Query('id') id: number): Promise<any> {
-    return this.playerearningService.getPlayearningById(id);
+  getPlayearningById(
+    @Query('walletAddress') walletAddress: string
+  ): Promise<any> {
+    return this.playerearningService.getPlayearningById(walletAddress);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -42,13 +44,13 @@ export class UsersController {
     return this.playerearningService.createPlayearning(userprofile, files);
   }
 
-  @Patch(':id')
+  @Patch(':walletAddress')
   updatPlayseEarning(
-    @Param('id') userId: number,
+    @Param('walletAddress') walletAddress: string,
     @Body() updateplayerEarningDto: UpdatePlayerEarningDto
   ) {
     return this.playerearningService.updatPlayseEarning(
-      userId,
+      walletAddress,
       updateplayerEarningDto
     );
   }

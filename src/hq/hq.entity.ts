@@ -21,4 +21,7 @@ export class Hq {
 
   @Column({ default: null })
   status?: number;
+
+  @Column({ default: null })
+  walletAddress?: string;
 }

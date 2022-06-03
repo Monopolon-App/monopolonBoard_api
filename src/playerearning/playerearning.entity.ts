@@ -36,6 +36,9 @@ export class PlayerEarning {
   @Column({ default: null })
   invadedcoins?: string;
 
+  @Column({ default: null })
+  walletAddress?: string;
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

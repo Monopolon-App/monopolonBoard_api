@@ -60,10 +60,10 @@ export class CommunityService {
     }
   }
 
-  async getUserById(id: number): Promise<any> {
+  async getUserById(walletAddress: string): Promise<any> {
     try {
       const [user, count] = await this.communityRepository.findAndCount({
-        where: { id },
+        where: { walletAddress },
       });
 
       if (count > 0) {
@@ -83,15 +83,20 @@ export class CommunityService {
   }
 
   async updateCommunity(
-    Id: number,
+    walletAddress: string,
     communityData: UpdateCommunityDto
   ): Promise<any> {
     try {
       const community = new Community();
-      community.id = Id;
-      await this.communityRepository.update({ id: Id }, community);
+      community.walletAddress = walletAddress;
+      await this.communityRepository.update(
+        { walletAddress: walletAddress },
+        community
+      );
 
-      const updatesRecord = await this.communityRepository.findOne({ id: Id });
+      const updatesRecord = await this.communityRepository.findOne({
+        walletAddress: walletAddress,
+      });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },

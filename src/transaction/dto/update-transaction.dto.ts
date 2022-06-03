@@ -9,5 +9,8 @@ export class UpdateTransactionDto {
   amount?: string;
 
   @ApiProperty({ required: false })
+  walletAddress?: string;
+
+  @ApiProperty({ required: false })
   userId?: number;
 }

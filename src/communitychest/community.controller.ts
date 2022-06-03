@@ -27,8 +27,8 @@ export class CommunityController {
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getcommunityById')
-  getUserById(@Query('id') id: number): Promise<any> {
-    return this.communityService.getUserById(id);
+  getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
+    return this.communityService.getUserById(walletAddress);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -42,11 +42,14 @@ export class CommunityController {
     return this.communityService.createCommunity(userprofile, files);
   }
 
-  @Patch(':id')
+  @Patch(':walletAddress')
   updateCommunity(
-    @Param('id') userId: number,
+    @Param('walletAddress') walletAddress: string,
     @Body() updatecommunityDto: UpdateCommunityDto
   ) {
-    return this.communityService.updateCommunity(userId, updatecommunityDto);
+    return this.communityService.updateCommunity(
+      walletAddress,
+      updatecommunityDto
+    );
   }
 }

@@ -27,9 +27,11 @@ export class PlayerEarningService {
     private readonly PlayearningRepository: Repository<PlayerEarning>
   ) {}
 
-  async getPlayearningById(userId: number): Promise<any> {
+  async getPlayearningById(walletAddress: string): Promise<any> {
     try {
-      const user = await this.PlayearningRepository.findOne({ id: userId });
+      const user = await this.PlayearningRepository.findOne({
+        walletAddress: walletAddress,
+      });
 
       if (user) {
         return 'data';
@@ -59,10 +61,10 @@ export class PlayerEarningService {
     }
   }
 
-  async getUserById(id: number): Promise<any> {
+  async getUserById(walletAddress: string): Promise<any> {
     try {
       const [user, count] = await this.PlayearningRepository.findAndCount({
-        where: { id },
+        where: { walletAddress },
       });
 
       if (count > 0) {
@@ -82,19 +84,19 @@ export class PlayerEarningService {
   }
 
   async updatPlayseEarning(
-    userId: number,
+    walletAddress: string,
     udatePlayerEarningDto: UpdatePlayerEarningDto
   ): Promise<any> {
     try {
       const user = new PlayerEarning();
-      user.id = userId;
+      user.walletAddress = walletAddress;
       await this.PlayearningRepository.update(
-        { id: userId },
+        { walletAddress: walletAddress },
         udatePlayerEarningDto
       );
 
       const updatesRecord = await this.PlayearningRepository.findOne({
-        id: userId,
+        walletAddress: walletAddress,
       });
 
       return new HttpException(

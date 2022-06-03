@@ -15,4 +15,7 @@ export class Community {
 
   @Column({ default: null })
   description?: string;
+
+  @Column({ default: null })
+  walletAddress?: string;
 }

@@ -36,4 +36,7 @@ export class UpdateCommunityDto {
 
   @ApiProperty({ required: false })
   totalMp?: string;
+
+  @ApiProperty({ required: false })
+  walletAddress?: string;
 }

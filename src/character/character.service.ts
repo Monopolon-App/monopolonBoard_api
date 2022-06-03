@@ -60,10 +60,10 @@ export class CharacterService {
     }
   }
 
-  async getUserById(id: number): Promise<any> {
+  async getUserById(walletAddress: string): Promise<any> {
     try {
       const [user, count] = await this.usersRepository.findAndCount({
-        where: { id },
+        where: { walletAddress },
       });
 
       if (count > 0) {
@@ -83,15 +83,20 @@ export class CharacterService {
   }
 
   async updateCharacter(
-    userId: number,
+    WalletAddress: string,
     characterData: UpdateCharacterDto
   ): Promise<any> {
     try {
-      const user = new Character();
-      user.id = userId;
-      await this.usersRepository.update({ id: userId }, characterData);
+      const char = new Character();
+      char.walletAddress = WalletAddress;
+      await this.usersRepository.update(
+        { walletAddress: WalletAddress },
+        characterData
+      );
 
-      const updatesRecord = await this.usersRepository.findOne({ id: userId });
+      const updatesRecord = await this.usersRepository.findOne({
+        walletAddress: WalletAddress,
+      });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },

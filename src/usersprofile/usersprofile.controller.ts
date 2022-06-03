@@ -27,8 +27,8 @@ export class UsersProfileController {
 
   // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
-  getUserById(@Query('id') id: number): Promise<any> {
-    return this.usersService.getUserById(id);
+  getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
+    return this.usersService.getUserById(walletAddress);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -39,15 +39,14 @@ export class UsersProfileController {
     @Body() userprofile: UsersProfile,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
-    console.log('files==========', files);
     return this.usersService.createUser(userprofile, files);
   }
 
-  @Patch(':id')
+  @Patch(':walletAddress')
   updateUserProfile(
-    @Param('id') userId: number,
+    @Param('walletAddress') walletAddress: string,
     @Body() updateUserDto: UpdateUserDto
   ) {
-    return this.usersService.updateUserProfile(userId, updateUserDto);
+    return this.usersService.updateUserProfile(walletAddress, updateUserDto);
   }
 }
