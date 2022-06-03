@@ -24,4 +24,7 @@ export class UpdatePlayerEarningDto {
 
   @ApiProperty({ default: null })
   invadedcoins?: string;
+
+  @ApiProperty({ default: null })
+  walletAddress?: string;
 }
