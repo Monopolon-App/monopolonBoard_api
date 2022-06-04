@@ -56,10 +56,16 @@ export class Character {
   hp?: string;
 
   @Column({ default: null })
-  mp?: string;
+  MarektPlaceID?: string;
 
   @Column({ default: null })
-  usersProfileId?: string;
+  ImageURL?: string;
+
+  @Column({ default: null })
+  ObjectURL?: string;
+
+  @Column({ default: null })
+  mp?: string;
 
   @ManyToOne(() => UsersProfile, (usersProfile) => usersProfile.character)
   usersProfile?: UsersProfile;

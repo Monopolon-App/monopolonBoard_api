@@ -46,4 +46,13 @@ export class hqDto {
 
   @ApiProperty({ required: false })
   usersProfileId?: string;
+
+  @ApiProperty({ required: false })
+  MarektPlaceID?: string;
+
+  @ApiProperty({ required: false })
+  ImageURL?: string;
+
+  @ApiProperty({ required: false })
+  ObjectURL?: string;
 }
