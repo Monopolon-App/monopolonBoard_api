@@ -56,7 +56,7 @@ export class PlayerEarningService {
       );
       return {
         success: true,
-        message: 'playearEarning created successfully.',
+        message: 'player Earning created successfully.',
         result: playearEarning,
       };
     } catch (error) {
