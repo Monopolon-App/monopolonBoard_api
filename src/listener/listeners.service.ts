@@ -103,7 +103,8 @@ export class ListenerService implements OnModuleInit {
     } catch (e) {
       console.log('error', e);
     }
-    this.handleEvent(staticEvent);
+    // if you want to test the below function then uncomment the below code.
+    // this.handleEvent(staticEvent);
   }
 
   // fetch the nft metadata form the API.
