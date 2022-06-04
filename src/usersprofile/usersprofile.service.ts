@@ -24,9 +24,11 @@ export class UsersProfileService {
     private readonly usersRepository: Repository<UsersProfile>
   ) {}
 
-  async getById(userId: number): Promise<any> {
+  async getById(walletAddress: string): Promise<any> {
     try {
-      const user = await this.usersRepository.findOne({ id: userId });
+      const user = await this.usersRepository.findOne({
+        walletAddress: walletAddress,
+      });
       if (user) {
         return 'data';
       }
