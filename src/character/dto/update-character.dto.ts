@@ -45,7 +45,7 @@ export class UpdateCharacterDto {
   walletAddress?: string;
 
   @ApiProperty({ required: false })
-  usersProfileId?: string;
+  usersProfileId?: number;
 
   @ApiProperty({ required: false })
   MarektPlaceID?: string;

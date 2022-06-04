@@ -29,6 +29,7 @@ import { CommunityModule } from './communitychest/community.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MulterModule } from '@nestjs/platform-express';
+import { ListenersModule } from './listener/listeners.module';
 
 @Module({
   imports: [
@@ -84,6 +85,7 @@ import { MulterModule } from '@nestjs/platform-express';
     MulterModule.register({
       dest: './uploads',
     }),
+    ListenersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

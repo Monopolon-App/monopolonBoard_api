@@ -37,7 +37,7 @@ export class UsersProfile {
   @Column({ default: null })
   profileImage?: string;
 
-  @Column({ default: null })
+  @Column({ unique: true })
   walletAddress?: string;
 
   @Column({ default: null })
