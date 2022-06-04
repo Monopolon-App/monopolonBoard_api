@@ -67,6 +67,9 @@ export class Character {
   @Column({ default: null })
   mp?: string;
 
+  @Column({ default: null })
+  usersProfileId?: string;
+
   @ManyToOne(() => UsersProfile, (usersProfile) => usersProfile.character)
   usersProfile?: UsersProfile;
 }
