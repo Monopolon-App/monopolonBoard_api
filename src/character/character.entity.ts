@@ -19,6 +19,7 @@ export class Character {
   @Column({ default: null })
   walletAddress?: string;
 
+  // TODO: put all the contrac address
   @Column({ default: null })
   erc721?: string;
 

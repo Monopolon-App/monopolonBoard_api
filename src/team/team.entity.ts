@@ -16,6 +16,7 @@ export class Team {
   @Column({ default: null })
   userId?: number;
 
+  // TODO: User walletAddress
   @Column({ default: null })
   walletAddress?: string;
 
