@@ -16,6 +16,9 @@ import { Character } from '../character/character.entity';
 
 @Entity()
 export class UsersProfile {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @Column({ default: null })
   firstName?: string;
 
@@ -34,7 +37,7 @@ export class UsersProfile {
   @Column({ default: null })
   profileImage?: string;
 
-  @PrimaryGeneratedColumn()
+  @Column({ default: null })
   walletAddress?: string;
 
   @Column({ default: null })
