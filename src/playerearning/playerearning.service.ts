@@ -32,14 +32,15 @@ export class PlayerEarningService {
       const user = await this.PlayearningRepository.findOne({
         walletAddress: walletAddress,
       });
-
-      return {
-        success: true,
-        message: 'playearEarning Listed.',
-        result: user,
-      };
-
-      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+      if (user) {
+        return {
+          success: true,
+          message: 'playearEarning Listed.',
+          result: user,
+        };
+      } else {
+        return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+      }
     } catch (error) {
       throw error;
     }
