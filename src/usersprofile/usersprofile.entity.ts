@@ -37,9 +37,10 @@ export class UsersProfile {
   @Column({ default: null })
   profileImage?: string;
 
-  @Column({ default: null })
+  @Column({ unique: true })
   walletAddress?: string;
 
+  // increase the TeamId by 1
   @Column({ default: null })
   teamID?: number;
 
@@ -49,7 +50,7 @@ export class UsersProfile {
   @Column({ type: 'timestamp' })
   lastRollTimeStamp?: Date;
 
-  @Column({ default: null })
+  @Column({ default: 1 })
   noOfRoll?: number;
 
   @Column({ type: 'timestamp' })
@@ -64,7 +65,7 @@ export class UsersProfile {
   @Column({ default: null })
   enterGameStatus?: number;
 
-  @Column({ default: null })
+  @Column({ default: 0 })
   gridPosition?: number;
 
   @OneToMany(() => Character, (character) => character.usersProfile)

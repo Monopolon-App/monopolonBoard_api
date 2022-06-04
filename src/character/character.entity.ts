@@ -19,6 +19,7 @@ export class Character {
   @Column({ default: null })
   walletAddress?: string;
 
+  // TODO: put all the contrac address
   @Column({ default: null })
   erc721?: string;
 
@@ -68,7 +69,7 @@ export class Character {
   mp?: string;
 
   @Column({ default: null })
-  usersProfileId?: string;
+  usersProfileId?: number;
 
   @ManyToOne(() => UsersProfile, (usersProfile) => usersProfile.character)
   usersProfile?: UsersProfile;
