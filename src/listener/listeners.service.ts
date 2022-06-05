@@ -196,6 +196,7 @@ export class ListenerService implements OnModuleInit {
             user.gridPosition = 0;
             user.noOfRoll = 1;
             user.teamID = team.id;
+            user.enterGameStatus = 1;
             const [_, userWalletCount] =
               await this.usersRepository.findAndCount({
                 where: {
