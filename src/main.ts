@@ -9,7 +9,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: ['http://localhost:3000', /\.monopolon\.io$/],
+    origin: ['http://localhost:3000', /\.monopolon\.io$/, /\.deviztech\.com$/],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
