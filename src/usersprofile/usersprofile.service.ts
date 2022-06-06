@@ -60,14 +60,24 @@ export class UsersProfileService {
         relations: ['character'],
         where: { walletAddress },
       });
-      return new HttpException(
-        {
-          status: HttpStatus.OK,
-          message: 'Success',
-          data: user,
-        },
-        HttpStatus.OK
-      );
+      if (user) {
+        return new HttpException(
+          {
+            status: HttpStatus.OK,
+            message: 'Success',
+            data: user,
+          },
+          HttpStatus.OK
+        );
+      } else {
+        return new HttpException(
+          {
+            status: HttpStatus.OK,
+            message: 'USer Not Found',
+          },
+          HttpStatus.OK
+        );
+      }
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
