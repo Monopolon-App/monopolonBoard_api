@@ -47,5 +47,8 @@ export class UpdateUserDto {
   enterGameStatus?: number;
 
   @ApiProperty({ required: false })
+  CurrentSelectedNFT?: string;
+
+  @ApiProperty({ required: false })
   gridPosition?: number;
 }

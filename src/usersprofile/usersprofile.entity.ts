@@ -68,6 +68,9 @@ export class UsersProfile {
   @Column({ default: 0 })
   gridPosition?: number;
 
+  @Column({ default: null })
+  CurrentSelectedNFT?: string;
+
   @OneToMany(() => Character, (character) => character.usersProfile)
   character: Character[];
 

@@ -44,6 +44,9 @@ export class createUserDto {
   fEffect?: number;
 
   @ApiProperty({ required: false })
+  CurrentSelectedNFT?: string;
+
+  @ApiProperty({ required: false })
   enterGameStatus?: number;
 
   @ApiProperty({ required: false })
