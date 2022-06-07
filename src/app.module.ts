@@ -6,6 +6,8 @@ import * as Joi from 'joi';
 
 // Entities
 import { UsersProfile } from './usersprofile/usersprofile.entity';
+import { Fortune } from './fortunecard/fortune-card.entity';
+
 import { PlayerEarning } from './playerearning/playerearning.entity';
 import { EnterGame } from './entergame/entergame.entity';
 import { Transaction } from './transaction/transaction.entity';
@@ -16,6 +18,8 @@ import { Character } from './character/character.entity';
 import { Community } from './communitychest/community.entity';
 
 // Modules
+import { FortuneCardModule } from './fortunecard/fortune-card.module';
+
 import { UsersModule } from './usersprofile/usersprofile.module';
 import { PlayEarningModule } from './playerearning/playerearning.module';
 import { EnterGameModule } from './entergame/entergame.module';
@@ -64,6 +68,7 @@ import { ListenersModule } from './listener/listeners.module';
           PlayerEarning,
           EnterGame,
           Transaction,
+          Fortune,
           Team,
           Hq,
           Grid,
@@ -74,6 +79,7 @@ import { ListenersModule } from './listener/listeners.module';
       }),
     }),
     UsersModule,
+    FortuneCardModule,
     PlayEarningModule,
     EnterGameModule,
     TransactionModule,

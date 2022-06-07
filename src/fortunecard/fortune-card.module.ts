@@ -11,4 +11,4 @@ import { FortuneService } from './fortune-card.service';
   providers: [FortuneService, ConfigService],
   controllers: [FortuneCardController],
 })
-export class UsersModule {}
+export class FortuneCardModule {}
