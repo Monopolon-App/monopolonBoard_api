@@ -20,8 +20,8 @@ import { UpdateFortuneDto } from './dto/update-fortune-card.dto';
 
 import { FortuneService } from './fortune-card.service';
 
-@ApiTags('hq')
-@Controller('hq')
+@ApiTags('fortunecard')
+@Controller('fortunecard')
 export class FortuneCardController {
   constructor(private readonly FortuneService: FortuneService) {}
 

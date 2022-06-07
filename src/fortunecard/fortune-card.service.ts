@@ -32,9 +32,12 @@ export class FortuneService {
       const user = await this.fortuneRepository.findOne({ id: userId });
 
       if (user) {
-        return 'data';
+        return {
+          success: true,
+          message: 'fortunecard get successfully.',
+          result: user,
+        };
       }
-
       return new HttpException(
         'fortunecard does not exist',
         HttpStatus.NOT_FOUND
