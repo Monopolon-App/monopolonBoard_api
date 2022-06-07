@@ -9,7 +9,6 @@ import { UsersProfile } from './usersprofile/usersprofile.entity';
 import { Fortune } from './fortunecard/fortune-card.entity';
 
 import { PlayerEarning } from './playerearning/playerearning.entity';
-import { EnterGame } from './entergame/entergame.entity';
 import { Transaction } from './transaction/transaction.entity';
 import { Team } from './team/team.entity';
 import { Hq } from './hq/hq.entity';
@@ -22,7 +21,6 @@ import { FortuneCardModule } from './fortunecard/fortune-card.module';
 
 import { UsersModule } from './usersprofile/usersprofile.module';
 import { PlayEarningModule } from './playerearning/playerearning.module';
-import { EnterGameModule } from './entergame/entergame.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { TeamModule } from './team/team.module';
 import { HqModule } from './hq/hq.module';
@@ -66,7 +64,6 @@ import { ListenersModule } from './listener/listeners.module';
         entities: [
           UsersProfile,
           PlayerEarning,
-          EnterGame,
           Transaction,
           Fortune,
           Team,
@@ -81,7 +78,6 @@ import { ListenersModule } from './listener/listeners.module';
     UsersModule,
     FortuneCardModule,
     PlayEarningModule,
-    EnterGameModule,
     TransactionModule,
     TeamModule,
     HqModule,
