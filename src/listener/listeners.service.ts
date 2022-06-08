@@ -7,7 +7,16 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import Web3 from 'web3';
-import { Contract, ContractOptions } from 'web3-eth-contract';
+import { Contract } from 'web3-eth-contract';
+import _ from 'lodash';
+
+type TrxDataType = {
+  from: string;
+  to: string;
+  tokenId: number;
+  transactionHash: string;
+  blockNumber: number;
+};
 
 import CONTRACT_ABI from './constants/contractABI.json';
 import {
@@ -23,46 +32,14 @@ import { UsersProfile } from '../usersprofile/usersprofile.entity';
 import { Character } from '../character/character.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Team } from '../team/team.entity';
-
-const staticEvent = {
-  address: '0x5f8f682A9dd9dc399acBdfcf3393aff680f1F22F',
-  blockNumber: 18399996,
-  transactionHash:
-    '0x060fa1d06bfed189d135345b5ebe26a3f4fc7ba8e4926f7d9db305d3ce220406',
-  transactionIndex: 43,
-  blockHash:
-    '0x8117c72780d24f4eaa2e3a999581fd56d7ce9176816b5ab4eaee5ad43c721a16',
-  logIndex: 134,
-  removed: false,
-  id: 'log_92f7a21c',
-  returnValues: {
-    '0': '0x33784523Ff246Db56DCe26C7ad6836C84A7C7218',
-    '1': '0xCc99855481022fCc44037DC50b48e3D7415613AD',
-    '2': '1479',
-    from: '0x33784523Ff246Db56DCe26C7ad6836C84A7C7218',
-    to: '0xCc99855481022fCc44037DC50b48e3D7415613AD',
-    tokenId: '1479',
-  },
-  event: 'Transfer',
-  signature:
-    '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
-  raw: {
-    data: '0x',
-    topics: [
-      '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
-      '0x00000000000000000000000033784523ff246db56dce26c7ad6836c84a7c7218',
-      '0x000000000000000000000000cc99855481022fcc44037dc50b48e3d7415613ad',
-      '0x00000000000000000000000000000000000000000000000000000000000005c7',
-    ],
-  },
-};
+import { PlayerEarning } from 'src/playerearning/playerearning.entity';
+// import { staticEvent } from './mockData';
 
 @Injectable()
 export class ListenerService implements OnModuleInit {
   private readonly logger = new Logger(ListenerService.name);
 
   public web3;
-  //
   public tokenContract: Contract;
   public networkMode;
 
@@ -100,9 +77,10 @@ export class ListenerService implements OnModuleInit {
 
     try {
       await this.listenContractEvents();
-    } catch (e) {
-      console.log('error', e);
+    } catch (error) {
+      this.logger.error('Listener::Error:', error);
     }
+
     // if you want to test the below function then uncomment the below code.
     // this.handleEvent(staticEvent);
   }
@@ -149,71 +127,100 @@ export class ListenerService implements OnModuleInit {
         fromBlock: 'latest',
       })
       .on('connected', function (subscriptionId) {
-        console.log('CONNECTED::event::subscriptionId::', subscriptionId);
+        self.logger.verbose(
+          'CONNECTED::event::subscriptionId::' + subscriptionId
+        );
       })
       .on('data', async function (event) {
-        return await self.handleEvent(event);
+        return self.handleEvent(event);
       })
       .on('changed', function (event) {
-        console.log('CHANGED::event::', event);
+        self.logger.verbose('CHANGED::event::' + JSON.stringify(event));
         // remove event from local database
       })
       .on('error', function (error, receipt) {
-        console.log('ERROR::error/receipt:', error, receipt);
+        self.logger.log(
+          'ERROR::error/receipt:' + JSON.stringify({ error, receipt })
+        );
         // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
       });
   }
 
   async handleEvent(event) {
-    console.log('DATA::event::', event);
-    console.log('event=======', JSON.stringify(event));
+    this.logger.debug('DATA::event::', JSON.stringify(event));
+
     // we need the tokenIf for the Info
     const tokenId = event?.returnValues?.tokenId;
     const tokenMeta = await this.getNftMetadata(tokenId);
 
-    const walletAddress = '0x' + event?.raw?.topics[1]?.substring(26);
+    const trxData: TrxDataType = {
+      from: _.get(event, 'returnValues.0', undefined),
+      to: this.web3.utils.fromWei(
+        _.get(event, 'returnValues.1', undefined),
+        'ether'
+      ),
+      tokenId: this.web3.utils.fromWei(
+        _.get(event, 'returnValues.2', undefined),
+        'ether'
+      ),
+      transactionHash: _.get(event, 'transactionHash', undefined),
+      blockNumber: _.get(event, 'blockNumber', undefined),
+    };
+
+    this.logger.debug(`-Listener:event:trxData:${JSON.stringify(trxData)}`);
 
     return getManager().transaction(async (transactionalEntityManager) => {
       return transactionalEntityManager
         .createQueryBuilder(UsersProfile, 'users_profile')
         .setLock('pessimistic_write')
         .where('users_profile.walletAddress = :walletAddress', {
-          walletAddress,
+          walletAddress: trxData.from,
         })
         .getOne()
         .then(async (walletUser) => {
-          let user = walletUser;
-          if (!user) {
-            // if user not found with wallet address then register new user
-
-            let team = new Team();
-            team.walletAddress = walletAddress;
-
-            user = new UsersProfile();
-            user.walletAddress = walletAddress;
-            user.lastRollTimeStamp = new Date();
-            user.lastActionTimeStamp = new Date();
-            user.gridPosition = 0;
-            user.noOfRoll = 1;
-            user.teamID = team.id;
-            user.enterGameStatus = 1;
-            const [_, userWalletCount] =
-              await this.usersRepository.findAndCount({
-                where: {
-                  walletAddress: walletAddress,
-                },
-              });
-
-            if (userWalletCount > 0) {
-              throw new UnauthorizedException(
-                'wallet address already registered'
-              );
-            }
-            team.userId = user.id;
-            team = await transactionalEntityManager.save(team);
-            user.teamID = team.id;
-            user = await transactionalEntityManager.save(user);
+          if (walletUser) {
+            throw new UnauthorizedException(
+              'wallet address already registered'
+            );
           }
+
+          // if user not found with wallet address then register new user
+
+          // cerate new team
+          const team = new Team();
+          team.walletAddress = trxData.from;
+          const teamRecord = await transactionalEntityManager.save(team);
+          this.logger.debug(
+            `-Listener:Create:Team:${JSON.stringify(teamRecord)}`
+          );
+
+          // create new user record and assign team to user
+          const newUser = new UsersProfile();
+          newUser.walletAddress = trxData.from;
+          newUser.lastRollTimeStamp = new Date(); // 6 h before
+          newUser.lastActionTimeStamp = new Date();
+          newUser.gridPosition = 0;
+          newUser.noOfRoll = 1;
+          newUser.enterGameStatus = 1;
+          newUser.teamId = teamRecord.id;
+          const newUserRecord = await transactionalEntityManager.save(newUser);
+          this.logger.debug(
+            `-Listener:Create:UserProfile:${JSON.stringify(newUserRecord)}`
+          );
+
+          // create new player earning
+          const newPlayerEarning = new PlayerEarning();
+          newPlayerEarning.userId = newUserRecord.id;
+          newPlayerEarning.walletAddress = newUserRecord.walletAddress;
+
+          const newPlayerEarningRecord = await transactionalEntityManager.save(
+            newPlayerEarning
+          );
+          this.logger.debug(
+            `-Listener:Create:PlayerEarning:${JSON.stringify(
+              newPlayerEarningRecord
+            )}`
+          );
 
           return transactionalEntityManager
             .createQueryBuilder(Character, 'character')
@@ -224,9 +231,9 @@ export class ListenerService implements OnModuleInit {
               if (trxCount * 1 === 0) {
                 // Create transaction records
                 const transferTransaction = new Character();
-                transferTransaction.walletAddress = walletAddress;
+                transferTransaction.walletAddress = trxData.from;
                 transferTransaction.erc721 = CONTRACT_ADDRESS[this.networkMode];
-                transferTransaction.usersProfileId = user.id;
+                transferTransaction.usersProfileId = newUser.id;
                 if (tokenMeta.type == 2) {
                   // we need to have the tokenId as the WeaponId
                   transferTransaction.weapon = parseInt(tokenId);

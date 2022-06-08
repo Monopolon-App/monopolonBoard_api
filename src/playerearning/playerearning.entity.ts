@@ -13,6 +13,9 @@ export class PlayerEarning {
   id: number;
 
   @Column({ default: null })
+  userId?: number;
+
+  @Column({ default: null })
   goldcoins?: string;
 
   @Column({ default: null })
