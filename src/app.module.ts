@@ -14,10 +14,14 @@ import { Team } from './team/team.entity';
 import { Hq } from './hq/hq.entity';
 import { Grid } from './grid/grid.entity';
 import { Character } from './character/character.entity';
+import { PlayerEarning } from './playerearning/playerearning.entity';
+
 import { Community } from './communitychest/community.entity';
 
 // Modules
 import { FortuneCardModule } from './fortunecard/fortune-card.module';
+
+import { PlayEarningModule } from './playerearning/playerearning.module';
 import { WithdrawalModule } from './withdrawal/withdrawal.module';
 import { EquipmentModule } from './equipment/equipment.module';
 import { UsersModule } from './usersprofile/usersprofile.module';
@@ -69,6 +73,7 @@ import { ListenersModule } from './listener/listeners.module';
           Equipment,
           Team,
           Hq,
+          PlayerEarning,
           Grid,
           Character,
           Community,
@@ -81,6 +86,7 @@ import { ListenersModule } from './listener/listeners.module';
     TransactionModule,
     TeamModule,
     WithdrawalModule,
+    PlayEarningModule,
     EquipmentModule,
     HqModule,
     GridModule,
