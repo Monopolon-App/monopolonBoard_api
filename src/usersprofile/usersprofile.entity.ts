@@ -72,6 +72,9 @@ export class UsersProfile {
   @Column({ default: null })
   CurrentSelectedNFT?: string;
 
+  @Column({ default: null })
+  LastMinTime?: string;
+
   @OneToMany(() => Character, (character) => character.usersProfile)
   character: Character[];
 
