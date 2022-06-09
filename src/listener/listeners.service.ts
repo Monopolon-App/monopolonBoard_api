@@ -88,7 +88,7 @@ export class ListenerService implements OnModuleInit {
   // fetch the nft metadata form the API.
   async getNftMetadata(tokenId: number, erc721: string): Promise<nftMetadata> {
     const metadataUrl = `https://marketplace.monopolon.io/api/nfts/tokenId/${tokenId}`;
-    if (erc721 == '0x4956596E49131914e669a9A3231B15CbF131e1CD') {
+    if (erc721 == '0x5E17561c297E75875b0362FaB3c9553F4d15D4ac') {
       const metadataUrl = `https://companymp.monopolon.io/api/nfts/tokenId/${tokenId}`;
     }
 
@@ -227,6 +227,8 @@ export class ListenerService implements OnModuleInit {
           newHQ.userId = newUserRecord.id;
           newHQ.walletAddress = newUserRecord.walletAddress;
 
+          const newHQRecord = await transactionalEntityManager.save(newHQ);
+
           // create new player earning
           // const newPlayerEarning = new UsersProfile();
           // newPlayerEarning.id = newUserRecord.id;
@@ -248,6 +250,7 @@ export class ListenerService implements OnModuleInit {
             .getCount()
             .then(async (trxCount) => {
               if (trxCount * 1 === 0) {
+                console.log('metadata', tokenMeta);
                 // Create transaction records
                 const transferTransaction = new Character();
                 transferTransaction.walletAddress = trxData.from;
