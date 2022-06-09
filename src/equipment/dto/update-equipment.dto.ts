@@ -34,4 +34,7 @@ export class UpdateEquipmentDto {
 
   @ApiProperty({ required: false })
   status?: string;
+
+  @ApiProperty({ required: false })
+  thumburl?: string;
 }

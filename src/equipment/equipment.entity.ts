@@ -45,4 +45,7 @@ export class Equipment {
 
   @Column({ default: null })
   status?: string;
+
+  @Column({ default: null })
+  thumburl?: string;
 }

@@ -34,4 +34,7 @@ export class EquipmentDto {
 
   @ApiProperty({ required: false })
   status?: string;
+
+  @ApiProperty({ required: false })
+  thumburl?: string;
 }
