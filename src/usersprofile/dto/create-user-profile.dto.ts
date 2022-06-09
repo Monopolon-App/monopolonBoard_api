@@ -41,6 +41,9 @@ export class createUserDto {
   cCEffect?: number;
 
   @ApiProperty({ required: false })
+  LastMinTime?: string;
+
+  @ApiProperty({ required: false })
   fEffect?: number;
 
   @ApiProperty({ required: false })
