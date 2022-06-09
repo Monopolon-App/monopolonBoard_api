@@ -10,6 +10,7 @@ import {
   ManyToMany,
   JoinTable,
   ManyToOne,
+  Generated,
 } from 'typeorm';
 // this is need to be relative since after compile it will have different path: https://stackoverflow.com/questions/63865678/nestjs-test-suite-failed-to-run-cannot-find-module-src-article-article-entity
 import { Character } from '../character/character.entity';
@@ -41,8 +42,8 @@ export class UsersProfile {
   walletAddress?: string;
 
   // increase the TeamId by 1
-  @Column({ default: null })
-  teamID?: number;
+  @Column()
+  teamId?: number;
 
   @Column({ default: null })
   mgmRewardsAccumulated?: string;

@@ -13,8 +13,8 @@ export class Team {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ default: null })
-  userId?: number;
+  // @Column({ default: null })
+  // userId?: number;
 
   // TODO: User walletAddress
   @Column({ default: null })

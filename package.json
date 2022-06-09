@@ -54,6 +54,7 @@
     "delimiter": "^1.0.2",
     "ethereumjs-util": "^7.1.4",
     "joi": "^17.4.0",
+    "lodash": "^4.17.21",
     "mysql2": "^2.2.5",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
