@@ -54,7 +54,4 @@ export class createUserDto {
 
   @ApiProperty({ required: false })
   gridPosition?: number;
-
-  @ApiProperty({ required: false })
-  LastMinTime?: string;
 }

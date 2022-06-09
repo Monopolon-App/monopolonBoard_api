@@ -49,16 +49,16 @@ export class WithdrawalService {
     }
   }
 
-  async createWithdrawa(
+  async createWithdrawal(
     withdrawal: Withdrawal,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      const fortunecard = await this.withdrwalRepository.save(withdrawal);
+      const withdrawals = await this.withdrwalRepository.save(withdrawal);
       return {
         success: true,
         message: 'Withdrawal created successfully.',
-        result: fortunecard,
+        result: withdrawals,
       };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);

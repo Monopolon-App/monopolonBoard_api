@@ -39,7 +39,7 @@ export class WithdrawalController {
     @Body() withdrawal: Withdrawal,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
-    return this.withdrawalService.createWithdrawa(withdrawal, files);
+    return this.withdrawalService.createWithdrawal(withdrawal, files);
   }
 
   @Patch(':walletAddress')
