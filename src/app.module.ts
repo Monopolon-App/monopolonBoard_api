@@ -9,7 +9,6 @@ import { UsersProfile } from './usersprofile/usersprofile.entity';
 import { Fortune } from './fortunecard/fortune-card.entity';
 import { Withdrawal } from './withdrawal/withdrawal.entity';
 import { Equipment } from './equipment/equipment.entity';
-import { PlayerEarning } from './playerearning/playerearning.entity';
 import { Transaction } from './transaction/transaction.entity';
 import { Team } from './team/team.entity';
 import { Hq } from './hq/hq.entity';
@@ -22,7 +21,6 @@ import { FortuneCardModule } from './fortunecard/fortune-card.module';
 import { WithdrawalModule } from './withdrawal/withdrawal.module';
 import { EquipmentModule } from './equipment/equipment.module';
 import { UsersModule } from './usersprofile/usersprofile.module';
-import { PlayEarningModule } from './playerearning/playerearning.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { TeamModule } from './team/team.module';
 import { HqModule } from './hq/hq.module';
@@ -65,7 +63,6 @@ import { ListenersModule } from './listener/listeners.module';
         database: configService.get('DATABASE_NAME'),
         entities: [
           UsersProfile,
-          PlayerEarning,
           Transaction,
           Fortune,
           Withdrawal,
@@ -81,7 +78,6 @@ import { ListenersModule } from './listener/listeners.module';
     }),
     UsersModule,
     FortuneCardModule,
-    PlayEarningModule,
     TransactionModule,
     TeamModule,
     WithdrawalModule,

@@ -32,7 +32,6 @@ import { UsersProfile } from '../usersprofile/usersprofile.entity';
 import { Character } from '../character/character.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Team } from '../team/team.entity';
-import { PlayerEarning } from 'src/playerearning/playerearning.entity';
 // import { staticEvent } from './mockData';
 
 @Injectable()
@@ -209,8 +208,8 @@ export class ListenerService implements OnModuleInit {
           );
 
           // create new player earning
-          const newPlayerEarning = new PlayerEarning();
-          newPlayerEarning.userId = newUserRecord.id;
+          const newPlayerEarning = new UsersProfile();
+          newPlayerEarning.id = newUserRecord.id;
           newPlayerEarning.walletAddress = newUserRecord.walletAddress;
 
           const newPlayerEarningRecord = await transactionalEntityManager.save(
