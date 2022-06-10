@@ -23,5 +23,8 @@ export class Transaction {
   walletAddress?: string;
 
   @Column({ default: null })
+  fromAddress?: string;
+
+  @Column({ default: null })
   userId?: number;
 }

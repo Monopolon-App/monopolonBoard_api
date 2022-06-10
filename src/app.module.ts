@@ -36,6 +36,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { ListenersModule } from './listener/listeners.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -96,6 +97,7 @@ import { ListenersModule } from './listener/listeners.module';
       dest: './uploads',
     }),
     ListenersModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

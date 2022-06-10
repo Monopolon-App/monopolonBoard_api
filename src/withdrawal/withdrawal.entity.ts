@@ -24,4 +24,7 @@ export class Withdrawal {
 
   @Column({ default: null })
   walletAddress?: string;
+
+  // @Column({ default: null })
+  // reason?: string;
 }
