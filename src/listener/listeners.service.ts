@@ -207,10 +207,12 @@ export class ListenerService implements OnModuleInit {
           );
 
           // create new user record and assign team to user
+          const lastRollActionTimeStamp = new Date();
+          lastRollActionTimeStamp.setHours(new Date().getHours() - 6);
           const newUser = new UsersProfile();
           newUser.walletAddress = trxData.from;
-          newUser.lastRollTimeStamp.setHours(new Date().getHours() - 6); // 6 h before
-          newUser.lastActionTimeStamp.setHours(new Date().getHours() - 6);
+          newUser.lastRollTimeStamp = lastRollActionTimeStamp; // 6 h before
+          newUser.lastActionTimeStamp = lastRollActionTimeStamp;
           newUser.gridPosition = 0;
           newUser.noOfRoll = 1;
           newUser.enterGameStatus = 1;
@@ -261,17 +263,17 @@ export class ListenerService implements OnModuleInit {
                   transferTransaction.tokenId = tokenId;
                   transferTransaction.ImageURL = tokenMeta.imgUrl;
                   transferTransaction.Luk =
-                    tokenMeta.attributes.commonAttribute.luk.toString();
+                    tokenMeta.attributes.commonAttribute.luk?.toString();
                   transferTransaction.str =
-                    tokenMeta.attributes.commonAttribute.str.toString();
+                    tokenMeta.attributes.commonAttribute.str?.toString();
                   transferTransaction.dex =
-                    tokenMeta.attributes.commonAttribute.dex.toString();
+                    tokenMeta.attributes.commonAttribute.dex?.toString();
                   transferTransaction.prep =
-                    tokenMeta.attributes.commonAttribute.prep.toString();
+                    tokenMeta.attributes.commonAttribute.prep?.toString();
                   transferTransaction.mp =
-                    tokenMeta.attributes.commonAttribute.mp.toString();
+                    tokenMeta.attributes.commonAttribute.mp?.toString();
                   transferTransaction.hp =
-                    tokenMeta.attributes.commonAttribute.hp.toString();
+                    tokenMeta.attributes.commonAttribute.hp?.toString();
                   teamRecord.totalDex = transferTransaction.dex;
                   teamRecord.totalHp = transferTransaction.hp;
                   teamRecord.totalLuk = transferTransaction.Luk;
