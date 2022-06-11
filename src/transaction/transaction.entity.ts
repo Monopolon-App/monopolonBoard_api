@@ -1,12 +1,9 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  Double,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 // this is need to be relative since after compile it will have different path: https://stackoverflow.com/questions/63865678/nestjs-test-suite-failed-to-run-cannot-find-module-src-article-article-entity
+
+export enum TransactionType {
+  WITHDRAWAL = 'withdrawal',
+}
 
 @Entity()
 export class Transaction {
@@ -27,4 +24,17 @@ export class Transaction {
 
   @Column({ default: null })
   userId?: number;
+
+  /**
+   * either it can be withrawal or any other in the future
+   */
+  @Column({
+    type: 'enum',
+    enum: TransactionType,
+    default: TransactionType.WITHDRAWAL,
+  })
+  type: TransactionType;
+
+  @Column({ default: null })
+  hash?: string;
 }
