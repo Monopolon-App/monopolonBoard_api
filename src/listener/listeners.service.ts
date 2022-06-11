@@ -19,9 +19,12 @@ type TrxDataType = {
 };
 
 import CONTRACT_ABI from './constants/contractABI.json';
+import MGM_CONTRACT_ABI from './constants/contractMgmToken.json';
 import {
   COMPANY_ADDRESS,
   CONTRACT_ADDRESS,
+  MGM_CONTRACT_ADDRESS,
+  MGM_REWARD_COMPANY_ADDRESS,
   WS_PROVIDER_URL,
 } from 'src/constants/constants';
 import { ConfigService } from '@nestjs/config';
@@ -33,6 +36,7 @@ import { Character } from '../character/character.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Team } from '../team/team.entity';
 import { Hq } from 'src/hq/hq.entity';
+import { JsonRpcResponse } from 'web3-core-helpers';
 // import { staticEvent } from './mockData';
 
 @Injectable()
@@ -41,6 +45,7 @@ export class ListenerService implements OnModuleInit {
 
   public web3;
   public tokenContract: Contract;
+  public mgmTokenContract: Contract;
   public networkMode;
 
   constructor(
@@ -67,6 +72,12 @@ export class ListenerService implements OnModuleInit {
     this.tokenContract = new this.web3.eth.Contract(
       CONTRACT_ABI as any,
       CONTRACT_ADDRESS[this.networkMode]
+    );
+
+    this.mgmTokenContract = new this.web3.eth.Contract(
+      MGM_CONTRACT_ABI as any,
+      MGM_CONTRACT_ADDRESS[this.networkMode],
+      { from: MGM_REWARD_COMPANY_ADDRESS }
     );
   }
 
