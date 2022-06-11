@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
-import { ListenerService } from './listeners.service';
+import { ListenerService } from '../listener/listeners.service';
 import { UsersModule } from '../usersprofile/usersprofile.module';
 import { TransactionModule } from '../transaction/transaction.module';
 import { Transaction } from '../transaction/transaction.entity';
 import { UsersProfile } from '../usersprofile/usersprofile.entity';
+import { SchedulerService } from './scheduler.service';
 import { Withdrawal } from '../withdrawal/withdrawal.entity';
 import { WithdrawalModule } from '../withdrawal/withdrawal.module';
 
@@ -18,7 +19,7 @@ import { WithdrawalModule } from '../withdrawal/withdrawal.module';
     WithdrawalModule,
     TypeOrmModule.forFeature([UsersProfile, Transaction, Withdrawal]),
   ],
-  providers: [ListenerService],
+  providers: [SchedulerService, ListenerService],
   exports: [],
 })
-export class ListenersModule {}
+export class SchedulerModule {}

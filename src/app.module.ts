@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
+import { ScheduleModule } from '@nestjs/schedule';
 
 // Entities
 import { UsersProfile } from './usersprofile/usersprofile.entity';
@@ -15,7 +16,6 @@ import { Hq } from './hq/hq.entity';
 import { Grid } from './grid/grid.entity';
 import { Character } from './character/character.entity';
 import { PlayerEarning } from './playerearning/playerearning.entity';
-
 import { Community } from './communitychest/community.entity';
 
 // Modules
@@ -31,15 +31,16 @@ import { HqModule } from './hq/hq.module';
 import { GridModule } from './grid/grid.module';
 import { CharacterModule } from './character/character.module';
 import { CommunityModule } from './communitychest/community.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { ListenersModule } from './listener/listeners.module';
-import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: ['.env.local'],
       validationSchema: Joi.object({
@@ -54,6 +55,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         JWT_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
         JWT_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+        COMPANY_PRIVATE_KEY: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -82,6 +84,9 @@ import { ScheduleModule } from '@nestjs/schedule';
         synchronize: true,
       }),
     }),
+    MulterModule.register({
+      dest: './uploads',
+    }),
     UsersModule,
     FortuneCardModule,
     TransactionModule,
@@ -93,11 +98,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     GridModule,
     CharacterModule,
     CommunityModule,
-    MulterModule.register({
-      dest: './uploads',
-    }),
     ListenersModule,
-    ScheduleModule.forRoot(),
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

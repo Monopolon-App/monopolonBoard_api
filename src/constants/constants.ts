@@ -15,6 +15,14 @@ export const WS_PROVIDER_URL = {
     'wss://speedy-nodes-nyc.moralis.io/3a710cfda2add248cf5f780c/bsc/mainnet/ws',
 };
 
+export const RPC_PROVIDER_URL = {
+  MAINNET:
+    'https://speedy-nodes-nyc.moralis.io/3a710cfda2add248cf5f780c/bsc/mainnet',
+  TESTNET:
+    'https://speedy-nodes-nyc.moralis.io/3a710cfda2add248cf5f780c/bsc/testnet',
+};
+
 export const COMPANY_ADDRESS = '0xCc99855481022fCc44037DC50b48e3D7415613AD';
+
 export const MGM_REWARD_COMPANY_ADDRESS =
   '0xf8765257b3226CF7c49B8c2f4D32eA3C04C77a57';

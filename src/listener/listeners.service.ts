@@ -77,25 +77,10 @@ export class ListenerService implements OnModuleInit {
     this.mgmTokenContract = new this.web3.eth.Contract(
       MGM_CONTRACT_ABI as any,
       MGM_CONTRACT_ADDRESS[this.networkMode],
-      // { from: MGM_CONTRACT_ADDRESS[this.networkMode] }
       { from: MGM_REWARD_COMPANY_ADDRESS }
     );
-    this.transferMgmReward('0x33784523Ff246Db56DCe26C7ad6836C84A7C7218', 1)
-      .then()
-      .catch((error) => {
-        console.log('==>>transferMgmReward', error);
-      });
   }
 
-  // TODO: Fix the transfer function
-  async transferMgmReward(address: string, amount: number) {
-    this.mgmTokenContract.methods
-      .transfer(address, amount)
-      .send(function (error: Error | null, result?: JsonRpcResponse) {
-        console.log('==>>error', error);
-        console.log('======>result', result);
-      });
-  }
   async onModuleInit(): Promise<void> {
     this.logger.debug(
       `The module has been initialized at : ${new Date().toLocaleString()}`
