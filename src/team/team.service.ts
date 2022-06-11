@@ -1,19 +1,6 @@
-import {
-  Injectable,
-  HttpException,
-  HttpStatus,
-  NotFoundException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
-import {
-  Repository,
-  getConnection,
-  getManager,
-  TreeRepository,
-  Like,
-} from 'typeorm';
+import { Repository } from 'typeorm';
 import { Team } from './team.entity';
 import { UpdateTeamDto } from './dto/update-team.dto';
 
@@ -48,6 +35,18 @@ export class TeamService {
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
+      const team = await this.TeamRepository.findOne({
+        walletAddress: teams.walletAddress,
+      });
+
+      if (team) {
+        return {
+          success: true,
+          message: 'Team already exists with same wallet address.',
+          result: team,
+        };
+      }
+
       const Team = await this.TeamRepository.save(teams);
       return {
         success: true,
