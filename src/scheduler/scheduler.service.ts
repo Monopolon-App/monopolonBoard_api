@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { getConnection, getManager, Repository } from 'typeorm';
 import { Contract } from 'web3-eth-contract';
 import HDWalletProvider from '@truffle/hdwallet-provider';
+import _ from 'lodash';
 
 import { Withdrawal } from '../withdrawal/withdrawal.entity';
 import {
@@ -72,7 +73,7 @@ export class SchedulerService {
     );
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   handleCron() {
     this.logger.debug('Called when the current second is 5 minutes');
     this.withdrwalRepository
@@ -80,7 +81,8 @@ export class SchedulerService {
       .then((withdrwals) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        Promise.allSettled(
+
+        return Promise.all(
           withdrwals.map(async (withdrawal) => {
             try {
               const withdrawalRecord = await getConnection()
@@ -90,11 +92,20 @@ export class SchedulerService {
                 })
                 .getOne();
 
+              const toWalletAddress = _.get(
+                withdrawalRecord,
+                'walletAddress',
+                null
+              );
+              const amountWei = this.web3.utils.toWei(withdrawalRecord.amount);
+
+              let withdrawalStatus;
+
               // transferring the withdrawal amount to user wallet address from company address
               this.logger.verbose(
                 `Withdrawal:transferMgmReward:params:${JSON.stringify({
-                  to: withdrawalRecord.walletAddress,
-                  amount: withdrawalRecord.amount,
+                  to: toWalletAddress,
+                  amount: amountWei,
                   from: this.account.address,
                 })}`
               );
@@ -103,10 +114,7 @@ export class SchedulerService {
               const self = this;
 
               this.mgmContract.methods
-                .transfer(
-                  withdrawalRecord.walletAddress,
-                  withdrawalRecord.amount
-                )
+                .transfer(toWalletAddress, amountWei)
                 .send({ from: this.account.address })
                 .on('transactionHash', async function (hash) {
                   /**
@@ -122,9 +130,10 @@ export class SchedulerService {
                         }
                       )}`
                     );
+
                     await getManager().transaction(
                       async (transactionalEntityManager) => {
-                        const process = await transactionalEntityManager
+                        withdrawalStatus = await transactionalEntityManager
                           .createQueryBuilder(Withdrawal, 'withdrawal')
                           .update(Withdrawal)
                           .set({
@@ -135,10 +144,19 @@ export class SchedulerService {
                             id: withdrawalRecord.id,
                           })
                           .execute();
+
+                        self.logger.verbose(
+                          `Witdrawal::transferMgmReward::Status::Proceess:${JSON.stringify(
+                            withdrawalStatus
+                          )}:`
+                        );
                       }
                     );
                   } catch (error) {
-                    this.logger.error(`::LOG::ERROR::${error?.message}:`);
+                    self.logger.error(
+                      `Witdrawal::transferMgmReward::Error::${error?.message}:`
+                    );
+
                     return new HttpException(
                       error?.message,
                       HttpStatus.BAD_REQUEST
@@ -188,9 +206,15 @@ export class SchedulerService {
                           tTransferTransaction
                         );
 
+                      self.logger.log(
+                        `Withdrawal::transferMgmReward::createTrx::Success:${JSON.stringify(
+                          tTransferTransactionObj
+                        )}`
+                      );
+
                       // updating Withdrawal if transaction is successfully done.
                       if (tTransferTransactionObj) {
-                        await transactionalEntityManager
+                        withdrawalStatus = await transactionalEntityManager
                           .createQueryBuilder(Withdrawal, 'withdrawal')
                           .update(Withdrawal)
                           .set({ status: 'Success' })
@@ -198,6 +222,12 @@ export class SchedulerService {
                             id: withdrawalRecord.id,
                           })
                           .execute();
+
+                        self.logger.log(
+                          `Withdrawal::transferMgmReward::Status::Success:${JSON.stringify(
+                            withdrawalStatus
+                          )}`
+                        );
                       }
                     }
                   );
@@ -232,7 +262,7 @@ export class SchedulerService {
                         );
 
                       if (tTransferTransactionObj) {
-                        await transactionalEntityManager
+                        withdrawalStatus = await transactionalEntityManager
                           .createQueryBuilder(Withdrawal, 'withdrawal')
                           .update(Withdrawal)
                           .set({ status: 'Failed' })
@@ -244,26 +274,37 @@ export class SchedulerService {
                     }
                   );
                 })
+                .then((result) => {
+                  this.logger.verbose(
+                    `Withdrawal::transferMgmReward::Status::Success:${JSON.stringify(
+                      withdrawal
+                    )}`
+                  );
+                  return result;
+                })
                 .catch((error) => {
-                  this.logger.error(`::LOG::ERROR::${error?.message}:`);
-                  return new HttpException(
+                  this.logger.error(`Withdrawal::Error:${error?.message}:`);
+                  throw new HttpException(
                     error?.message,
                     HttpStatus.BAD_REQUEST
                   );
                 });
+
+              return withdrawalStatus;
             } catch (error) {
-              this.logger.error(`::LOG::ERROR::${error?.message}:`);
+              this.logger.error(`Withdrawal::Error: ${error?.message}:`);
+              throw new Error(error);
             }
           })
         )
           .then((success) => {
+            console.log({ success });
             this.logger.verbose(
-              `:::Success withdrawal ${JSON.stringify(success)}`
+              `Withdrawal::Success: ${JSON.stringify(success)}`
             );
-            // success.length;
           })
           .catch((failed) => {
-            this.logger.error(`:::Success withrawal ${JSON.stringify(failed)}`);
+            this.logger.error(`Withdrawal::Error: ${JSON.stringify(failed)}`);
           });
       });
   }
