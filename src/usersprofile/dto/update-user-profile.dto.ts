@@ -44,6 +44,9 @@ export class UpdateUserDto {
   fEffect?: number;
 
   @ApiProperty({ required: false })
+  LastMinTime?: string;
+
+  @ApiProperty({ required: false })
   enterGameStatus?: number;
 
   @ApiProperty({ required: false })
@@ -51,7 +54,4 @@ export class UpdateUserDto {
 
   @ApiProperty({ required: false })
   gridPosition?: number;
-
-  @ApiProperty({ required: false })
-  LastMinTime?: string;
 }

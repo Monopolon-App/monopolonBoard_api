@@ -57,10 +57,10 @@ export class UsersProfile {
   @Column({ type: 'timestamp' })
   lastActionTimeStamp?: Date;
 
-  @Column({ default: null })
+  @Column({ default: 0 })
   cCEffect?: number;
 
-  @Column({ default: null })
+  @Column({ default: 0 })
   fEffect?: number;
 
   @Column({ default: null })

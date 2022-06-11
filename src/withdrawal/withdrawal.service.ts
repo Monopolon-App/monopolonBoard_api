@@ -24,12 +24,12 @@ export class WithdrawalService {
   }
   constructor(
     @InjectRepository(Withdrawal)
-    private readonly fortuneRepository: Repository<Withdrawal>
+    private readonly withdrwalRepository: Repository<Withdrawal>
   ) {}
 
   async getById(walletAddress: string): Promise<any> {
     try {
-      const user = await this.fortuneRepository.findOne({
+      const user = await this.withdrwalRepository.findOne({
         walletAddress: walletAddress,
       });
 
@@ -49,16 +49,16 @@ export class WithdrawalService {
     }
   }
 
-  async createWithdrawa(
+  async createWithdrawal(
     withdrawal: Withdrawal,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      const fortunecard = await this.fortuneRepository.save(withdrawal);
+      const withdrawals = await this.withdrwalRepository.save(withdrawal);
       return {
         success: true,
         message: 'Withdrawal created successfully.',
-        result: fortunecard,
+        result: withdrawals,
       };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -67,7 +67,7 @@ export class WithdrawalService {
 
   async getUserById(walletAddress: string): Promise<any> {
     try {
-      const [user, count] = await this.fortuneRepository.findAndCount({
+      const [user, count] = await this.withdrwalRepository.findAndCount({
         where: { walletAddress },
       });
 
@@ -94,12 +94,12 @@ export class WithdrawalService {
     try {
       const user = new Withdrawal();
       user.walletAddress = walletAddress;
-      await this.fortuneRepository.update(
+      await this.withdrwalRepository.update(
         { walletAddress: walletAddress },
         withdrawalData
       );
 
-      const updatesRecord = await this.fortuneRepository.findOne({
+      const updatesRecord = await this.withdrwalRepository.findOne({
         walletAddress: walletAddress,
       });
 

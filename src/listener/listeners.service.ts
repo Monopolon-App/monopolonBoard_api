@@ -32,6 +32,7 @@ import { UsersProfile } from '../usersprofile/usersprofile.entity';
 import { Character } from '../character/character.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Team } from '../team/team.entity';
+import { Hq } from 'src/hq/hq.entity';
 // import { staticEvent } from './mockData';
 
 @Injectable()
@@ -85,8 +86,11 @@ export class ListenerService implements OnModuleInit {
   }
 
   // fetch the nft metadata form the API.
-  async getNftMetadata(tokenId: number): Promise<nftMetadata> {
+  async getNftMetadata(tokenId: number, erc721: string): Promise<nftMetadata> {
     const metadataUrl = `https://marketplace.monopolon.io/api/nfts/tokenId/${tokenId}`;
+    if (erc721 == '0x5E17561c297E75875b0362FaB3c9553F4d15D4ac') {
+      const metadataUrl = `https://companymp.monopolon.io/api/nfts/tokenId/${tokenId}`;
+    }
 
     const result = await axios.get<nftMetadataDTO>(metadataUrl);
 
@@ -99,6 +103,12 @@ export class ListenerService implements OnModuleInit {
     }
 
     return result.data.data[0];
+  }
+
+  async getRandomInt(min, max): Promise<number> {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
   }
 
   async listenContractEvents(): Promise<void> {
@@ -150,7 +160,10 @@ export class ListenerService implements OnModuleInit {
 
     // we need the tokenIf for the Info
     const tokenId = event?.returnValues?.tokenId;
-    const tokenMeta = await this.getNftMetadata(tokenId);
+    const tokenMeta = await this.getNftMetadata(
+      tokenId,
+      CONTRACT_ADDRESS[this.networkMode]
+    );
 
     const trxData: TrxDataType = {
       from: _.get(event, 'returnValues.0', undefined),
@@ -194,10 +207,12 @@ export class ListenerService implements OnModuleInit {
           );
 
           // create new user record and assign team to user
+          const lastRollActionTimeStamp = new Date();
+          lastRollActionTimeStamp.setHours(new Date().getHours() - 6);
           const newUser = new UsersProfile();
           newUser.walletAddress = trxData.from;
-          newUser.lastRollTimeStamp = new Date(); // 6 h before
-          newUser.lastActionTimeStamp = new Date();
+          newUser.lastRollTimeStamp = lastRollActionTimeStamp; // 6 h before
+          newUser.lastActionTimeStamp = lastRollActionTimeStamp;
           newUser.gridPosition = 0;
           newUser.noOfRoll = 1;
           newUser.enterGameStatus = 1;
@@ -207,19 +222,28 @@ export class ListenerService implements OnModuleInit {
             `-Listener:Create:UserProfile:${JSON.stringify(newUserRecord)}`
           );
 
-          // create new player earning
-          const newPlayerEarning = new UsersProfile();
-          newPlayerEarning.id = newUserRecord.id;
-          newPlayerEarning.walletAddress = newUserRecord.walletAddress;
+          // Create a new HQ for users, Randomly assigning a gridPosition.
+          const newHQ = new Hq();
+          newHQ.status = 1;
+          newHQ.hqGridPosition = await this.getRandomInt(1, 126);
+          newHQ.userId = newUserRecord.id;
+          newHQ.walletAddress = newUserRecord.walletAddress;
 
-          const newPlayerEarningRecord = await transactionalEntityManager.save(
-            newPlayerEarning
-          );
-          this.logger.debug(
-            `-Listener:Create:PlayerEarning:${JSON.stringify(
-              newPlayerEarningRecord
-            )}`
-          );
+          const newHQRecord = await transactionalEntityManager.save(newHQ);
+
+          // create new player earning
+          // const newPlayerEarning = new UsersProfile();
+          // newPlayerEarning.id = newUserRecord.id;
+          // newPlayerEarning.walletAddress = newUserRecord.walletAddress;
+
+          // const newPlayerEarningRecord = await transactionalEntityManager.save(
+          //   newPlayerEarning
+          // );
+          // this.logger.debug(
+          //   `-Listener:Create:PlayerEarning:${JSON.stringify(
+          //     newPlayerEarningRecord
+          //   )}`
+          // );
 
           return transactionalEntityManager
             .createQueryBuilder(Character, 'character')
@@ -228,26 +252,52 @@ export class ListenerService implements OnModuleInit {
             .getCount()
             .then(async (trxCount) => {
               if (trxCount * 1 === 0) {
+                console.log('metadata', tokenMeta);
                 // Create transaction records
                 const transferTransaction = new Character();
                 transferTransaction.walletAddress = trxData.from;
                 transferTransaction.erc721 = CONTRACT_ADDRESS[this.networkMode];
-                transferTransaction.usersProfileId = newUser.id;
-                if (tokenMeta.type == 2) {
-                  // we need to have the tokenId as the WeaponId
-                  transferTransaction.weapon = parseInt(tokenId);
-                } else if (tokenMeta.type == 1) {
+                transferTransaction.usersProfileId = newUserRecord.id;
+                if (tokenMeta.type == 1) {
                   // this will only store when we have the character as the token
                   transferTransaction.tokenId = tokenId;
+                  transferTransaction.ImageURL = tokenMeta.imgUrl;
+                  transferTransaction.Luk =
+                    tokenMeta.attributes.commonAttribute.luk?.toString();
+                  transferTransaction.str =
+                    tokenMeta.attributes.commonAttribute.str?.toString();
+                  transferTransaction.dex =
+                    tokenMeta.attributes.commonAttribute.dex?.toString();
+                  transferTransaction.prep =
+                    tokenMeta.attributes.commonAttribute.prep?.toString();
+                  transferTransaction.mp =
+                    tokenMeta.attributes.commonAttribute.mp?.toString();
+                  transferTransaction.hp =
+                    tokenMeta.attributes.commonAttribute.hp?.toString();
+                  teamRecord.totalDex = transferTransaction.dex;
+                  teamRecord.totalHp = transferTransaction.hp;
+                  teamRecord.totalLuk = transferTransaction.Luk;
+                  teamRecord.totalMp = transferTransaction.mp;
+                  teamRecord.totalPrep = transferTransaction.prep;
+                  teamRecord.totalStr = transferTransaction.str;
                 }
                 // Receiver : create transaction record (update it balance)
                 const transactionResp = await transactionalEntityManager.save(
                   transferTransaction
                 );
+
+                teamRecord.slot1 = transactionResp.id;
+
+                const teamRecord1 = await transactionalEntityManager.save(
+                  teamRecord
+                );
+
                 console.log(
                   '::LOG::SUCCESS::Transaction Result:',
                   transactionResp
                 );
+
+                console.log('::LOG::SUCCESS::teamReord Result:', teamRecord1);
                 return transactionResp;
               } else {
                 console.log('::LOG::ERROR::Duplicate transaction record:');

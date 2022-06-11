@@ -41,6 +41,9 @@ export class createUserDto {
   cCEffect?: number;
 
   @ApiProperty({ required: false })
+  LastMinTime?: string;
+
+  @ApiProperty({ required: false })
   fEffect?: number;
 
   @ApiProperty({ required: false })
@@ -51,7 +54,4 @@ export class createUserDto {
 
   @ApiProperty({ required: false })
   gridPosition?: number;
-
-  @ApiProperty({ required: false })
-  LastMinTime?: string;
 }
