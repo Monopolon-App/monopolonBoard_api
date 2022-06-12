@@ -6,20 +6,18 @@ import { getConnection, getManager, Repository } from 'typeorm';
 import { Contract } from 'web3-eth-contract';
 import HDWalletProvider from '@truffle/hdwallet-provider';
 import _ from 'lodash';
+import { ConfigService } from '@nestjs/config';
 
-import { Withdrawal } from '../withdrawal/withdrawal.entity';
 import {
   Transaction,
   TransactionType,
-} from '../transaction/transaction.entity';
-
-import mgmContractAbi from './constants/mgmContractAbi.json';
+} from 'src/transaction/transaction.entity';
+import { Withdrawal } from 'src/withdrawal/withdrawal.entity';
 import {
   MGM_CONTRACT_ADDRESS,
-  MGM_REWARD_COMPANY_ADDRESS,
   RPC_PROVIDER_URL,
-} from '../constants/constants';
-import { ConfigService } from '@nestjs/config';
+} from 'src/constants/constants';
+import mgmContractAbi from './constants/mgmContractAbi.json';
 
 declare interface PromiseConstructor {
   allSettled(
@@ -82,230 +80,246 @@ export class SchedulerService {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
 
-        return Promise.all(
-          withdrwals.map(async (withdrawal) => {
-            try {
-              const withdrawalRecord = await getConnection()
-                .createQueryBuilder(Withdrawal, 'withdrawal')
-                .where('withdrawal.id = :id', {
-                  id: withdrawal.id,
-                })
-                .getOne();
+        if (withdrwals.length) {
+          this.logger.verbose(
+            `Withdrawal::findApprovedWithdrawal::results::Found > ${JSON.stringify(
+              withdrwals
+            )}`
+          );
+          return Promise.all(
+            withdrwals.map(async (withdrawal) => {
+              try {
+                const withdrawalRecord = await getConnection()
+                  .createQueryBuilder(Withdrawal, 'withdrawal')
+                  .where('withdrawal.id = :id', {
+                    id: withdrawal.id,
+                  })
+                  .getOne();
 
-              const toWalletAddress = _.get(
-                withdrawalRecord,
-                'walletAddress',
-                null
-              );
-              const amountWei = this.web3.utils.toWei(withdrawalRecord.amount);
+                const toWalletAddress = _.get(
+                  withdrawalRecord,
+                  'walletAddress',
+                  null
+                );
+                const amountWei = this.web3.utils.toWei(
+                  withdrawalRecord.amount
+                );
 
-              let withdrawalStatus;
+                let withdrawalStatus;
 
-              // transferring the withdrawal amount to user wallet address from company address
-              this.logger.verbose(
-                `Withdrawal:transferMgmReward:params:${JSON.stringify({
-                  to: toWalletAddress,
-                  amount: amountWei,
-                  from: this.account.address,
-                })}`
-              );
+                // transferring the withdrawal amount to user wallet address from company address
+                this.logger.verbose(
+                  `Withdrawal:transferMgmReward:params:${JSON.stringify({
+                    to: toWalletAddress,
+                    amount: amountWei,
+                    from: this.account.address,
+                  })}`
+                );
 
-              // eslint-disable-next-line @typescript-eslint/no-this-alias
-              const self = this;
+                // eslint-disable-next-line @typescript-eslint/no-this-alias
+                const self = this;
 
-              this.mgmContract.methods
-                .transfer(toWalletAddress, amountWei)
-                .send({ from: this.account.address })
-                .on('transactionHash', async function (hash) {
-                  /**
-                   * when we get the Transaction but confirmation is waiting then we will get this hash but this is not 100%correct may be
-                   * according to the blockchain. we have to wait for 3 confirmation
-                   */
+                this.mgmContract.methods
+                  .transfer(toWalletAddress, amountWei)
+                  .send({ from: this.account.address })
+                  .on('transactionHash', async function (hash) {
+                    /**
+                     * when we get the Transaction but confirmation is waiting then we will get this hash but this is not 100%correct may be
+                     * according to the blockchain. we have to wait for 3 confirmation
+                     */
 
-                  try {
-                    self.logger.debug(
-                      `Withdrawal::transferMgmReward::transactionHash:${JSON.stringify(
-                        {
-                          hash,
+                    try {
+                      self.logger.debug(
+                        `Withdrawal::transferMgmReward::transactionHash:${JSON.stringify(
+                          {
+                            hash,
+                          }
+                        )}`
+                      );
+
+                      await getManager().transaction(
+                        async (transactionalEntityManager) => {
+                          withdrawalStatus = await transactionalEntityManager
+                            .createQueryBuilder(Withdrawal, 'withdrawal')
+                            .update(Withdrawal)
+                            .set({
+                              status: 'Processing',
+                              hash: hash,
+                            })
+                            .where('withdrawal.id = :id', {
+                              id: withdrawalRecord.id,
+                            })
+                            .execute();
+
+                          self.logger.verbose(
+                            `Witdrawal::transferMgmReward::Status::Proceess:${JSON.stringify(
+                              withdrawalStatus
+                            )}:`
+                          );
                         }
+                      );
+                    } catch (error) {
+                      self.logger.error(
+                        `Witdrawal::transferMgmReward::Error::${error?.message}:`
+                      );
+
+                      return new HttpException(
+                        error?.message,
+                        HttpStatus.BAD_REQUEST
+                      );
+                    }
+                  })
+                  // .on(
+                  //   'confirmation',
+                  //   async function (confirmationNumber, receipt) {
+                  //     self.logger.warn(
+                  //       `Witdrawal::transferMgmReward::confirmation:${JSON.stringify(
+                  //         {
+                  //           confirmationNumber,
+                  //           receipt,
+                  //         }
+                  //       )}`
+                  //     );
+                  //   }
+                  // )
+                  .on('receipt', async function (receipt) {
+                    /**
+                     * When Transaction is Successful then we will get the Event from here
+                     */
+                    self.logger.log(
+                      `Withdrawal::transferMgmReward::receipt:${JSON.stringify(
+                        receipt
                       )}`
                     );
 
                     await getManager().transaction(
                       async (transactionalEntityManager) => {
-                        withdrawalStatus = await transactionalEntityManager
-                          .createQueryBuilder(Withdrawal, 'withdrawal')
-                          .update(Withdrawal)
-                          .set({
-                            status: 'Processing',
-                            hash: hash,
-                          })
-                          .where('withdrawal.id = :id', {
-                            id: withdrawalRecord.id,
-                          })
-                          .execute();
-
-                        self.logger.verbose(
-                          `Witdrawal::transferMgmReward::Status::Proceess:${JSON.stringify(
-                            withdrawalStatus
-                          )}:`
+                        const tTransferTransaction = new Transaction();
+                        tTransferTransaction.amount = withdrawal.amount;
+                        tTransferTransaction.type = TransactionType.WITHDRAWAL;
+                        tTransferTransaction.hash = receipt?.transactionHash;
+                        tTransferTransaction.walletAddress =
+                          withdrawal.walletAddress;
+                        tTransferTransaction.fromAddress = self.account.address;
+                        tTransferTransaction.userId = parseInt(
+                          withdrawal.userId
                         );
+                        tTransferTransaction.description = `Success: Transfer ${withdrawal.amount} to ${withdrawal.walletAddress}`;
+
+                        //Transfer : Create transaction record (update its balance)
+                        const tTransferTransactionObj =
+                          await transactionalEntityManager.save(
+                            tTransferTransaction
+                          );
+
+                        self.logger.log(
+                          `Withdrawal::transferMgmReward::createTrx::Success:${JSON.stringify(
+                            tTransferTransactionObj
+                          )}`
+                        );
+
+                        // updating Withdrawal if transaction is successfully done.
+                        if (tTransferTransactionObj) {
+                          withdrawalStatus = await transactionalEntityManager
+                            .createQueryBuilder(Withdrawal, 'withdrawal')
+                            .update(Withdrawal)
+                            .set({ status: 'Success' })
+                            .where('withdrawal.id = :id', {
+                              id: withdrawalRecord.id,
+                            })
+                            .execute();
+
+                          self.logger.log(
+                            `Withdrawal::transferMgmReward::Status::Success:${JSON.stringify(
+                              withdrawalStatus
+                            )}`
+                          );
+                        }
                       }
                     );
-                  } catch (error) {
+                  })
+                  .on('error', async function (error, receipt) {
+                    /**
+                     * when we get the Error from the Transfering the MGM reward
+                     */
                     self.logger.error(
-                      `Witdrawal::transferMgmReward::Error::${error?.message}:`
+                      `Withdrawal::transferMgmReward::Error:${JSON.stringify({
+                        error,
+                        receipt,
+                      })}`
                     );
 
-                    return new HttpException(
+                    await getManager().transaction(
+                      async (transactionalEntityManager) => {
+                        const tTransferTransaction = new Transaction();
+                        tTransferTransaction.amount = withdrawal.amount;
+                        tTransferTransaction.walletAddress =
+                          withdrawal.walletAddress;
+                        tTransferTransaction.fromAddress = self.account.address;
+                        tTransferTransaction.userId = parseInt(
+                          withdrawal.userId
+                        );
+                        tTransferTransaction.type = TransactionType.WITHDRAWAL;
+                        tTransferTransaction.description = `Failed: Transfer ${withdrawal.amount} to ${withdrawal.walletAddress}`;
+                        tTransferTransaction.hash = receipt?.hash;
+
+                        //Transfer : Create transaction record (update its balance)
+                        const tTransferTransactionObj =
+                          await transactionalEntityManager.save(
+                            tTransferTransaction
+                          );
+
+                        if (tTransferTransactionObj) {
+                          withdrawalStatus = await transactionalEntityManager
+                            .createQueryBuilder(Withdrawal, 'withdrawal')
+                            .update(Withdrawal)
+                            .set({ status: 'Failed' })
+                            .where('withdrawal.id = :id', {
+                              id: withdrawalRecord.id,
+                            })
+                            .execute();
+                        }
+                      }
+                    );
+                  })
+                  .then((result) => {
+                    this.logger.verbose(
+                      `Withdrawal::transferMgmReward::Status::Success:${JSON.stringify(
+                        withdrawal
+                      )}`
+                    );
+                    return result;
+                  })
+                  .catch((error) => {
+                    this.logger.error(`Withdrawal::Error:${error?.message}:`);
+                    throw new HttpException(
                       error?.message,
                       HttpStatus.BAD_REQUEST
                     );
-                  }
-                })
-                .on(
-                  'confirmation',
-                  async function (confirmationNumber, receipt) {
-                    self.logger.warn(
-                      `Witdrawal::transferMgmReward::confirmation:${JSON.stringify(
-                        {
-                          confirmationNumber,
-                          receipt,
-                        }
-                      )}`
-                    );
-                  }
-                )
-                .on('receipt', async function (receipt) {
-                  /**
-                   * When Transaction is Successful then we will get the Event from here
-                   */
-                  self.logger.log(
-                    `Withdrawal::transferMgmReward::receipt:${JSON.stringify({
-                      receipt,
-                    })}`
-                  );
+                  });
 
-                  await getManager().transaction(
-                    async (transactionalEntityManager) => {
-                      const tTransferTransaction = new Transaction();
-                      tTransferTransaction.amount = withdrawal.amount;
-                      tTransferTransaction.type = TransactionType.WITHDRAWAL;
-                      tTransferTransaction.hash =
-                        receipt.receipt?.transactionHash;
-                      tTransferTransaction.walletAddress =
-                        withdrawal.walletAddress;
-                      tTransferTransaction.fromAddress =
-                        MGM_REWARD_COMPANY_ADDRESS;
-                      tTransferTransaction.userId = parseInt(withdrawal.userId);
-                      tTransferTransaction.description = `Success: Transfer ${withdrawal.amount} to ${withdrawal.walletAddress}`;
-
-                      //Transfer : Create transaction record (update its balance)
-                      const tTransferTransactionObj =
-                        await transactionalEntityManager.save(
-                          tTransferTransaction
-                        );
-
-                      self.logger.log(
-                        `Withdrawal::transferMgmReward::createTrx::Success:${JSON.stringify(
-                          tTransferTransactionObj
-                        )}`
-                      );
-
-                      // updating Withdrawal if transaction is successfully done.
-                      if (tTransferTransactionObj) {
-                        withdrawalStatus = await transactionalEntityManager
-                          .createQueryBuilder(Withdrawal, 'withdrawal')
-                          .update(Withdrawal)
-                          .set({ status: 'Success' })
-                          .where('withdrawal.id = :id', {
-                            id: withdrawalRecord.id,
-                          })
-                          .execute();
-
-                        self.logger.log(
-                          `Withdrawal::transferMgmReward::Status::Success:${JSON.stringify(
-                            withdrawalStatus
-                          )}`
-                        );
-                      }
-                    }
-                  );
-                })
-                .on('error', async function (error, receipt) {
-                  /**
-                   * when we get the Error from the Transfering the MGM reward
-                   */
-                  self.logger.error(
-                    `Withdrawal::transferMgmReward::Error:${JSON.stringify({
-                      error,
-                      receipt,
-                    })}`
-                  );
-
-                  await getManager().transaction(
-                    async (transactionalEntityManager) => {
-                      const tTransferTransaction = new Transaction();
-                      tTransferTransaction.amount = withdrawal.amount;
-                      tTransferTransaction.walletAddress =
-                        withdrawal.walletAddress;
-                      tTransferTransaction.fromAddress =
-                        MGM_REWARD_COMPANY_ADDRESS;
-                      tTransferTransaction.userId = parseInt(withdrawal.userId);
-                      tTransferTransaction.type = TransactionType.WITHDRAWAL;
-                      tTransferTransaction.description = `Error: Transfer ${withdrawal.amount} to ${withdrawal.walletAddress}`;
-
-                      //Transfer : Create transaction record (update its balance)
-                      const tTransferTransactionObj =
-                        await transactionalEntityManager.save(
-                          tTransferTransaction
-                        );
-
-                      if (tTransferTransactionObj) {
-                        withdrawalStatus = await transactionalEntityManager
-                          .createQueryBuilder(Withdrawal, 'withdrawal')
-                          .update(Withdrawal)
-                          .set({ status: 'Failed' })
-                          .where('withdrawal.id = :id', {
-                            id: withdrawalRecord.id,
-                          })
-                          .execute();
-                      }
-                    }
-                  );
-                })
-                .then((result) => {
-                  this.logger.verbose(
-                    `Withdrawal::transferMgmReward::Status::Success:${JSON.stringify(
-                      withdrawal
-                    )}`
-                  );
-                  return result;
-                })
-                .catch((error) => {
-                  this.logger.error(`Withdrawal::Error:${error?.message}:`);
-                  throw new HttpException(
-                    error?.message,
-                    HttpStatus.BAD_REQUEST
-                  );
-                });
-
-              return withdrawalStatus;
-            } catch (error) {
-              this.logger.error(`Withdrawal::Error: ${error?.message}:`);
-              throw new Error(error);
-            }
-          })
-        )
-          .then((success) => {
-            console.log({ success });
-            this.logger.verbose(
-              `Withdrawal::Success: ${JSON.stringify(success)}`
-            );
-          })
-          .catch((failed) => {
-            this.logger.error(`Withdrawal::Error: ${JSON.stringify(failed)}`);
-          });
+                return withdrawalStatus;
+              } catch (error) {
+                this.logger.error(`Withdrawal::Error: ${error?.message}:`);
+                throw new Error(error);
+              }
+            })
+          )
+            .then((success) => {
+              this.logger.verbose(
+                `Withdrawal::Success: ${JSON.stringify(success)}`
+              );
+            })
+            .catch((error) => {
+              this.logger.error(`Withdrawal::Error: ${JSON.stringify(error)}`);
+            });
+        } else {
+          this.logger.verbose(
+            `Withdrawal::findApprovedWithdrawal::results::NotFound > ${JSON.stringify(
+              withdrwals
+            )}`
+          );
+        }
       });
   }
 }
