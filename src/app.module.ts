@@ -42,7 +42,7 @@ import { ListenersModule } from './listener/listeners.module';
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      envFilePath: ['.env.local'],
+      envFilePath: ['.env.production'],
       validationSchema: Joi.object({
         DATABASE_HOST: Joi.string().required(),
         DATABASE_PORT: Joi.string().required(),
