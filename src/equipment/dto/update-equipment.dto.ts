@@ -37,4 +37,7 @@ export class UpdateEquipmentDto {
 
   @ApiProperty({ required: false })
   thumburl?: string;
+
+  @ApiProperty({ required: false })
+  logInfo?: string;
 }

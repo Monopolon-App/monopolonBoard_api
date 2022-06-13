@@ -13,4 +13,7 @@ export class UpdateWithdrawalDto {
 
   @ApiProperty({ required: false })
   walletAddress?: string;
+
+  @ApiProperty({ required: false })
+  logInfo?: string;
 }

@@ -10,4 +10,7 @@ export class UpdateFortuneDto {
 
   @ApiProperty({ required: false })
   walletAddress?: string;
+
+  @ApiProperty({ required: false })
+  logInfo?: string;
 }

@@ -54,4 +54,7 @@ export class UpdateUserDto {
 
   @ApiProperty({ required: false })
   gridPosition?: number;
+
+  @ApiProperty({ required: false })
+  logInfo?: string;
 }
