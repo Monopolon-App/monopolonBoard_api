@@ -9,6 +9,22 @@ import {
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
 import _ from 'lodash';
+import { ConfigService } from '@nestjs/config';
+import { getManager, Repository } from 'typeorm';
+import axios from 'axios';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import { UsersProfile } from 'src/usersprofile/usersprofile.entity';
+import { Character } from 'src/character/character.entity';
+import { Team } from 'src/team/team.entity';
+import { Hq } from 'src/hq/hq.entity';
+
+import CONTRACT_ABI from './constants/contractABI.json';
+import { CONTRACT_ADDRESS, WS_PROVIDER_URL } from 'src/constants/constants';
+import { nftMetadata, nftMetadataDTO } from './nft-metadata.dto';
+
+// mock data for testing
+// import { staticEvent } from './mockData';
 
 type TrxDataType = {
   from: string;
@@ -18,29 +34,12 @@ type TrxDataType = {
   blockNumber: number;
 };
 
-import CONTRACT_ABI from './constants/contractABI.json';
-import {
-  COMPANY_ADDRESS,
-  CONTRACT_ADDRESS,
-  WS_PROVIDER_URL,
-} from 'src/constants/constants';
-import { ConfigService } from '@nestjs/config';
-import { nftMetadata, nftMetadataDTO } from './nft-metadata.dto';
-import axios from 'axios';
-import { getManager, Repository } from 'typeorm';
-import { UsersProfile } from '../usersprofile/usersprofile.entity';
-import { Character } from '../character/character.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Team } from '../team/team.entity';
-import { Hq } from 'src/hq/hq.entity';
-// import { staticEvent } from './mockData';
-
 @Injectable()
 export class ListenerService implements OnModuleInit {
   private readonly logger = new Logger(ListenerService.name);
 
   public web3;
-  public tokenContract: Contract;
+  public tokenContract: Contract; // nft
   public networkMode;
 
   constructor(
@@ -87,9 +86,10 @@ export class ListenerService implements OnModuleInit {
 
   // fetch the nft metadata form the API.
   async getNftMetadata(tokenId: number, erc721: string): Promise<nftMetadata> {
-    const metadataUrl = `https://marketplace.monopolon.io/api/nfts/tokenId/${tokenId}`;
+    let metadataUrl = `https://marketplace.monopolon.io/api/nfts/tokenId/${tokenId}`;
+
     if (erc721 == '0x5E17561c297E75875b0362FaB3c9553F4d15D4ac') {
-      const metadataUrl = `https://companymp.monopolon.io/api/nfts/tokenId/${tokenId}`;
+      metadataUrl = `https://companymp.monopolon.io/api/nfts/tokenId/${tokenId}`;
     }
 
     const result = await axios.get<nftMetadataDTO>(metadataUrl);
@@ -118,11 +118,13 @@ export class ListenerService implements OnModuleInit {
     this.logger.verbose('\n');
     this.logger.verbose(`INFO:`);
     this.logger.verbose(`-Network Mode: ${this.networkMode}`);
-    this.logger.verbose(`-WWS Provider: ${WS_PROVIDER_URL[this.networkMode]}`);
+    this.logger.verbose(`-WSS Provider: ${WS_PROVIDER_URL[this.networkMode]}`);
     this.logger.verbose(
       `-Contract Address: ${CONTRACT_ADDRESS[this.networkMode]}`
     );
-    this.logger.verbose(`-Company Address: ${COMPANY_ADDRESS}`);
+    this.logger.verbose(
+      `-Company Address: ${this.configService.get('COMPANY_ADDRESS')}`
+    );
     this.logger.verbose('\n');
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -131,7 +133,7 @@ export class ListenerService implements OnModuleInit {
     this.tokenContract.events
       .Transfer({
         filter: {
-          to: COMPANY_ADDRESS,
+          to: this.configService.get('COMPANY_ADDRESS'),
         },
         fromBlock: 'latest',
       })

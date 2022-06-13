@@ -27,4 +27,7 @@ export class UpdatePlayerEarningDto {
 
   @ApiProperty({ default: null })
   walletAddress?: string;
+
+  @ApiProperty({ required: false })
+  logInfo?: string;
 }

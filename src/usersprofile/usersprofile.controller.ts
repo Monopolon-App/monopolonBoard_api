@@ -49,4 +49,17 @@ export class UsersProfileController {
   ) {
     return this.usersService.updateUserProfile(walletAddress, updateUserDto);
   }
+
+  @Put('/enterMining/:walletAddress')
+  enterMining(@Param('walletAddress') walletAddress: string) {
+    return this.usersService.enterMining(walletAddress);
+  }
+
+  @Put('/rollingDice/:walletAddress')
+  rollingDice(
+    @Param('walletAddress') walletAddress: string,
+    @Query('rollDice') rollDice: number
+  ) {
+    return this.usersService.rollingDice(walletAddress, rollDice);
+  }
 }

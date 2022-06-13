@@ -13,4 +13,7 @@ export class UpdateHqDto {
 
   @ApiProperty({ required: false })
   walletAddress?: string;
+
+  @ApiProperty({ required: false })
+  logInfo?: string;
 }
