@@ -42,6 +42,9 @@ export class PlayerEarning {
   @Column({ default: null })
   walletAddress?: string;
 
+  @Column({ default: null })
+  logInfo?: string;
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

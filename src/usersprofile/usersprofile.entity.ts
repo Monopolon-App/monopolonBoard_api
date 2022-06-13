@@ -78,6 +78,9 @@ export class UsersProfile {
   @OneToMany(() => Character, (character) => character.usersProfile)
   character: Character[];
 
+  @Column({ default: null })
+  logInfo?: string;
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

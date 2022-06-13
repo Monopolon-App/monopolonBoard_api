@@ -13,4 +13,7 @@ export class UpdateTransactionDto {
 
   @ApiProperty({ required: false })
   userId?: number;
+
+  @ApiProperty({ required: false })
+  logInfo?: string;
 }

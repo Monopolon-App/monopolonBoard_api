@@ -18,4 +18,13 @@ export class Fortune {
 
   @Column({ default: null })
   walletAddress?: string;
+
+  @Column({ default: null })
+  logInfo?: string;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 }
