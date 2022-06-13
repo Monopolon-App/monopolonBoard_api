@@ -48,7 +48,7 @@ export class ListenerService implements OnModuleInit {
     private readonly usersRepository: Repository<UsersProfile>
   ) {
     this.networkMode =
-      this.configService.get('ENV_TAG') !== 'production'
+      this.configService.get('ENV_TAG') === 'production'
         ? 'MAINNET'
         : 'TESTNET';
 

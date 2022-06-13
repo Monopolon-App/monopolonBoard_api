@@ -44,7 +44,7 @@ export class SchedulerService {
     private readonly withdrwalRepository: Repository<Withdrawal>
   ) {
     this.networkMode =
-      this.configService.get('ENV_TAG') !== 'production'
+      this.configService.get('ENV_TAG') === 'production'
         ? 'MAINNET'
         : 'TESTNET';
 
