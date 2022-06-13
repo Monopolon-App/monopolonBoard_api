@@ -1,19 +1,8 @@
-import {
-  Injectable,
-  HttpException,
-  HttpStatus,
-  NotFoundException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
-import {
-  Repository,
-  getConnection,
-  getManager,
-  TreeRepository,
-  Like,
-} from 'typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcryptjs';
+
 import { UsersProfile } from './usersprofile.entity';
 import { UpdateUserDto } from './dto/update-user-profile.dto';
 
@@ -24,62 +13,44 @@ export class UsersProfileService {
     private readonly usersRepository: Repository<UsersProfile>
   ) {}
 
-  async getById(walletAddress: string): Promise<any> {
+  async getByWalletAddress(walletAddress: string): Promise<any> {
     try {
       const user = await this.usersRepository.findOne({
         walletAddress: walletAddress,
       });
       if (user) {
-        return 'data';
+        return user;
       }
-      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+
+      throw new HttpException('User does not exist', HttpStatus.NOT_FOUND);
     } catch (error) {
-      throw error;
+      throw new HttpException(error?.message, HttpStatus.BAD_REQUEST);
     }
   }
 
-  async createUser(
+  async getById(id: number): Promise<any> {
+    try {
+      const user = await this.usersRepository.findOne({
+        id,
+      });
+      if (user) {
+        return user;
+      }
+      throw new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+    } catch (error) {
+      throw new HttpException(error?.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async createUserProfile(
     userprofile: UsersProfile,
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
       const userProfile = await this.usersRepository.save(userprofile);
-      return {
-        success: true,
-        message: 'UserProfile created successfully.',
-        result: userProfile,
-      };
+      return userProfile;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  async getUserById(walletAddress: string): Promise<any> {
-    try {
-      const user = await this.usersRepository.findOne({
-        relations: ['character'],
-        where: { walletAddress },
-      });
-      if (user) {
-        return new HttpException(
-          {
-            status: HttpStatus.OK,
-            message: 'Success',
-            data: user,
-          },
-          HttpStatus.OK
-        );
-      } else {
-        return new HttpException(
-          {
-            status: HttpStatus.OK,
-            message: 'USer Not Found',
-          },
-          HttpStatus.OK
-        );
-      }
-    } catch (error) {
-      return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -106,5 +77,39 @@ export class UsersProfileService {
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const currentHashedRefreshToken = await bcrypt.hashSync(refreshToken, 10);
+    await this.usersRepository.update(
+      { id: userId },
+      {
+        currentHashedRefreshToken,
+      }
+    );
+  }
+
+  async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
+    const user = await this.usersRepository.findOne({ id: userId });
+
+    const isRefreshTokenMatching = await bcrypt.compare(
+      refreshToken,
+      user.currentHashedRefreshToken
+    );
+
+    if (!isRefreshTokenMatching) {
+      throw new HttpException('Incorrect refresh token!', HttpStatus.FORBIDDEN);
+    }
+
+    return user;
+  }
+
+  async removeRefreshToken(userId: number) {
+    return this.usersRepository.update(
+      { id: userId },
+      {
+        currentHashedRefreshToken: null,
+      }
+    );
   }
 }

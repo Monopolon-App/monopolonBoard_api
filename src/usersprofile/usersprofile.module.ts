@@ -11,4 +11,4 @@ import { UsersProfileService } from './usersprofile.service';
   providers: [UsersProfileService, ConfigService],
   controllers: [UsersProfileController],
 })
-export class UsersModule {}
+export class UsersProfileModule {}

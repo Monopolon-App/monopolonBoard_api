@@ -19,12 +19,12 @@ import { PlayerEarning } from './playerearning/playerearning.entity';
 import { Community } from './communitychest/community.entity';
 
 // Modules
+import { AuthModule } from './auth/auth.module';
 import { FortuneCardModule } from './fortunecard/fortune-card.module';
-
 import { PlayEarningModule } from './playerearning/playerearning.module';
 import { WithdrawalModule } from './withdrawal/withdrawal.module';
 import { EquipmentModule } from './equipment/equipment.module';
-import { UsersModule } from './usersprofile/usersprofile.module';
+import { UsersProfileModule } from './usersprofile/usersprofile.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { TeamModule } from './team/team.module';
 import { HqModule } from './hq/hq.module';
@@ -88,7 +88,8 @@ import { ListenersModule } from './listener/listeners.module';
     MulterModule.register({
       dest: './uploads',
     }),
-    UsersModule,
+    AuthModule,
+    UsersProfileModule,
     FortuneCardModule,
     TransactionModule,
     TeamModule,

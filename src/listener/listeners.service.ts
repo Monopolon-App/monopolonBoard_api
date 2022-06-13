@@ -13,6 +13,7 @@ import { ConfigService } from '@nestjs/config';
 import { getManager, Repository } from 'typeorm';
 import axios from 'axios';
 import { InjectRepository } from '@nestjs/typeorm';
+import HDWalletProvider from '@truffle/hdwallet-provider';
 
 import { UsersProfile } from 'src/usersprofile/usersprofile.entity';
 import { Character } from 'src/character/character.entity';
@@ -20,7 +21,11 @@ import { Team } from 'src/team/team.entity';
 import { Hq } from 'src/hq/hq.entity';
 
 import CONTRACT_ABI from './constants/contractABI.json';
-import { CONTRACT_ADDRESS, WS_PROVIDER_URL } from 'src/constants/constants';
+import {
+  CONTRACT_ADDRESS,
+  RPC_PROVIDER_URL,
+  WS_PROVIDER_URL,
+} from 'src/constants/constants';
 import { nftMetadata, nftMetadataDTO } from './nft-metadata.dto';
 
 // mock data for testing
@@ -150,9 +155,7 @@ export class ListenerService implements OnModuleInit {
         // remove event from local database
       })
       .on('error', function (error, receipt) {
-        self.logger.log(
-          'ERROR::error/receipt:' + JSON.stringify({ error, receipt })
-        );
+        self.logger.log(`listenContractEvents::Error: ${error?.message}`);
         // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
       });
   }

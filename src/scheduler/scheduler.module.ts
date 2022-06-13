@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
 import { ListenerService } from '../listener/listeners.service';
-import { UsersModule } from '../usersprofile/usersprofile.module';
+import { UsersProfileModule } from '../usersprofile/usersprofile.module';
 import { TransactionModule } from '../transaction/transaction.module';
 import { Transaction } from '../transaction/transaction.entity';
 import { UsersProfile } from '../usersprofile/usersprofile.entity';
@@ -14,7 +14,7 @@ import { WithdrawalModule } from '../withdrawal/withdrawal.module';
 @Module({
   imports: [
     ConfigModule,
-    UsersModule,
+    UsersProfileModule,
     TransactionModule,
     WithdrawalModule,
     TypeOrmModule.forFeature([UsersProfile, Transaction, Withdrawal]),

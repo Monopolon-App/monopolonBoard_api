@@ -26,9 +26,17 @@ export class UsersProfileController {
   constructor(private readonly usersService: UsersProfileService) {}
 
   // @UseGuards(JwtAuthGuard)
-  @Get('/getUserById')
-  getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
-    return this.usersService.getUserById(walletAddress);
+  @Get('/:walletAddress')
+  getUserByWalletAddress(
+    @Param('walletAddress') walletAddress: string
+  ): Promise<any> {
+    return this.usersService.getByWalletAddress(walletAddress);
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  @Get('/:userId')
+  getUserById(@Param('userId') userId: number): Promise<any> {
+    return this.usersService.getById(userId);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -39,14 +47,6 @@ export class UsersProfileController {
     @Body() userprofile: UsersProfile,
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
-    return this.usersService.createUser(userprofile, files);
-  }
-
-  @Patch(':walletAddress')
-  updateUserProfile(
-    @Param('walletAddress') walletAddress: string,
-    @Body() updateUserDto: UpdateUserDto
-  ) {
-    return this.usersService.updateUserProfile(walletAddress, updateUserDto);
+    return this.usersService.createUserProfile(userprofile, files);
   }
 }
