@@ -314,12 +314,6 @@ export class SchedulerService {
             .catch((error) => {
               this.logger.error(`Withdrawal::Error: ${JSON.stringify(error)}`);
             });
-        } else {
-          this.logger.verbose(
-            `Withdrawal::findApprovedWithdrawal::results::NotFound > ${JSON.stringify(
-              withdrwals
-            )}`
-          );
         }
       });
   }
@@ -333,13 +327,13 @@ export class SchedulerService {
       })
       .getManyAndCount()
       .then(([users, count]) => {
-        this.logger.debug(
-          `updateLastActionJob::users::result: ${JSON.stringify({
-            users,
-            count,
-          })}`
-        );
         if (count > 0) {
+          this.logger.debug(
+            `updateLastActionJob::users::result: ${JSON.stringify({
+              users,
+              count,
+            })}`
+          );
           users.forEach(async (user) => {
             try {
               const data = await getConnection()
@@ -375,13 +369,13 @@ export class SchedulerService {
       })
       .getManyAndCount()
       .then(([users, count]) => {
-        this.logger.debug(
-          `updateLastRollJob::users::result: ${JSON.stringify({
-            users,
-            count,
-          })}`
-        );
         if (count > 0) {
+          this.logger.debug(
+            `updateLastRollJob::users::result: ${JSON.stringify({
+              users,
+              count,
+            })}`
+          );
           users.forEach(async (user) => {
             try {
               const data = await getConnection()
