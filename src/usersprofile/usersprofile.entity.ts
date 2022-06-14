@@ -87,5 +87,5 @@ export class UsersProfile {
     nullable: true,
     default: null,
   })
-  public lastTryLoginToken?: string;
+  public lastLoginAttemptToken?: string;
 }

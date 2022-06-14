@@ -69,7 +69,7 @@ export class AuthService {
         await this.userProfileRepository.update(
           { walletAddress },
           {
-            lastTryLoginToken: token,
+            lastLoginAttemptToken: token,
           }
         );
       } else {
@@ -89,6 +89,19 @@ export class AuthService {
       });
 
       return validatedToken;
+    } catch (error) {
+      throw new HttpException(error?.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  public async generateSignature(sessionToken: string): Promise<any> {
+    try {
+      const signature = await this.web3.eth.accounts.sign(
+        sessionToken,
+        this.companyPrivateKey
+      );
+
+      return signature;
     } catch (error) {
       throw new HttpException(error?.message, HttpStatus.BAD_REQUEST);
     }
@@ -193,38 +206,40 @@ export class AuthService {
     }
   }
 
-  async login(loginDto: LoginDto): Promise<any> {
-    const { walletAddress, signature } = loginDto;
-    let recoveredAddress;
+  async login({ walletAddress, signature }: LoginDto): Promise<any> {
     try {
-      recoveredAddress = this.web3.eth.accounts.recover(
-        MESSAGE_DATA,
-        signature
-      );
-    } catch (error) {
-      throw new HttpException('Problem with signature verification.', 403);
-    }
-
-    // TODO: 1). can input sign message and compare it with sign message on database. 2). save sign message to database when register
-    if (recoveredAddress.toLowerCase() !== walletAddress.toLowerCase()) {
-      throw new HttpException('Signature is not correct.', 400);
-    }
-
-    try {
-      const existUser = await this.userProfileRepository.findOne({
+      const userData = await this.userProfileRepository.findOne({
         walletAddress,
       });
 
-      if (!existUser) {
+      await this.validateSessionToken(userData.lastLoginAttemptToken);
+
+      if (!userData) {
         throw new HttpException(
           'Wallet address not registered!',
-          HttpStatus.BAD_REQUEST
+          HttpStatus.UNAUTHORIZED
         );
       }
 
-      return existUser;
+      const recoveredAddress = await this.web3.eth.accounts.recover(
+        userData.lastLoginAttemptToken,
+        signature
+      );
+
+      if (recoveredAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+        throw new HttpException(
+          'Signature is not correct.',
+          HttpStatus.UNAUTHORIZED
+        );
+      }
+
+      userData.lastLoginAttemptToken = null;
+
+      const userProfleData = await this.userProfileRepository.save(userData);
+
+      return userProfleData;
     } catch (error) {
-      throw error;
+      throw new HttpException(error?.message, HttpStatus.UNAUTHORIZED);
     }
   }
 

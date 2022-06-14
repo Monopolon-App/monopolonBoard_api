@@ -83,6 +83,13 @@ export class AuthController {
     return this.authService.getSessionToken(walletAddress);
   }
 
+  @Get('/signature')
+  generateSignature(
+    @Query('tokenSession') tokenSession: string
+  ): Promise<UsersProfile> {
+    return this.authService.generateSignature(tokenSession);
+  }
+
   @Get('/validateToken')
   validateSessionToken(@Query('token') token: string): Promise<UsersProfile> {
     return this.authService.validateSessionToken(token);
