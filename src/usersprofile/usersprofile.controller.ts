@@ -19,6 +19,7 @@ import { UsersProfile } from './usersprofile.entity';
 import { UpdateUserDto } from './dto/update-user-profile.dto';
 
 import { UsersProfileService } from './usersprofile.service';
+import { registerUserParams } from './interfaces/params.interface';
 
 @ApiTags('usersprofile')
 @Controller('usersprofile')
@@ -61,5 +62,12 @@ export class UsersProfileController {
     @Query('rollDice') rollDice: number
   ) {
     return this.usersService.rollingDice(walletAddress, rollDice);
+  }
+
+  @Post('/registerUser/:walletAddress/tokenId/:tokenId')
+  registerUser(
+    @Param() { walletAddress, tokenId }: registerUserParams
+  ): Promise<any> {
+    return this.usersService.registerUser(walletAddress, tokenId);
   }
 }
