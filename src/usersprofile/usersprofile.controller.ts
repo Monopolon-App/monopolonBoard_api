@@ -70,4 +70,11 @@ export class UsersProfileController {
   ): Promise<any> {
     return this.usersService.registerUser(walletAddress, tokenId);
   }
+
+  @Get('/getCurrentTime')
+  getCurrentTime() {
+    return {
+      currentTime: new Date(),
+    };
+  }
 }
