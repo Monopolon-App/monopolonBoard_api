@@ -16,6 +16,7 @@ import { Grid } from 'src/grid/grid.entity';
 import { Character } from 'src/character/character.entity';
 import { PlayerEarning } from 'src/playerearning/playerearning.entity';
 import { Community } from 'src/communitychest/community.entity';
+import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { Community } from 'src/communitychest/community.entity';
           Grid,
           Character,
           Community,
+          WithdrawalHistory,
         ],
         synchronize: true,
       }),

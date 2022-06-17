@@ -25,6 +25,7 @@ import { AppService } from './app.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { ListenersModule } from './listener/listeners.module';
 import { DatabaseModule } from './database/database.module';
+import { WithdrawalHistoryModule } from './withdrawalHistory/withdrawalHistory.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { DatabaseModule } from './database/database.module';
     CommunityModule,
     ListenersModule,
     SchedulerModule,
+    WithdrawalHistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
