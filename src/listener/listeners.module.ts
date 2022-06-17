@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
@@ -13,7 +13,7 @@ import { WithdrawalModule } from '../withdrawal/withdrawal.module';
 @Module({
   imports: [
     ConfigModule,
-    UsersModule,
+    forwardRef(() => UsersModule),
     TransactionModule,
     WithdrawalModule,
     TypeOrmModule.forFeature([UsersProfile, Transaction, Withdrawal]),
