@@ -12,6 +12,7 @@ class DatabaseLogger implements TypeOrmLogger {
       `${query} -- Parameters: ${this.stringifyParameters(parameters)}`
     );
   }
+
   logQueryError(
     error: string,
     query: string,
@@ -27,6 +28,7 @@ class DatabaseLogger implements TypeOrmLogger {
       )} -- ${error}`
     );
   }
+
   logQuerySlow(
     time: number,
     query: string,
@@ -42,12 +44,15 @@ class DatabaseLogger implements TypeOrmLogger {
       )} -- ${query}`
     );
   }
+
   logMigration(message: string) {
     this.logger.log(message);
   }
+
   logSchemaBuild(message: string) {
     this.logger.log(message);
   }
+
   log(
     level: 'log' | 'info' | 'warn',
     message: string,
@@ -66,6 +71,7 @@ class DatabaseLogger implements TypeOrmLogger {
       return this.logger.warn(message);
     }
   }
+
   private stringifyParameters(parameters?: unknown[]) {
     try {
       return JSON.stringify(parameters);

@@ -12,11 +12,12 @@ import { AuthService } from './auth.service';
 import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtRefreshTokenStrategy } from './jwt-refresh-token.strategy';
+import { ListenersModule } from 'src/listener/listeners.module';
 
 @Module({
   imports: [
     ConfigModule,
-    forwardRef(() => UsersProfileModule),
+    UsersProfileModule,
     PassportModule,
     TypeOrmModule.forFeature([UsersProfile]),
     JwtModule.registerAsync({
@@ -29,6 +30,7 @@ import { JwtRefreshTokenStrategy } from './jwt-refresh-token.strategy';
         },
       }),
     }),
+    ListenersModule,
   ],
   providers: [
     AuthService,
