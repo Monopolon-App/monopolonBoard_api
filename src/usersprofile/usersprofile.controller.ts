@@ -19,6 +19,7 @@ import { UsersProfile } from './usersprofile.entity';
 import { UpdateUserDto } from './dto/update-user-profile.dto';
 
 import { UsersProfileService } from './usersprofile.service';
+import { registerUserParams } from './interfaces/params.interface';
 
 @ApiTags('usersprofile')
 @Controller('usersprofile')
@@ -48,5 +49,32 @@ export class UsersProfileController {
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
     return this.usersService.createUserProfile(userprofile, files);
+  }
+
+  @Put('/enterMining/:walletAddress')
+  enterMining(@Param('walletAddress') walletAddress: string) {
+    return this.usersService.enterMining(walletAddress);
+  }
+
+  @Put('/rollingDice/:walletAddress')
+  rollingDice(
+    @Param('walletAddress') walletAddress: string,
+    @Query('rollDice') rollDice: number
+  ) {
+    return this.usersService.rollingDice(walletAddress, rollDice);
+  }
+
+  @Post('/registerUser/:walletAddress/tokenId/:tokenId')
+  registerUser(
+    @Param() { walletAddress, tokenId }: registerUserParams
+  ): Promise<any> {
+    return this.usersService.registerUser(walletAddress, tokenId);
+  }
+
+  @Get('/getCurrentTime')
+  getCurrentTime() {
+    return {
+      currentTime: new Date(),
+    };
   }
 }

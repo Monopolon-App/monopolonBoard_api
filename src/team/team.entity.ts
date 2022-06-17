@@ -52,4 +52,13 @@ export class Team {
 
   @Column({ default: null })
   totalMp?: string;
+
+  @Column({ default: null })
+  logInfo?: string;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 }

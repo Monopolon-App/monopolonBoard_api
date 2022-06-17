@@ -55,4 +55,7 @@ export class UpdateCharacterDto {
 
   @ApiProperty({ required: false })
   ObjectURL?: string;
+
+  @ApiProperty({ required: false })
+  logInfo?: string;
 }

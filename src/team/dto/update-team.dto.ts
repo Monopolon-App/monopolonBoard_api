@@ -39,4 +39,7 @@ export class UpdateTeamDto {
 
   @ApiProperty({ required: false })
   totalMp?: string;
+
+  @ApiProperty({ required: false })
+  logInfo?: string;
 }

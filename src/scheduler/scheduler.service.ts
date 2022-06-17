@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { getConnection, getManager, Repository } from 'typeorm';
 import { Contract } from 'web3-eth-contract';
 import HDWalletProvider from '@truffle/hdwallet-provider';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import { ConfigService } from '@nestjs/config';
 
 import {
@@ -18,6 +18,7 @@ import {
   RPC_PROVIDER_URL,
 } from 'src/constants/constants';
 import mgmContractAbi from './constants/mgmContractAbi.json';
+import { UsersProfile } from 'src/usersprofile/usersprofile.entity';
 
 declare interface PromiseConstructor {
   allSettled(
@@ -43,7 +44,7 @@ export class SchedulerService {
     private readonly withdrwalRepository: Repository<Withdrawal>
   ) {
     this.networkMode =
-      this.configService.get('ENV_TAG') !== 'production'
+      this.configService.get('ENV_TAG') === 'production'
         ? 'MAINNET'
         : 'TESTNET';
 
@@ -99,7 +100,7 @@ export class SchedulerService {
                 const toWalletAddress = _.get(
                   withdrawalRecord,
                   'walletAddress',
-                  null
+                  '0000-00-00 00:00:00'
                 );
                 const amountWei = this.web3.utils.toWei(
                   withdrawalRecord.amount
@@ -313,12 +314,90 @@ export class SchedulerService {
             .catch((error) => {
               this.logger.error(`Withdrawal::Error: ${JSON.stringify(error)}`);
             });
-        } else {
-          this.logger.verbose(
-            `Withdrawal::findApprovedWithdrawal::results::NotFound > ${JSON.stringify(
-              withdrwals
-            )}`
+        }
+      });
+  }
+
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  updateLastActionJob() {
+    return getConnection()
+      .createQueryBuilder(UsersProfile, 'userProfile')
+      .where('userProfile.lastActionTimeStamp = :lastActionTimeStamp', {
+        lastActionTimeStamp: '0000-00-00 00:00:00',
+      })
+      .getManyAndCount()
+      .then(([users, count]) => {
+        if (count > 0) {
+          this.logger.debug(
+            `updateLastActionJob::users::result: ${JSON.stringify({
+              users,
+              count,
+            })}`
           );
+          users.forEach(async (user) => {
+            try {
+              const data = await getConnection()
+                .createQueryBuilder()
+                .update(UsersProfile)
+                .set({ lastActionTimeStamp: new Date() })
+                .where('id = :id', {
+                  id: user.id,
+                })
+                .execute();
+
+              this.logger.debug(
+                `updateLastActionJob::users::data: ${JSON.stringify(data)}`
+              );
+
+              return data;
+            } catch (error) {
+              this.logger.error(
+                `updateLastActionJob::users::error: ${error?.message}`
+              );
+            }
+          });
+        }
+      });
+  }
+
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  updateLastRollJob() {
+    return getConnection()
+      .createQueryBuilder(UsersProfile, 'userProfile')
+      .where('userProfile.lastRollTimeStamp = :lastRollTimeStamp', {
+        lastRollTimeStamp: '0000-00-00 00:00:00',
+      })
+      .getManyAndCount()
+      .then(([users, count]) => {
+        if (count > 0) {
+          this.logger.debug(
+            `updateLastRollJob::users::result: ${JSON.stringify({
+              users,
+              count,
+            })}`
+          );
+          users.forEach(async (user) => {
+            try {
+              const data = await getConnection()
+                .createQueryBuilder()
+                .update(UsersProfile)
+                .set({ lastRollTimeStamp: new Date() })
+                .where('id = :id', {
+                  id: user.id,
+                })
+                .execute();
+
+              this.logger.debug(
+                `updateLastRollJob::users::data: ${JSON.stringify(data)}`
+              );
+
+              return data;
+            } catch (error) {
+              this.logger.error(
+                `updateLastRollJob::users::error: ${error?.message}`
+              );
+            }
+          });
         }
       });
   }

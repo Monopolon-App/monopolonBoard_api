@@ -69,13 +69,20 @@ export class UsersProfile {
   @Column({ default: null })
   LastMinTime?: string;
 
+  @Column({ default: 1, nullable: true })
+  noOfLastAction?: number;
+
   @OneToMany(() => Character, (character) => character.usersProfile)
   character: Character[];
 
   @Column({
     nullable: true,
+    default: null,
   })
   public currentHashedRefreshToken?: string;
+
+  @Column({ default: null })
+  logInfo?: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

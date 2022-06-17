@@ -73,4 +73,13 @@ export class Character {
 
   @ManyToOne(() => UsersProfile, (usersProfile) => usersProfile.character)
   usersProfile?: UsersProfile;
+
+  @Column({ default: null })
+  logInfo?: string;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 }

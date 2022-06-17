@@ -51,3 +51,15 @@ export class IFilterParams {
   @ApiProperty({ name: 'createdAt', required: false })
   createdAt?: string;
 }
+
+export class registerUserParams {
+  @ApiProperty({
+    name: 'walletAddress',
+    example: '0x467aC5BA181b7ef22c654C5523B32B765443ac5E',
+    required: true,
+  })
+  walletAddress: string;
+
+  @ApiProperty({ required: true })
+  tokenId: number;
+}
