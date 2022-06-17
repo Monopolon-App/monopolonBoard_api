@@ -16,6 +16,7 @@ import { Grid } from 'src/grid/grid.entity';
 import { Character } from 'src/character/character.entity';
 import { PlayerEarning } from 'src/playerearning/playerearning.entity';
 import { Community } from 'src/communitychest/community.entity';
+import { Listener } from 'src/listener/listeners.entity';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { Community } from 'src/communitychest/community.entity';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService) => ({
+        logger: new DatabaseLogger(),
         type: 'mysql',
         host: configService.get('DATABASE_HOST'),
         port: parseInt(configService.get('DATABASE_PORT'), 10) || 3306,
@@ -41,6 +43,7 @@ import { Community } from 'src/communitychest/community.entity';
           Grid,
           Character,
           Community,
+          Listener,
         ],
         synchronize: true,
       }),

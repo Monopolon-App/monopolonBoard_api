@@ -22,6 +22,7 @@ import { Hq } from 'src/hq/hq.entity';
 import CONTRACT_ABI from './constants/contractABI.json';
 import { CONTRACT_ADDRESS, WS_PROVIDER_URL } from 'src/constants/constants';
 import { nftMetadata, nftMetadataDTO } from './nft-metadata.dto';
+import { Listener } from './listeners.entity';
 
 // mock data for testing
 // import { staticEvent } from './mockData';
@@ -44,8 +45,8 @@ export class ListenerService implements OnModuleInit {
 
   constructor(
     private readonly configService: ConfigService,
-    @InjectRepository(UsersProfile)
-    private readonly usersRepository: Repository<UsersProfile>
+    @InjectRepository(Listener)
+    private readonly listenersRepository: Repository<Listener>
   ) {
     this.networkMode =
       this.configService.get('ENV_TAG') === 'production'
@@ -86,13 +87,15 @@ export class ListenerService implements OnModuleInit {
 
   // fetch the nft metadata form the API.
   async getNftMetadata(tokenId: number, erc721: string): Promise<nftMetadata> {
-    let metadataUrl = `https://marketplace.monopolon.io/api/nfts/tokenId/${tokenId}`;
+    let MP_API_URL = 'https://marketplace.monopolon.io/api';
 
     if (erc721 == '0x5E17561c297E75875b0362FaB3c9553F4d15D4ac') {
-      metadataUrl = `https://companymp.monopolon.io/api/nfts/tokenId/${tokenId}`;
+      MP_API_URL = `https://companymp.monopolon.io/api`;
     }
 
-    const result = await axios.get<nftMetadataDTO>(metadataUrl);
+    const result = await axios.get<nftMetadataDTO>(`/nfts/tokenId/${tokenId}`, {
+      baseURL: MP_API_URL,
+    });
 
     if (result?.data?.data?.length === 0) {
       this.logger.log(`NFT metadata not found for tokenId ${tokenId}`);
@@ -112,6 +115,12 @@ export class ListenerService implements OnModuleInit {
   }
 
   async listenContractEvents(): Promise<void> {
+    const lastBlockNumber = await this.getLastBlockNumberListener();
+
+    const fromBlock = lastBlockNumber?.blockNumber
+      ? lastBlockNumber?.blockNumber + 1
+      : 'latest';
+
     this.logger.debug(
       `Started listen events Transfer at : ${new Date().toLocaleString()}`
     );
@@ -135,7 +144,7 @@ export class ListenerService implements OnModuleInit {
         filter: {
           to: this.configService.get('COMPANY_ADDRESS'),
         },
-        fromBlock: 'latest',
+        fromBlock,
       })
       .on('connected', function (subscriptionId) {
         self.logger.verbose(
@@ -180,6 +189,8 @@ export class ListenerService implements OnModuleInit {
       transactionHash: _.get(event, 'transactionHash', undefined),
       blockNumber: _.get(event, 'blockNumber', undefined),
     };
+
+    await this.setLastBlockNumberListener(trxData.blockNumber);
 
     this.logger.debug(`-Listener:event:trxData:${JSON.stringify(trxData)}`);
 
@@ -321,5 +332,40 @@ export class ListenerService implements OnModuleInit {
           return new HttpException(error?.message, HttpStatus.BAD_REQUEST);
         });
     });
+  }
+
+  async getLastBlockNumberListener(): Promise<Listener> {
+    const lastBlockNumberListener = await this.listenersRepository.findOne({
+      order: { blockNumber: 'DESC' },
+    });
+    this.logger.debug(
+      `Listener::getLastBlockNumberListener:Result=${
+        lastBlockNumberListener ? JSON.stringify(lastBlockNumberListener) : `{}`
+      }`
+    );
+
+    return lastBlockNumberListener;
+  }
+
+  async setLastBlockNumberListener(blockNumber: number): Promise<Listener> {
+    try {
+      const newBlockNumberListener = new Listener();
+      newBlockNumberListener.blockNumber = blockNumber;
+
+      const lastBlockNumberListener = await this.listenersRepository.save(
+        newBlockNumberListener
+      );
+
+      this.logger.debug(
+        `Listener::setLastBlockNumberListener:Result=${JSON.stringify(
+          lastBlockNumberListener
+        )}`
+      );
+      return lastBlockNumberListener;
+    } catch (error) {
+      this.logger.debug(
+        `Listener::setLastBlockNumberListener::ERROR:${JSON.stringify(error)}`
+      );
+    }
   }
 }

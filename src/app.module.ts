@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MulterModule } from '@nestjs/platform-express';
 
 // Modules
 import { FortuneCardModule } from './fortunecard/fortune-card.module';
-
 import { PlayEarningModule } from './playerearning/playerearning.module';
 import { WithdrawalModule } from './withdrawal/withdrawal.module';
 import { EquipmentModule } from './equipment/equipment.module';
@@ -22,7 +21,6 @@ import { SchedulerModule } from './scheduler/scheduler.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MulterModule } from '@nestjs/platform-express';
 import { ListenersModule } from './listener/listeners.module';
 import { DatabaseModule } from './database/database.module';
 
