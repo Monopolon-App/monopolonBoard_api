@@ -19,19 +19,20 @@ import { Hq } from './hq.entity';
 import { UpdateHqDto } from './dto/update-hq.dto';
 
 import { HqService } from './hq.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('hq')
 @Controller('hq')
 export class HqController {
   constructor(private readonly hqService: HqService) {}
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getHqById(@Query('wallwtAddress') wallwtAddress: string): Promise<any> {
     return this.hqService.getHqById(wallwtAddress);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -42,6 +43,7 @@ export class HqController {
     return this.hqService.createHq(userprofile, files);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':wallwtAddress')
   updateHq(
     @Param('wallwtAddress') wallwtAddress: string,

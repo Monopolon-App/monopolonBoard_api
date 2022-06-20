@@ -6,9 +6,7 @@ import {
   Query,
   UseGuards,
   Param,
-  Request,
   Put,
-  Patch,
   UseInterceptors,
   UploadedFiles,
 } from '@nestjs/common';
@@ -20,13 +18,14 @@ import { UpdateUserDto } from './dto/update-user-profile.dto';
 
 import { UsersProfileService } from './usersprofile.service';
 import { registerUserParams } from './interfaces/params.interface';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('usersprofile')
 @Controller('usersprofile')
 export class UsersProfileController {
   constructor(private readonly usersService: UsersProfileService) {}
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/:walletAddress')
   getUserByWalletAddress(
     @Param('walletAddress') walletAddress: string
@@ -34,13 +33,13 @@ export class UsersProfileController {
     return this.usersService.getByWalletAddress(walletAddress);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/:userId')
   getUserById(@Param('userId') userId: number): Promise<any> {
     return this.usersService.getById(userId);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -51,11 +50,13 @@ export class UsersProfileController {
     return this.usersService.createUserProfile(userprofile, files);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put('/enterMining/:walletAddress')
   enterMining(@Param('walletAddress') walletAddress: string) {
     return this.usersService.enterMining(walletAddress);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put('/rollingDice/:walletAddress')
   rollingDice(
     @Param('walletAddress') walletAddress: string,
@@ -64,6 +65,7 @@ export class UsersProfileController {
     return this.usersService.rollingDice(walletAddress, rollDice);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('/registerUser/:walletAddress/tokenId/:tokenId')
   registerUser(
     @Param() { walletAddress, tokenId }: registerUserParams

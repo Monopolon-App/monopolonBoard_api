@@ -6,8 +6,6 @@ import {
   Query,
   UseGuards,
   Param,
-  Request,
-  Put,
   Patch,
   UseInterceptors,
   UploadedFiles,
@@ -19,19 +17,20 @@ import { Transaction } from './transaction.entity';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 
 import { TeamService } from './transaction.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('transaction')
 @Controller('transaction')
 export class TransactionController {
   constructor(private readonly hqService: TeamService) {}
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/geTransactionById')
   getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
     return this.hqService.getTransactionById(walletAddress);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -42,6 +41,7 @@ export class TransactionController {
     return this.hqService.createTransaction(userprofile, files);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateTransaction(
     @Param('walletAddress') walletAddress: string,

@@ -19,19 +19,20 @@ import { Equipment } from './equipment.entity';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 
 import { EquipmentService } from './equipment.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('equipment')
 @Controller('equipment')
 export class EquipmentController {
   constructor(private readonly equipmentService: EquipmentService) {}
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
     return this.equipmentService.getUserById(walletAddress);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -42,6 +43,7 @@ export class EquipmentController {
     return this.equipmentService.createEquipment(equipment, files);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateEquipmentl(
     @Param('walletAddress') walletAddress: string,

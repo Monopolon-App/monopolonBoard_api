@@ -19,19 +19,20 @@ import { Character } from './character.entity';
 import { UpdateCharacterDto } from './dto/update-character.dto';
 
 import { CharacterService } from './character.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Character')
 @Controller('Character')
 export class CharacterController {
   constructor(private readonly hqService: CharacterService) {}
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
     return this.hqService.getUserById(walletAddress);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -42,6 +43,7 @@ export class CharacterController {
     return this.hqService.createCharacter(character, files);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateCharacter(
     @Param('walletAddress') walletAddress: string,

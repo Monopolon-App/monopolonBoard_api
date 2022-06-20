@@ -19,19 +19,20 @@ import { Grid } from './grid.entity';
 import { UpdateGridDto } from './dto/update-grid.dto';
 
 import { GridService } from './grid.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('grid')
 @Controller('grid')
 export class GridController {
   constructor(private readonly gridService: GridService) {}
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
     return this.gridService.getUserById(walletAddress);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -42,6 +43,7 @@ export class GridController {
     return this.gridService.createGrid(grid, files);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateGrid(
     @Param('walletAddress') walletAddress: string,
