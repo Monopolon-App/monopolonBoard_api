@@ -17,6 +17,7 @@ import { Character } from 'src/character/character.entity';
 import { PlayerEarning } from 'src/playerearning/playerearning.entity';
 import { Community } from 'src/communitychest/community.entity';
 import { Listener } from 'src/listener/listeners.entity';
+import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { Listener } from 'src/listener/listeners.entity';
           Character,
           Community,
           Listener,
+          WithdrawalHistory,
         ],
         synchronize: true,
       }),
