@@ -6,15 +6,15 @@ import { UsersProfile } from './usersprofile.entity';
 import { UsersProfileController } from './usersprofile.controller';
 import { UsersProfileService } from './usersprofile.service';
 import { ListenersModule } from '../listener/listeners.module';
-import { ListenerService } from '../listener/listeners.service';
+import { Listener } from 'src/listener/listeners.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UsersProfile]),
     ConfigModule,
-    forwardRef(() => ListenersModule),
+    TypeOrmModule.forFeature([UsersProfile, Listener]),
+    ListenersModule,
   ],
-  providers: [UsersProfileService, ConfigService, ListenerService],
+  providers: [UsersProfileService],
   controllers: [UsersProfileController],
 })
 export class UsersModule {}

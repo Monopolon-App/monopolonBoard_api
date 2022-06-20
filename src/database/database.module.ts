@@ -16,6 +16,7 @@ import { Grid } from 'src/grid/grid.entity';
 import { Character } from 'src/character/character.entity';
 import { PlayerEarning } from 'src/playerearning/playerearning.entity';
 import { Community } from 'src/communitychest/community.entity';
+import { Listener } from 'src/listener/listeners.entity';
 import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity';
 
 @Module({
@@ -24,6 +25,7 @@ import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService) => ({
+        logger: new DatabaseLogger(),
         type: 'mysql',
         host: configService.get('DATABASE_HOST'),
         port: parseInt(configService.get('DATABASE_PORT'), 10) || 3306,
@@ -42,6 +44,7 @@ import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity
           Grid,
           Character,
           Community,
+          Listener,
           WithdrawalHistory,
         ],
         synchronize: true,
