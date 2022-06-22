@@ -66,12 +66,8 @@ export class AuthService {
       });
 
       if (user) {
-        await this.userProfileRepository.update(
-          { walletAddress },
-          {
-            lastLoginAttemptToken: token,
-          }
-        );
+        user.lastLoginAttemptToken = token;
+        await this.userProfileRepository.save(user);
       } else {
         throw new UnauthorizedException('User not registered!');
       }
@@ -178,31 +174,6 @@ export class AuthService {
       return userResp;
     } catch (error) {
       throw new UnauthorizedException(error.message);
-    }
-  }
-
-  /**
-   * validateSignature
-   * @param sig
-   * @param accountAddress
-   * @returns string account address
-   * @description custom validation signature
-   */
-  async validateSignature(sig) {
-    try {
-      const msg = await this.web3.utils.sha3(MESSAGE_DATA);
-      const signature = ethUtils.fromRpcSig(sig);
-      const pubKey = ethUtils.ecrecover(
-        msg,
-        signature.v,
-        signature.r,
-        signature.s
-      );
-      const foundAddress = '0x' + ethUtils.pubToAddress(pubKey).toString('hex');
-
-      return foundAddress;
-    } catch (error) {
-      return undefined;
     }
   }
 
