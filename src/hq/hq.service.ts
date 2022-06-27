@@ -96,4 +96,19 @@ export class HqService {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
+
+  async getHqByGridPosition(hqGridPosition: number): Promise<any> {
+    const [hq] = await this.HqRepository.findAndCount({
+      where: { hqGridPosition },
+    });
+    // here we get All the Hqs for particular gridPosition
+    return new HttpException(
+      {
+        status: HttpStatus.OK,
+        message: 'Success',
+        data: hq,
+      },
+      HttpStatus.OK
+    );
+  }
 }

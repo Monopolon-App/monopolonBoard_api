@@ -49,4 +49,15 @@ export class HqController {
   ) {
     return this.hqService.updateHq(wallwtAddress, updategridDto);
   }
+
+  /**
+   * Api for get all the Hq which is present in given GridPosition.
+   * @param hqGridPosition
+   */
+  @Get('/getHqByGrid')
+  getHqByGridPosition(
+    @Query('gridPosition') hqGridPosition: number
+  ): Promise<any> {
+    return this.hqService.getHqByGridPosition(hqGridPosition);
+  }
 }
