@@ -24,6 +24,7 @@ import { AppService } from './app.service';
 import { ListenersModule } from './listener/listeners.module';
 import { DatabaseModule } from './database/database.module';
 import { WithdrawalHistoryModule } from './withdrawalHistory/withdrawalHistory.module';
+import { LootingModule } from './looting/looting.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { WithdrawalHistoryModule } from './withdrawalHistory/withdrawalHistory.m
     ListenersModule,
     SchedulerModule,
     WithdrawalHistoryModule,
+    LootingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
