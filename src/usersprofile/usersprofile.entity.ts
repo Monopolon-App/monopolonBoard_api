@@ -84,6 +84,12 @@ export class UsersProfile {
   @Column({ default: null })
   logInfo?: string;
 
+  @Column({ default: null })
+  gameType?: string;
+
+  @Column({ default: 0 })
+  noOfLooting?: number;
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
