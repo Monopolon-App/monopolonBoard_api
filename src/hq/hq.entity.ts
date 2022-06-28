@@ -5,7 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Double,
+  OneToMany,
 } from 'typeorm';
+import { Team } from '../team/team.entity';
 // this is need to be relative since after compile it will have different path: https://stackoverflow.com/questions/63865678/nestjs-test-suite-failed-to-run-cannot-find-module-src-article-article-entity
 
 @Entity()
@@ -27,6 +29,9 @@ export class Hq {
 
   @Column({ default: null })
   logInfo?: string;
+
+  @OneToMany(() => Team, (team) => team.hq)
+  team?: Team[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
