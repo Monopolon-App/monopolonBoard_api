@@ -99,7 +99,7 @@ export class HqService {
 
   async getHqByGridPosition(hqGridPosition: number): Promise<any> {
     const [hq] = await this.HqRepository.findAndCount({
-      relations: ['team'],
+      relations: ['team', 'user'],
       where: { hqGridPosition },
     });
     // here we get All the Hqs for particular gridPosition
