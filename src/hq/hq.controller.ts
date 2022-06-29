@@ -19,6 +19,7 @@ import { Hq } from './hq.entity';
 import { UpdateHqDto } from './dto/update-hq.dto';
 
 import { HqService } from './hq.service';
+import { Looting } from '../looting/looting.entity';
 
 @ApiTags('hq')
 @Controller('hq')
@@ -59,5 +60,13 @@ export class HqController {
     @Query('gridPosition') hqGridPosition: number
   ): Promise<any> {
     return this.hqService.getHqByGridPosition(hqGridPosition);
+  }
+
+  @Post('/looting/create')
+  createLooting(
+    @Body()
+    looting: Looting
+  ): Promise<any> {
+    return this.hqService.createLooting(looting);
   }
 }
