@@ -25,6 +25,9 @@ import { ListenersModule } from './listener/listeners.module';
 import { DatabaseModule } from './database/database.module';
 import { WithdrawalHistoryModule } from './withdrawalHistory/withdrawalHistory.module';
 import { LootingModule } from './looting/looting.module';
+import { ErrorModule } from './errorException/error.module';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './errorException/allException';
 
 @Module({
   imports: [
@@ -66,9 +69,16 @@ import { LootingModule } from './looting/looting.module';
     SchedulerModule,
     WithdrawalHistoryModule,
     LootingModule,
+    ErrorModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
 })
 export class AppModule {
   constructor(private connection: Connection) {}
