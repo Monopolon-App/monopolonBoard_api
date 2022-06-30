@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { getManager, Repository } from 'typeorm';
 import { Looting } from './looting.entity';
-import { UpdateLootingDto } from './dto/update-looting.dto';
 
 @Injectable()
 export class LootingService {
@@ -16,7 +15,7 @@ export class LootingService {
     private readonly lootingRepository: Repository<Looting>
   ) {}
 
-  async getLootingById(walletAddress: string): Promise<any> {
+  async getLootingByWalletAddress(walletAddress: string): Promise<any> {
     try {
       const [user, count] = await this.lootingRepository.findAndCount({
         where: { walletAddress },
@@ -49,5 +48,14 @@ export class LootingService {
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async getLootingById(lootingId: number): Promise<any> {
+    const looting = await this.lootingRepository.findOne({
+      relations: ['hq'],
+      where: { id: lootingId },
+    });
+
+    return looting;
   }
 }

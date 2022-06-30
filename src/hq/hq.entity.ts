@@ -41,8 +41,8 @@ export class Hq {
   @OneToMany(() => UsersProfile, (user) => user.hq)
   user?: UsersProfile[];
 
-  @OneToOne(() => Looting, (looting) => looting.hq)
-  looting?: Looting;
+  @OneToMany(() => Looting, (looting) => looting.hq)
+  looting?: Looting[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
