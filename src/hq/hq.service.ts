@@ -21,6 +21,8 @@ import {
   Transaction,
   TransactionType,
 } from '../transaction/transaction.entity';
+import { UsersProfile } from '../usersprofile/usersprofile.entity';
+import { LootingService } from '../looting/looting.service';
 
 @Injectable()
 export class HqService {
@@ -29,7 +31,8 @@ export class HqService {
   }
   constructor(
     @InjectRepository(Hq)
-    private readonly HqRepository: Repository<Hq>
+    private readonly HqRepository: Repository<Hq>,
+    private readonly lootingService: LootingService
   ) {}
 
   async getById(walletAddress: string): Promise<any> {
@@ -120,6 +123,11 @@ export class HqService {
     );
   }
 
+  /**
+   * one User can loot only 3 Times. if they dont choose mining LastMinTime will be true then he can loot
+   * if LastMinTime will be true then can loot so we have to add the condition in the create looting API here
+   * @param looting
+   */
   async createLooting(looting: Looting): Promise<any> {
     try {
       const hqId = looting.hq;
@@ -134,11 +142,24 @@ export class HqService {
           })
           .getOne();
 
+        const user = await getConnection()
+          .createQueryBuilder()
+          .select('users_profile')
+          .from(UsersProfile, 'users_profile')
+          .where('users_profile.walletAddress = :walletAddress', {
+            walletAddress: looting.walletAddress,
+          })
+          .getOne();
+
         if (hq.status === 0) {
           throw new HttpException(
             'This Hq is Being looted',
             HttpStatus.BAD_REQUEST
           );
+        }
+
+        if (!user) {
+          throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
 
         await transactionalEntityManager
@@ -153,32 +174,63 @@ export class HqService {
           })
           .execute();
 
-        await getManager().transaction(async (transactionalEntityManager) => {
-          const tTransferTransaction = new Transaction();
-          tTransferTransaction.amount = `-${amount}`;
-          tTransferTransaction.type = TransactionType.LOOTED;
-          tTransferTransaction.walletAddress = hq.walletAddress;
-          tTransferTransaction.userId = hq.userId;
-          await transactionalEntityManager.save(tTransferTransaction);
-        });
+        const tTransferTransaction = new Transaction();
+        tTransferTransaction.amount = `-${amount}`;
+        tTransferTransaction.type = TransactionType.LOOTED;
+        tTransferTransaction.walletAddress = hq.walletAddress;
+        tTransferTransaction.userId = hq.userId;
+        await transactionalEntityManager.save(tTransferTransaction);
 
-        await getManager().transaction(async (transactionalEntityManager) => {
-          const tTransferTransaction = new Transaction();
-          tTransferTransaction.amount = amount;
-          tTransferTransaction.type = TransactionType.LOOTING;
-          tTransferTransaction.walletAddress = looting.walletAddress;
-          tTransferTransaction.userId = looting.userId;
-          await transactionalEntityManager.save(tTransferTransaction);
-        });
+        const tTransferTransactionForLootingUser = new Transaction();
+        tTransferTransactionForLootingUser.amount = amount;
+        tTransferTransactionForLootingUser.type = TransactionType.LOOTING;
+        tTransferTransactionForLootingUser.walletAddress =
+          looting.walletAddress;
+        tTransferTransactionForLootingUser.userId = user.id;
+        await transactionalEntityManager.save(
+          tTransferTransactionForLootingUser
+        );
 
-        return getManager().transaction(async (transactionalEntityManager) => {
-          const lootings = new Looting();
-          lootings.walletAddress = looting.walletAddress;
-          lootings.userId = looting.userId;
-          lootings.gridPosition = looting.gridPosition;
-          lootings.amount = looting.amount;
-          return await transactionalEntityManager.save(lootings);
-        });
+        const lootings = new Looting();
+        lootings.walletAddress = looting.walletAddress;
+        lootings.userId = user.id;
+        lootings.gridPosition = hq.hqGridPosition;
+        lootings.amount = looting.amount;
+        lootings.hq = hq;
+        return transactionalEntityManager.save(lootings);
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async updateLooting(lootingId: number): Promise<any> {
+    try {
+      return getManager().transaction(async (transactionalEntityManager) => {
+        const looting = await this.lootingService.getLootingById(lootingId);
+
+        if (!looting) {
+          throw new HttpException('looting not found', HttpStatus.NOT_FOUND);
+        }
+        const hqId = looting.hq.id;
+
+        if (looting.hq.status === 0) {
+          throw new HttpException(
+            'User is already available to loot',
+            HttpStatus.BAD_REQUEST
+          );
+        }
+
+        return await transactionalEntityManager
+          .createQueryBuilder(Hq, 'hq')
+          .update(Hq)
+          .set({
+            status: 1,
+          })
+          .where('hq.id = :id', {
+            id: hqId,
+          })
+          .execute();
       });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);

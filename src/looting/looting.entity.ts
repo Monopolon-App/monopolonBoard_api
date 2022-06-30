@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -25,7 +26,7 @@ export class Looting {
   @Column({ default: null })
   amount?: string;
 
-  @OneToOne(() => Hq, (hq) => hq.looting)
+  @ManyToOne(() => Hq, (hq) => hq.looting)
   hq?: Hq;
 
   @CreateDateColumn({ type: 'timestamp' })
