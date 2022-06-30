@@ -9,6 +9,8 @@ import {
 
 export enum TransactionType {
   WITHDRAWAL = 'withdrawal',
+  LOOTING = 'looting',
+  LOOTED = 'looted',
 }
 
 @Entity()

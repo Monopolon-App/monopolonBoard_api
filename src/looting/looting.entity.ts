@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Hq } from '../hq/hq.entity';
 
 @Entity()
 export class Looting {
@@ -19,6 +21,12 @@ export class Looting {
 
   @Column({ default: null })
   walletAddress?: string;
+
+  @Column({ default: null })
+  amount?: string;
+
+  @OneToOne(() => Hq, (hq) => hq.looting)
+  hq?: Hq;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

@@ -16,6 +16,11 @@ import {
 } from 'typeorm';
 import { Hq } from './hq.entity';
 import { UpdateHqDto } from './dto/update-hq.dto';
+import { Looting } from '../looting/looting.entity';
+import {
+  Transaction,
+  TransactionType,
+} from '../transaction/transaction.entity';
 
 @Injectable()
 export class HqService {
@@ -100,7 +105,9 @@ export class HqService {
   async getHqByGridPosition(hqGridPosition: number): Promise<any> {
     const [hq] = await this.HqRepository.findAndCount({
       relations: ['team', 'user'],
-      where: { hqGridPosition },
+
+      // we have to update there status is available and we have to add the code comment here so we can understand
+      where: { hqGridPosition, status: 1 },
     });
     // here we get All the Hqs for particular gridPosition
     return new HttpException(
@@ -111,5 +118,70 @@ export class HqService {
       },
       HttpStatus.OK
     );
+  }
+
+  async createLooting(looting: Looting): Promise<any> {
+    try {
+      const hqId = looting.hq;
+      const amount = looting.amount;
+      return getManager().transaction(async (transactionalEntityManager) => {
+        const hq = await getConnection()
+          .createQueryBuilder()
+          .select('hq')
+          .from(Hq, 'hq')
+          .where('hq.id = :id', {
+            id: hqId,
+          })
+          .getOne();
+
+        if (hq.status === 0) {
+          throw new HttpException(
+            'This Hq is Being looted',
+            HttpStatus.BAD_REQUEST
+          );
+        }
+
+        await transactionalEntityManager
+          .createQueryBuilder(Hq, 'hq')
+          .setLock('pessimistic_write')
+          .update(Hq)
+          .set({
+            status: 0,
+          })
+          .where('hq.id = :id', {
+            id: hqId,
+          })
+          .execute();
+
+        await getManager().transaction(async (transactionalEntityManager) => {
+          const tTransferTransaction = new Transaction();
+          tTransferTransaction.amount = `-${amount}`;
+          tTransferTransaction.type = TransactionType.LOOTED;
+          tTransferTransaction.walletAddress = hq.walletAddress;
+          tTransferTransaction.userId = hq.userId;
+          await transactionalEntityManager.save(tTransferTransaction);
+        });
+
+        await getManager().transaction(async (transactionalEntityManager) => {
+          const tTransferTransaction = new Transaction();
+          tTransferTransaction.amount = amount;
+          tTransferTransaction.type = TransactionType.LOOTING;
+          tTransferTransaction.walletAddress = looting.walletAddress;
+          tTransferTransaction.userId = looting.userId;
+          await transactionalEntityManager.save(tTransferTransaction);
+        });
+
+        return getManager().transaction(async (transactionalEntityManager) => {
+          const lootings = new Looting();
+          lootings.walletAddress = looting.walletAddress;
+          lootings.userId = looting.userId;
+          lootings.gridPosition = looting.gridPosition;
+          lootings.amount = looting.amount;
+          return await transactionalEntityManager.save(lootings);
+        });
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 }
