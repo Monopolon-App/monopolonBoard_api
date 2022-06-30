@@ -214,7 +214,7 @@ export class HqService {
         }
         const hqId = looting.hq.id;
 
-        if (looting.hq.status === 0) {
+        if (looting.hq.status === 1) {
           throw new HttpException(
             'User is already available to loot',
             HttpStatus.BAD_REQUEST
