@@ -162,42 +162,63 @@ export class HqService {
           throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
 
-        await transactionalEntityManager
-          .createQueryBuilder(Hq, 'hq')
-          .setLock('pessimistic_write')
-          .update(Hq)
-          .set({
-            status: 0,
-          })
-          .where('hq.id = :id', {
-            id: hqId,
-          })
-          .execute();
+        if (user.LastMinTime === 'true') {
+          if (user.noOfLooting > 3) {
+            throw new HttpException(
+              'User is not able to loot any more',
+              HttpStatus.BAD_REQUEST
+            );
+          } else {
+            await transactionalEntityManager
+              .createQueryBuilder(UsersProfile, 'users_profile')
+              .setLock('pessimistic_write')
+              .update(UsersProfile)
+              .set({
+                noOfLooting: user.noOfLooting + 1,
+              })
+              .where('users_profile.id = :id', {
+                id: user.id,
+              })
+              .execute();
 
-        const tTransferTransaction = new Transaction();
-        tTransferTransaction.amount = `-${amount}`;
-        tTransferTransaction.type = TransactionType.LOOTED;
-        tTransferTransaction.walletAddress = hq.walletAddress;
-        tTransferTransaction.userId = hq.userId;
-        await transactionalEntityManager.save(tTransferTransaction);
+            await transactionalEntityManager
+              .createQueryBuilder(Hq, 'hq')
+              .setLock('pessimistic_write')
+              .update(Hq)
+              .set({
+                status: 0,
+              })
+              .where('hq.id = :id', {
+                id: hqId,
+              })
+              .execute();
 
-        const tTransferTransactionForLootingUser = new Transaction();
-        tTransferTransactionForLootingUser.amount = amount;
-        tTransferTransactionForLootingUser.type = TransactionType.LOOTING;
-        tTransferTransactionForLootingUser.walletAddress =
-          looting.walletAddress;
-        tTransferTransactionForLootingUser.userId = user.id;
-        await transactionalEntityManager.save(
-          tTransferTransactionForLootingUser
-        );
+            const tTransferTransaction = new Transaction();
+            tTransferTransaction.amount = `-${amount}`;
+            tTransferTransaction.type = TransactionType.LOOTED;
+            tTransferTransaction.walletAddress = hq.walletAddress;
+            tTransferTransaction.userId = hq.userId;
+            await transactionalEntityManager.save(tTransferTransaction);
 
-        const lootings = new Looting();
-        lootings.walletAddress = looting.walletAddress;
-        lootings.userId = user.id;
-        lootings.gridPosition = hq.hqGridPosition;
-        lootings.amount = looting.amount;
-        lootings.hq = hq;
-        return transactionalEntityManager.save(lootings);
+            const tTransferTransactionForLootingUser = new Transaction();
+            tTransferTransactionForLootingUser.amount = amount;
+            tTransferTransactionForLootingUser.type = TransactionType.LOOTING;
+            tTransferTransactionForLootingUser.walletAddress =
+              looting.walletAddress;
+            tTransferTransactionForLootingUser.userId = user.id;
+            await transactionalEntityManager.save(
+              tTransferTransactionForLootingUser
+            );
+
+            const lootings = new Looting();
+            lootings.walletAddress = looting.walletAddress;
+            lootings.userId = user.id;
+            lootings.gridPosition = hq.hqGridPosition;
+            lootings.amount = looting.amount;
+            lootings.hq = hq;
+            return transactionalEntityManager.save(lootings);
+          }
+        }
       });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
