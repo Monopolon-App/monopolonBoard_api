@@ -71,7 +71,11 @@ export class HqController {
   }
 
   @Put('/looting/update/:id')
-  updateLooting(@Param('id') lootingId: number): Promise<any> {
-    return this.hqService.updateLooting(lootingId);
+  updateLooting(
+    @Param('id') lootingId: number,
+    @Body()
+    looting: Looting
+  ): Promise<any> {
+    return this.hqService.updateLooting(lootingId, looting);
   }
 }

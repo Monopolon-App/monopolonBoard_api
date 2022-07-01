@@ -131,7 +131,6 @@ export class HqService {
   async createLooting(looting: Looting): Promise<any> {
     try {
       const hqId = looting.hq;
-      const amount = looting.amount;
       return getManager().transaction(async (transactionalEntityManager) => {
         const hq = await getConnection()
           .createQueryBuilder()
@@ -165,7 +164,7 @@ export class HqService {
         if (user.LastMinTime === 'true') {
           if (user.noOfLooting > 3) {
             throw new HttpException(
-              'User is not able to loot any more',
+              'User can not loot any more because user already looted 3 time',
               HttpStatus.BAD_REQUEST
             );
           } else {
@@ -193,28 +192,10 @@ export class HqService {
               })
               .execute();
 
-            const tTransferTransaction = new Transaction();
-            tTransferTransaction.amount = `-${amount}`;
-            tTransferTransaction.type = TransactionType.LOOTED;
-            tTransferTransaction.walletAddress = hq.walletAddress;
-            tTransferTransaction.userId = hq.userId;
-            await transactionalEntityManager.save(tTransferTransaction);
-
-            const tTransferTransactionForLootingUser = new Transaction();
-            tTransferTransactionForLootingUser.amount = amount;
-            tTransferTransactionForLootingUser.type = TransactionType.LOOTING;
-            tTransferTransactionForLootingUser.walletAddress =
-              looting.walletAddress;
-            tTransferTransactionForLootingUser.userId = user.id;
-            await transactionalEntityManager.save(
-              tTransferTransactionForLootingUser
-            );
-
             const lootings = new Looting();
             lootings.walletAddress = looting.walletAddress;
             lootings.userId = user.id;
             lootings.gridPosition = hq.hqGridPosition;
-            lootings.amount = looting.amount;
             lootings.hq = hq;
             return transactionalEntityManager.save(lootings);
           }
@@ -225,22 +206,65 @@ export class HqService {
     }
   }
 
-  async updateLooting(lootingId: number): Promise<any> {
+  async updateLooting(lootingId: number, looting: Looting): Promise<any> {
     try {
       return getManager().transaction(async (transactionalEntityManager) => {
-        const looting = await this.lootingService.getLootingById(lootingId);
+        const createdLooting = await this.lootingService.getLootingById(
+          lootingId
+        );
 
-        if (!looting) {
+        if (!createdLooting) {
           throw new HttpException('looting not found', HttpStatus.NOT_FOUND);
         }
-        const hqId = looting.hq.id;
+        const hqId = createdLooting.hq.id;
 
-        if (looting.hq.status === 1) {
+        if (createdLooting.hq.status === 1) {
           throw new HttpException(
             'User is already available to loot',
             HttpStatus.BAD_REQUEST
           );
         }
+
+        const user = await getConnection()
+          .createQueryBuilder()
+          .select('users_profile')
+          .from(UsersProfile, 'users_profile')
+          .where('users_profile.walletAddress = :walletAddress', {
+            walletAddress: createdLooting.walletAddress,
+          })
+          .getOne();
+
+        const hqWalletAddress = createdLooting.hq.walletAddress;
+        const hqUserId = createdLooting.hq.userId;
+
+        const tTransferTransaction = new Transaction();
+        tTransferTransaction.amount = `-${looting.amount}`;
+        tTransferTransaction.type = TransactionType.LOOTED;
+        tTransferTransaction.walletAddress = hqWalletAddress;
+        tTransferTransaction.userId = hqUserId;
+        await transactionalEntityManager.save(tTransferTransaction);
+
+        const tTransferTransactionForLootingUser = new Transaction();
+        tTransferTransactionForLootingUser.amount = `${looting.amount}`;
+        tTransferTransactionForLootingUser.type = TransactionType.LOOTING;
+        tTransferTransactionForLootingUser.walletAddress =
+          createdLooting.walletAddress;
+        tTransferTransactionForLootingUser.userId = user.id;
+        await transactionalEntityManager.save(
+          tTransferTransactionForLootingUser
+        );
+
+        await transactionalEntityManager
+          .createQueryBuilder(Looting, 'looting')
+          .setLock('pessimistic_write')
+          .update(Looting)
+          .set({
+            amount: looting.amount,
+          })
+          .where('looting.id = :id', {
+            id: lootingId,
+          })
+          .execute();
 
         return await transactionalEntityManager
           .createQueryBuilder(Hq, 'hq')
