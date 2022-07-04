@@ -199,6 +199,11 @@ export class HqService {
             lootings.hq = hq;
             return transactionalEntityManager.save(lootings);
           }
+        } else {
+          throw new HttpException(
+            'lastMine is false for this walletAddress',
+            HttpStatus.BAD_REQUEST
+          );
         }
       });
     } catch (error) {
