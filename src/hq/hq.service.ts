@@ -271,6 +271,48 @@ export class HqService {
           })
           .execute();
 
+        // this update looting user's mgmRewardsAccumulated
+        await transactionalEntityManager
+          .createQueryBuilder(UsersProfile, 'users_profile')
+          .setLock('pessimistic_write')
+          .update(UsersProfile)
+          .set({
+            mgmRewardsAccumulated: (
+              parseFloat(user.mgmRewardsAccumulated) +
+              parseFloat(looting.amount)
+            ).toString(),
+          })
+          .where('users_profile.walletAddress = :walletAddress', {
+            walletAddress: createdLooting.walletAddress,
+          })
+          .execute();
+
+        // this is looted User's profile
+        const hqUser = await getConnection()
+          .createQueryBuilder()
+          .select('users_profile')
+          .from(UsersProfile, 'users_profile')
+          .where('users_profile.walletAddress = :walletAddress', {
+            walletAddress: hqWalletAddress,
+          })
+          .getOne();
+
+        // this update looted user's mgmRewardsAccumulated
+        await transactionalEntityManager
+          .createQueryBuilder(UsersProfile, 'users_profile')
+          .setLock('pessimistic_write')
+          .update(UsersProfile)
+          .set({
+            mgmRewardsAccumulated: (
+              parseFloat(hqUser.mgmRewardsAccumulated) -
+              parseFloat(looting.amount)
+            ).toString(),
+          })
+          .where('users_profile.walletAddress = :walletAddress', {
+            walletAddress: hqWalletAddress,
+          })
+          .execute();
+
         return await transactionalEntityManager
           .createQueryBuilder(Hq, 'hq')
           .update(Hq)
