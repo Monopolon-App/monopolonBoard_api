@@ -49,6 +49,7 @@ export class AuthController {
       success: true,
       message: 'Authenticated',
       accessToken: accessTokenCookie,
+      refreshToken: refreshTokenCookie,
       data: request.user,
     };
   }
