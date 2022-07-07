@@ -42,6 +42,8 @@ import { DatabaseModule } from './database/database.module';
         JWT_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
         JWT_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+        JWT_SESSION_TOKEN_SECRET: Joi.string().required(),
+        JWT_SESSION_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         COMPANY_PRIVATE_KEY: Joi.string().required(), // company private key for withdrawal
         COMPANY_ADDRESS: Joi.string().required(), // company nft wallet address for listener
       }),
