@@ -65,6 +65,7 @@ export class AuthController {
     return {
       success: true,
       message: 'Authenticated',
+      accessToken: accessTokenCookie,
       data: request.user,
     };
   }
