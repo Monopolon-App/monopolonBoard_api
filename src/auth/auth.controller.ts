@@ -48,6 +48,8 @@ export class AuthController {
     return {
       success: true,
       message: 'Authenticated',
+      accessToken: accessTokenCookie,
+      refreshToken: refreshTokenCookie,
       data: request.user,
     };
   }
@@ -63,6 +65,7 @@ export class AuthController {
     return {
       success: true,
       message: 'Authenticated',
+      accessToken: accessTokenCookie,
       data: request.user,
     };
   }
