@@ -29,7 +29,7 @@ export class EquipmentService {
 
   async getById(walletAddress: string): Promise<any> {
     try {
-      const user = await this.equipmentRepository.findOne({
+      const user = await this.equipmentRepository.find({
         walletAddress: walletAddress,
       });
 
