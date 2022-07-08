@@ -29,14 +29,14 @@ export class EquipmentService {
 
   async getById(walletAddress: string): Promise<any> {
     try {
-      const user = await this.equipmentRepository.findOne({
+      const user = await this.equipmentRepository.find({
         walletAddress: walletAddress,
       });
 
       if (user) {
         return {
           success: true,
-          message: 'Equipment get successfully.',
+          message: 'Equipment received successfully.',
           result: user,
         };
       }

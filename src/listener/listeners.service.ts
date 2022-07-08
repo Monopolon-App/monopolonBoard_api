@@ -23,6 +23,7 @@ import CONTRACT_ABI from './constants/contractABI.json';
 import { CONTRACT_ADDRESS, WS_PROVIDER_URL } from 'src/constants/constants';
 import { nftMetadata, nftMetadataDTO } from './nft-metadata.dto';
 import { Listener } from './listeners.entity';
+import { Equipment } from 'src/equipment/equipment.entity';
 
 // mock data for testing
 // import { staticEvent } from './mockData';
@@ -268,8 +269,11 @@ export class ListenerService implements OnModuleInit {
                 console.log('metadata', tokenMeta);
                 // Create transaction records
                 const transferTransaction = new Character();
-                transferTransaction.walletAddress = trxData.from;
-                transferTransaction.erc721 = CONTRACT_ADDRESS[this.networkMode];
+                const transferEquipment = new Equipment();
+                transferTransaction.walletAddress =
+                  transferEquipment.walletAddress = trxData.from;
+                transferTransaction.erc721 = transferEquipment.erc721 =
+                  CONTRACT_ADDRESS[this.networkMode];
                 transferTransaction.usersProfileId = newUserRecord.id;
                 if (tokenMeta.type == 1) {
                   // this will only store when we have the character as the token
@@ -294,6 +298,46 @@ export class ListenerService implements OnModuleInit {
                   teamRecord.totalPrep = transferTransaction.prep;
                   teamRecord.totalStr = transferTransaction.str;
                 }
+
+                if (tokenMeta.type == 2) {
+                  transferEquipment.tokenId = tokenId;
+
+                  transferEquipment.charequiped =
+                    transferTransaction.id.toString();
+
+                  transferEquipment.str =
+                    tokenMeta.attributes.commonAttribute.str?.toString();
+
+                  transferEquipment.dex =
+                    tokenMeta.attributes.commonAttribute.dex?.toString();
+
+                  transferEquipment.Luk =
+                    tokenMeta.attributes.commonAttribute.luk?.toString();
+
+                  transferEquipment.prep =
+                    tokenMeta.attributes.commonAttribute.prep?.toString();
+
+                  transferEquipment.mp =
+                    tokenMeta.attributes.commonAttribute.mp?.toString();
+
+                  transferEquipment.hp =
+                    tokenMeta.attributes.commonAttribute.hp?.toString();
+
+                  transferEquipment.status = 'equiped';
+
+                  teamRecord.totalDex = transferEquipment.dex;
+                  teamRecord.totalHp = transferEquipment.hp;
+                  teamRecord.totalLuk = transferEquipment.Luk;
+                  teamRecord.totalMp = transferEquipment.mp;
+                  teamRecord.totalPrep = transferEquipment.prep;
+                  teamRecord.totalStr = transferEquipment.str;
+
+                  const equipmentResp = await transactionalEntityManager.save(
+                    transferEquipment
+                  );
+                  return equipmentResp;
+                }
+
                 // Receiver : create transaction record (update it balance)
                 const transactionResp = await transactionalEntityManager.save(
                   transferTransaction
