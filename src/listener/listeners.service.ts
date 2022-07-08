@@ -15,7 +15,7 @@ import axios from 'axios';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { UsersProfile } from 'src/usersprofile/usersprofile.entity';
-import { Character } from 'src/character/character.entity';
+import { Character, StatusType } from 'src/character/character.entity';
 import { Team } from 'src/team/team.entity';
 import { Hq } from 'src/hq/hq.entity';
 
@@ -143,6 +143,7 @@ export class ListenerService implements OnModuleInit {
       .Transfer({
         filter: {
           to: this.configService.get('COMPANY_ADDRESS'),
+          from: this.configService.get('COMPANY_ADDRESS'),
         },
         fromBlock,
       })
@@ -164,6 +165,79 @@ export class ListenerService implements OnModuleInit {
         );
         // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
       });
+  }
+
+  async handleCompanyToUserNft(trxData: TrxDataType) {
+    const tokenId = this.web3.utils.toWei(trxData.tokenId, 'ether');
+
+    const tokenMeta = await this.getNftMetadata(
+      tokenId,
+      CONTRACT_ADDRESS[this.networkMode]
+    );
+
+    this.logger.debug(`-Listener:event:trxData:${JSON.stringify(trxData)}`);
+
+    await this.setLastBlockNumberListener(trxData.blockNumber);
+
+    return getManager().transaction(async (transactionalEntityManager) => {
+      return transactionalEntityManager
+        .createQueryBuilder(Character, 'character')
+        .setLock('pessimistic_write')
+        .where('character.tokenId = :tokenId', { tokenId: tokenId })
+        .getOne()
+        .then(async (character) => {
+          if (character) {
+            // Create transaction records
+            const transferTransaction = new Character();
+            transferTransaction.walletAddress = trxData.from;
+            transferTransaction.erc721 = CONTRACT_ADDRESS[this.networkMode];
+            transferTransaction.usersProfileId = character.usersProfileId;
+            if (tokenMeta.type == 1) {
+              // this will only store when we have the character as the token
+              transferTransaction.tokenId = tokenId;
+              transferTransaction.ImageURL = tokenMeta.imgUrl;
+              transferTransaction.Luk =
+                tokenMeta.attributes.commonAttribute.luk?.toString();
+              transferTransaction.str =
+                tokenMeta.attributes.commonAttribute.str?.toString();
+              transferTransaction.dex =
+                tokenMeta.attributes.commonAttribute.dex?.toString();
+              transferTransaction.prep =
+                tokenMeta.attributes.commonAttribute.prep?.toString();
+              transferTransaction.mp =
+                tokenMeta.attributes.commonAttribute.mp?.toString();
+              transferTransaction.hp =
+                tokenMeta.attributes.commonAttribute.hp?.toString();
+            }
+            // create transaction record
+            const transactionResp = await transactionalEntityManager.save(
+              transferTransaction
+            );
+            console.log('::LOG::SUCCESS::Transaction Result:', transactionResp);
+
+            await transactionalEntityManager
+              .createQueryBuilder(Character, 'character')
+              .update(Character)
+              .set({
+                status: StatusType.REMOVED,
+              })
+              .where('character.id = :id', {
+                id: character.id,
+              })
+              .execute();
+          } else {
+            console.log('::LOG::ERROR::Duplicate transaction record:');
+            return new HttpException(
+              'Duplicate transaction record',
+              HttpStatus.BAD_REQUEST
+            );
+          }
+        })
+        .catch((error) => {
+          console.log(`::LOG::ERROR::${error?.message}:`);
+          return new HttpException(error?.message, HttpStatus.BAD_REQUEST);
+        });
+    });
   }
 
   async handleEvent(event) {
@@ -190,6 +264,9 @@ export class ListenerService implements OnModuleInit {
       blockNumber: _.get(event, 'blockNumber', undefined),
     };
 
+    if (trxData.from === this.configService.get('COMPANY_ADDRESS')) {
+      return await this.handleCompanyToUserNft(trxData);
+    }
     await this.setLastBlockNumberListener(trxData.blockNumber);
 
     this.logger.debug(`-Listener:event:trxData:${JSON.stringify(trxData)}`);

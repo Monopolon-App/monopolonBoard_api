@@ -49,4 +49,9 @@ export class CharacterController {
   ) {
     return this.hqService.updateCharacter(walletAddress, updategridDto);
   }
+
+  @Patch(':id/update')
+  updateStatusOfCharacter(@Param('id') id: number) {
+    return this.hqService.updateStatusOfCharacter(id);
+  }
 }

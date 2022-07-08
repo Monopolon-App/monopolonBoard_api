@@ -14,7 +14,7 @@ import {
   TreeRepository,
   Like,
 } from 'typeorm';
-import { Character } from './character.entity';
+import { Character, StatusType } from './character.entity';
 import { UpdateCharacterDto } from './dto/update-character.dto';
 
 @Injectable()
@@ -24,12 +24,12 @@ export class CharacterService {
   }
   constructor(
     @InjectRepository(Character)
-    private readonly usersRepository: Repository<Character>
+    private readonly characterRepository: Repository<Character>
   ) {}
 
   async getById(userId: number): Promise<any> {
     try {
-      const user = await this.usersRepository.findOne({ id: userId });
+      const user = await this.characterRepository.findOne({ id: userId });
 
       if (user) {
         return 'data';
@@ -49,7 +49,7 @@ export class CharacterService {
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      const char = await this.usersRepository.save(characters);
+      const char = await this.characterRepository.save(characters);
       return {
         success: true,
         message: 'Character created successfully.',
@@ -62,7 +62,7 @@ export class CharacterService {
 
   async getUserById(walletAddress: string): Promise<any> {
     try {
-      const [user, count] = await this.usersRepository.findAndCount({
+      const [user, count] = await this.characterRepository.findAndCount({
         where: { walletAddress },
       });
 
@@ -89,12 +89,12 @@ export class CharacterService {
     try {
       const char = new Character();
       char.walletAddress = WalletAddress;
-      await this.usersRepository.update(
+      await this.characterRepository.update(
         { walletAddress: WalletAddress },
         characterData
       );
 
-      const updatesRecord = await this.usersRepository.findOne({
+      const updatesRecord = await this.characterRepository.findOne({
         walletAddress: WalletAddress,
       });
 
@@ -104,6 +104,37 @@ export class CharacterService {
       );
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async updateStatusOfCharacter(characterId: number) {
+    try {
+      return getManager().transaction(async (transactionalEntityManager) => {
+        return await this.characterRepository
+          .findOne({
+            id: characterId,
+          })
+          .then(async (character) => {
+            await transactionalEntityManager
+              .createQueryBuilder(Character, 'character')
+              .update(Character)
+              .set({
+                status: StatusType.REMOVING,
+              })
+              .where('character.id = :id', {
+                id: character.id,
+              })
+              .execute();
+          })
+          .catch(() => {
+            throw new HttpException(
+              'No character found for this id',
+              HttpStatus.NOT_FOUND
+            );
+          });
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 }
