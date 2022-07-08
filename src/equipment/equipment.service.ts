@@ -36,7 +36,7 @@ export class EquipmentService {
       if (user) {
         return {
           success: true,
-          message: 'Equipment get successfully.',
+          message: 'Equipment received successfully.',
           result: user,
         };
       }

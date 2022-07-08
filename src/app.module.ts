@@ -29,7 +29,7 @@ import { WithdrawalHistoryModule } from './withdrawalHistory/withdrawalHistory.m
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      envFilePath: ['.env.local'],
+      envFilePath: ['.env'],
       validationSchema: Joi.object({
         DATABASE_HOST: Joi.string().required(),
         DATABASE_PORT: Joi.string().required(),

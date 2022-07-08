@@ -52,4 +52,9 @@ export class EquipmentController {
       updateEquipmentDto
     );
   }
+
+  @Get(':walletAddress')
+  getEquipmentByWalledtAddress(@Param('walletAddress') walletAddress: string) {
+    return this.equipmentService.getById(walletAddress);
+  }
 }
