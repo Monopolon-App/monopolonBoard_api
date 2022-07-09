@@ -184,14 +184,13 @@ export class ListenerService implements OnModuleInit {
         .createQueryBuilder(Character, 'character')
         .setLock('pessimistic_write')
         .where('character.tokenId = :tokenId', { tokenId: tokenId })
-        .getOne()
-        .then(async (character) => {
-          if (character) {
+        .getCount()
+        .then(async (trxCount) => {
+          if (trxCount * 1 === 0) {
             // Create transaction records
             const transferTransaction = new Character();
             transferTransaction.walletAddress = trxData.from;
             transferTransaction.erc721 = CONTRACT_ADDRESS[this.networkMode];
-            transferTransaction.usersProfileId = character.usersProfileId;
             if (tokenMeta.type == 1) {
               // this will only store when we have the character as the token
               transferTransaction.tokenId = tokenId;
@@ -221,8 +220,8 @@ export class ListenerService implements OnModuleInit {
               .set({
                 status: StatusType.REMOVED,
               })
-              .where('character.id = :id', {
-                id: character.id,
+              .where('character.walletAddress = :walletAddress', {
+                walletAddress: trxData.to,
               })
               .execute();
           } else {
@@ -265,6 +264,7 @@ export class ListenerService implements OnModuleInit {
     };
 
     if (trxData.from === this.configService.get('COMPANY_ADDRESS')) {
+      trxData.to = _.get(event, 'returnValues.1', undefined);
       return await this.handleCompanyToUserNft(trxData);
     }
     await this.setLastBlockNumberListener(trxData.blockNumber);
