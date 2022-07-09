@@ -49,4 +49,9 @@ export class GridController {
   ) {
     return this.gridService.updateGrid(walletAddress, updategridDto);
   }
+
+  @Get('/getEventById')
+  getEventByGridId(@Query('id') id: number): Promise<any> {
+    return this.gridService.getEventByGridId(id);
+  }
 }

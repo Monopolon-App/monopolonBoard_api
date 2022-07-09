@@ -24,12 +24,12 @@ export class GridService {
   }
   constructor(
     @InjectRepository(Grid)
-    private readonly usersRepository: Repository<Grid>
+    private readonly gridRepository: Repository<Grid>
   ) {}
 
   async getById(userId: number): Promise<any> {
     try {
-      const user = await this.usersRepository.findOne({ id: userId });
+      const user = await this.gridRepository.findOne({ id: userId });
 
       if (user) {
         return 'data';
@@ -46,7 +46,7 @@ export class GridService {
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      const Grid = await this.usersRepository.save(grid);
+      const Grid = await this.gridRepository.save(grid);
       return {
         success: true,
         message: 'Grid created successfully.',
@@ -59,7 +59,7 @@ export class GridService {
 
   async getUserById(walletAddress: string): Promise<any> {
     try {
-      const [user, count] = await this.usersRepository.findAndCount({
+      const [user, count] = await this.gridRepository.findAndCount({
         where: { walletAddress },
       });
 
@@ -86,12 +86,12 @@ export class GridService {
     try {
       const user = new Grid();
       user.walletAddress = walletAddress;
-      await this.usersRepository.update(
+      await this.gridRepository.update(
         { walletAddress: walletAddress },
         gridData
       );
 
-      const updatesRecord = await this.usersRepository.findOne({
+      const updatesRecord = await this.gridRepository.findOne({
         walletAddress: walletAddress,
       });
 
@@ -101,6 +101,23 @@ export class GridService {
       );
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async getEventByGridId(id: number) {
+    try {
+      // TODO: we need to add data for grid 1-25 in db
+      const grid = await this.gridRepository.findOne({ id: id });
+
+      if (!grid) {
+        throw new HttpException(
+          'grid does not exist for this id',
+          HttpStatus.NOT_FOUND
+        );
+      }
+      return grid;
+    } catch (error) {
+      throw error;
     }
   }
 }
