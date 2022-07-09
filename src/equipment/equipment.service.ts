@@ -87,6 +87,36 @@ export class EquipmentService {
     }
   }
 
+  async getEquipmentByTokenId(tokenId: string): Promise<any> {
+    try {
+      const equipments = await this.equipmentRepository.find({
+        select: ['category'],
+        where: { tokenId: tokenId },
+      });
+
+      if (equipments) {
+        const diffEquipments = {};
+        for (let i = 0; i < equipments.length; i++) {
+          diffEquipments[equipments[i].category] =
+            await this.equipmentRepository.find({
+              where: { category: equipments[i].category },
+            });
+        }
+        return new HttpException(
+          {
+            status: HttpStatus.OK,
+            message: 'Success',
+            data: diffEquipments,
+          },
+          HttpStatus.OK
+        );
+      }
+      return new HttpException('User not found', HttpStatus.NOT_FOUND);
+    } catch (error) {
+      return new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
   async updateEquipment(
     walletAddress: string,
     equipmentData: UpdateEquipmentDto
