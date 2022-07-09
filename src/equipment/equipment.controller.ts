@@ -57,4 +57,9 @@ export class EquipmentController {
   getEquipmentByWalledtAddress(@Param('walletAddress') walletAddress: string) {
     return this.equipmentService.getById(walletAddress);
   }
+
+  @Get('getEquipmentByTokenId/:tokenId')
+  getEquipmentByTokenId(@Param('tokenId') tokenId: string) {
+    return this.equipmentService.getEquipmentByTokenId(tokenId);
+  }
 }

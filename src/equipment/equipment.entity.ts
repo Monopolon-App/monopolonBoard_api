@@ -26,6 +26,9 @@ export class Equipment {
   charequiped?: string;
 
   @Column({ default: null })
+  category?: string;
+
+  @Column({ default: null })
   str?: string;
 
   @Column({ default: null })
