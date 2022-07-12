@@ -19,6 +19,8 @@ import { Community } from 'src/communitychest/community.entity';
 import { Listener } from 'src/listener/listeners.entity';
 import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity';
 import { WanderingMerchant } from 'src/WanderingMerchant/wanderingMerchant.entity';
+import { Looting } from '../looting/looting.entity';
+import { ErrorEntity } from '../errorException/error.entity';
 
 @Module({
   imports: [
@@ -48,6 +50,8 @@ import { WanderingMerchant } from 'src/WanderingMerchant/wanderingMerchant.entit
           Listener,
           WithdrawalHistory,
           WanderingMerchant,
+          Looting,
+          ErrorEntity,
         ],
         synchronize: true,
       }),

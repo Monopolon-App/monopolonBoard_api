@@ -132,6 +132,7 @@ export class GridService {
       } else {
         return grid;
       }
+      return grid;
     } catch (error) {
       throw error;
     }
