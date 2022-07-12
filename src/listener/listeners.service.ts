@@ -24,7 +24,7 @@ import { CONTRACT_ADDRESS, WS_PROVIDER_URL } from 'src/constants/constants';
 import { nftMetadata, nftMetadataDTO } from './nft-metadata.dto';
 import { Listener } from './listeners.entity';
 import { Equipment } from 'src/equipment/equipment.entity';
-
+import { WanderingMerchant } from 'src/WanderingMerchant/wanderingMerchant.entity';
 // mock data for testing
 // import { staticEvent } from './mockData';
 

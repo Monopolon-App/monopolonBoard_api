@@ -62,4 +62,15 @@ export class EquipmentController {
   getEquipmentByTokenId(@Param('tokenId') tokenId: string) {
     return this.equipmentService.getEquipmentByTokenId(tokenId);
   }
+
+  @Put('equipNew')
+  equipeNew(
+    @Query('oldEquipmentId') oldEquipmentId: number,
+    @Query('newEquipmentId') newEquipmentId: number
+  ) {
+    return this.equipmentService.updateEquipmentStatus(
+      oldEquipmentId,
+      newEquipmentId
+    );
+  }
 }

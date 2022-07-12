@@ -18,6 +18,7 @@ import { PlayerEarning } from 'src/playerearning/playerearning.entity';
 import { Community } from 'src/communitychest/community.entity';
 import { Listener } from 'src/listener/listeners.entity';
 import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity';
+import { WanderingMerchant } from 'src/WanderingMerchant/wanderingMerchant.entity';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity
           Community,
           Listener,
           WithdrawalHistory,
+          WanderingMerchant,
         ],
         synchronize: true,
       }),

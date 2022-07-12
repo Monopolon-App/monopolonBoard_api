@@ -141,4 +141,40 @@ export class EquipmentService {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
+
+  async updateEquipmentStatus(
+    oldEquipmentId: number,
+    newEquipmentId: number
+  ): Promise<any> {
+    try {
+      const unEquip = await this.equipmentRepository.update(
+        {
+          id: oldEquipmentId,
+        },
+        { status: 'Unequiped' }
+      );
+
+      if (unEquip) {
+        const equipNew = await this.equipmentRepository.update(
+          {
+            id: newEquipmentId,
+          },
+          { status: 'Equiped' }
+        );
+
+        if (equipNew) {
+          const updatedRecord = await this.equipmentRepository.findOne({
+            id: newEquipmentId,
+          });
+          return new HttpException(
+            { message: 'Updated Successfully', data: updatedRecord },
+            HttpStatus.NO_CONTENT
+          );
+        }
+      }
+      return new HttpException('Something went wrong', HttpStatus.BAD_REQUEST);
+    } catch (error) {
+      return new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 }
