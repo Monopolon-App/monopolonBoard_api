@@ -121,9 +121,14 @@ export class AuthService {
       )}s`,
     });
 
-    return `access_token=${token}; Path=/; SameSite=None; Secure; Max-Age=${this.configService.get(
+    const cookie = `access_token=${token}; Path=/; SameSite=None; Secure; Max-Age=${this.configService.get(
       'JWT_ACCESS_TOKEN_EXPIRATION_TIME'
     )}`;
+
+    return {
+      cookie,
+      token,
+    };
   }
 
   /**
