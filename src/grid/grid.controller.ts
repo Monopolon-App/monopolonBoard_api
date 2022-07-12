@@ -11,6 +11,7 @@ import {
   Patch,
   UseInterceptors,
   UploadedFiles,
+  Inject,
 } from '@nestjs/common';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -19,10 +20,14 @@ import { Grid } from './grid.entity';
 import { UpdateGridDto } from './dto/update-grid.dto';
 
 import { GridService } from './grid.service';
+import { WanderingMerchantService } from 'src/WanderingMerchant/wanderingMerchant.service';
 
 @ApiTags('grid')
 @Controller('grid')
 export class GridController {
+  @Inject(WanderingMerchantService)
+  private wanderingMerchantService: WanderingMerchantService;
+
   constructor(private readonly gridService: GridService) {}
 
   // @UseGuards(JwtAuthGuard)

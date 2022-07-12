@@ -4,6 +4,7 @@ import {
   HttpStatus,
   NotFoundException,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -16,9 +17,13 @@ import {
 } from 'typeorm';
 import { Grid } from './grid.entity';
 import { UpdateGridDto } from './dto/update-grid.dto';
+import { WanderingMerchantService } from 'src/WanderingMerchant/wanderingMerchant.service';
 
 @Injectable()
 export class GridService {
+  @Inject(WanderingMerchantService)
+  private wanderingMerchantService: WanderingMerchantService;
+
   monthToDays(arg0: number) {
     throw new Error('Method not implemented.');
   }
@@ -114,6 +119,18 @@ export class GridService {
           'grid does not exist for this id',
           HttpStatus.NOT_FOUND
         );
+      }
+      if (grid.description === 'Wandering Merchant') {
+        const wanderingMerchant = this.wanderingMerchantService.getByStatus(1);
+        if (wanderingMerchant) {
+          return wanderingMerchant;
+        }
+        throw new HttpException(
+          'wandering merchant does not exist for this id',
+          HttpStatus.NOT_FOUND
+        );
+      } else {
+        return grid;
       }
       return grid;
     } catch (error) {

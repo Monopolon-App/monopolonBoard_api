@@ -18,6 +18,7 @@ import { PlayerEarning } from 'src/playerearning/playerearning.entity';
 import { Community } from 'src/communitychest/community.entity';
 import { Listener } from 'src/listener/listeners.entity';
 import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity';
+import { WanderingMerchant } from 'src/WanderingMerchant/wanderingMerchant.entity';
 import { Looting } from '../looting/looting.entity';
 import { ErrorEntity } from '../errorException/error.entity';
 
@@ -48,6 +49,7 @@ import { ErrorEntity } from '../errorException/error.entity';
           Community,
           Listener,
           WithdrawalHistory,
+          WanderingMerchant,
           Looting,
           ErrorEntity,
         ],
