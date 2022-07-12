@@ -4,6 +4,7 @@ import {
   HttpStatus,
   NotFoundException,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -16,9 +17,13 @@ import {
 } from 'typeorm';
 import { Equipment } from './equipment.entity';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
+import { CharacterService } from 'src/character/character.service';
 
 @Injectable()
 export class EquipmentService {
+  @Inject(CharacterService)
+  private characterService: CharacterService;
+
   monthToDays(arg0: number) {
     throw new Error('Method not implemented.');
   }
@@ -166,10 +171,22 @@ export class EquipmentService {
           const updatedRecord = await this.equipmentRepository.findOne({
             id: newEquipmentId,
           });
-          return new HttpException(
-            { message: 'Updated Successfully', data: updatedRecord },
-            HttpStatus.NO_CONTENT
-          );
+
+          const updateCharacter =
+            await this.characterService.updateCharacterStrength(updatedRecord);
+
+          if (updateCharacter) {
+            return new HttpException(
+              {
+                message: 'Updated Successfully',
+                data: {
+                  updatedEquipmet: updatedRecord,
+                  updateCharacter: updateCharacter.data,
+                },
+              },
+              HttpStatus.NO_CONTENT
+            );
+          }
         }
       }
       return new HttpException('Something went wrong', HttpStatus.BAD_REQUEST);

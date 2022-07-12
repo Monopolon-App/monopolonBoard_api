@@ -11,6 +11,7 @@ import {
   Patch,
   UseInterceptors,
   UploadedFiles,
+  Inject,
 } from '@nestjs/common';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -19,10 +20,14 @@ import { Equipment } from './equipment.entity';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 
 import { EquipmentService } from './equipment.service';
+import { CharacterService } from 'src/character/character.service';
 
 @ApiTags('equipment')
 @Controller('equipment')
 export class EquipmentController {
+  @Inject(CharacterService)
+  private characterService: CharacterService;
+
   constructor(private readonly equipmentService: EquipmentService) {}
 
   // @UseGuards(JwtAuthGuard)

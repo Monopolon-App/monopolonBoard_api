@@ -16,6 +16,7 @@ import {
 } from 'typeorm';
 import { Character } from './character.entity';
 import { UpdateCharacterDto } from './dto/update-character.dto';
+import { Equipment } from 'src/equipment/equipment.entity';
 
 @Injectable()
 export class CharacterService {
@@ -24,12 +25,12 @@ export class CharacterService {
   }
   constructor(
     @InjectRepository(Character)
-    private readonly usersRepository: Repository<Character>
+    private readonly characterRepository: Repository<Character>
   ) {}
 
   async getById(userId: number): Promise<any> {
     try {
-      const user = await this.usersRepository.findOne({ id: userId });
+      const user = await this.characterRepository.findOne({ id: userId });
 
       if (user) {
         return 'data';
@@ -49,7 +50,7 @@ export class CharacterService {
     files: Array<Express.Multer.File>
   ): Promise<any> {
     try {
-      const char = await this.usersRepository.save(characters);
+      const char = await this.characterRepository.save(characters);
       return {
         success: true,
         message: 'Character created successfully.',
@@ -62,7 +63,7 @@ export class CharacterService {
 
   async getUserById(walletAddress: string): Promise<any> {
     try {
-      const [user, count] = await this.usersRepository.findAndCount({
+      const [user, count] = await this.characterRepository.findAndCount({
         where: { walletAddress },
       });
 
@@ -89,17 +90,51 @@ export class CharacterService {
     try {
       const char = new Character();
       char.walletAddress = WalletAddress;
-      await this.usersRepository.update(
+      await this.characterRepository.update(
         { walletAddress: WalletAddress },
         characterData
       );
 
-      const updatesRecord = await this.usersRepository.findOne({
+      const updatesRecord = await this.characterRepository.findOne({
         walletAddress: WalletAddress,
       });
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },
+        HttpStatus.NO_CONTENT
+      );
+    } catch (error) {
+      return new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  public async updateCharacterStrength(equipment: Equipment): Promise<any> {
+    try {
+      console.log(equipment);
+
+      const char = await this.characterRepository.findOne({
+        id: +equipment.charequiped,
+      });
+
+      char.str = (+char.str + +equipment.str).toString();
+      char.dex = (+char.dex + +equipment.dex).toString();
+      char.Luk = (+char.Luk + +equipment.Luk).toString();
+      char.prep = (+char.prep + +equipment.prep).toString();
+      char.hp = (+char.hp + +equipment.hp).toString();
+      char.mp = (+char.mp + +equipment.mp).toString();
+
+      console.log(char);
+      await this.characterRepository.update(
+        { id: +equipment.charequiped },
+        char
+      );
+
+      const updatedRecord = await this.characterRepository.findOne({
+        id: +equipment.charequiped,
+      });
+
+      return new HttpException(
+        { message: 'Updated Successfully', data: updatedRecord },
         HttpStatus.NO_CONTENT
       );
     } catch (error) {
