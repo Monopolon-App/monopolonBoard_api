@@ -10,5 +10,6 @@ import { CharacterService } from './character.service';
   imports: [TypeOrmModule.forFeature([Character]), ConfigModule],
   providers: [CharacterService, ConfigService],
   controllers: [CharacterController],
+  exports: [CharacterService],
 })
 export class CharacterModule {}
