@@ -108,22 +108,31 @@ export class CharacterService {
     }
   }
 
-  public async updateCharacterStrength(equipment: Equipment): Promise<any> {
+  public async updateCharacterStrength(
+    equipment: Equipment,
+    equip: boolean
+  ): Promise<any> {
     try {
-      console.log(equipment);
-
       const char = await this.characterRepository.findOne({
         id: +equipment.charequiped,
       });
 
-      char.str = (+char.str + +equipment.str).toString();
-      char.dex = (+char.dex + +equipment.dex).toString();
-      char.Luk = (+char.Luk + +equipment.Luk).toString();
-      char.prep = (+char.prep + +equipment.prep).toString();
-      char.hp = (+char.hp + +equipment.hp).toString();
-      char.mp = (+char.mp + +equipment.mp).toString();
+      if (equip) {
+        char.str = (+char.str + +equipment.str).toString();
+        char.dex = (+char.dex + +equipment.dex).toString();
+        char.Luk = (+char.Luk + +equipment.Luk).toString();
+        char.prep = (+char.prep + +equipment.prep).toString();
+        char.hp = (+char.hp + +equipment.hp).toString();
+        char.mp = (+char.mp + +equipment.mp).toString();
+      } else {
+        char.str = (+char.str - +equipment.str).toString();
+        char.dex = (+char.dex - +equipment.dex).toString();
+        char.Luk = (+char.Luk - +equipment.Luk).toString();
+        char.prep = (+char.prep - +equipment.prep).toString();
+        char.hp = (+char.hp - +equipment.hp).toString();
+        char.mp = (+char.mp - +equipment.mp).toString();
+      }
 
-      console.log(char);
       await this.characterRepository.update(
         { id: +equipment.charequiped },
         char
@@ -133,10 +142,7 @@ export class CharacterService {
         id: +equipment.charequiped,
       });
 
-      return new HttpException(
-        { message: 'Updated Successfully', data: updatedRecord },
-        HttpStatus.NO_CONTENT
-      );
+      return updatedRecord;
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

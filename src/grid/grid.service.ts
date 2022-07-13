@@ -121,8 +121,11 @@ export class GridService {
         );
       }
       if (grid.description === 'Wandering Merchant') {
-        const wanderingMerchant = this.wanderingMerchantService.getByStatus(1);
+        const wanderingMerchant =
+          await this.wanderingMerchantService.getByStatus(1);
         if (wanderingMerchant) {
+          console.log(wanderingMerchant);
+          wanderingMerchant['description'] = grid.description;
           return wanderingMerchant;
         }
         throw new HttpException(

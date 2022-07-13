@@ -152,43 +152,55 @@ export class EquipmentService {
     newEquipmentId: number
   ): Promise<any> {
     try {
-      const unEquip = await this.equipmentRepository.update(
-        {
-          id: oldEquipmentId,
-        },
-        { status: 'Unequiped' }
-      );
-
-      if (unEquip) {
-        const equipNew = await this.equipmentRepository.update(
+      if (oldEquipmentId) {
+        await this.equipmentRepository.update(
           {
-            id: newEquipmentId,
+            id: oldEquipmentId,
           },
-          { status: 'Equiped' }
+          { status: 'Unequiped' }
         );
 
-        if (equipNew) {
-          const updatedRecord = await this.equipmentRepository.findOne({
-            id: newEquipmentId,
-          });
+        const oldEquipment = await this.equipmentRepository.findOne({
+          id: newEquipmentId,
+        });
+        await this.characterService.updateCharacterStrength(
+          oldEquipment,
+          false
+        );
+      }
 
-          const updateCharacter =
-            await this.characterService.updateCharacterStrength(updatedRecord);
+      const equipNew = await this.equipmentRepository.update(
+        {
+          id: newEquipmentId,
+        },
+        { status: 'Equiped' }
+      );
 
-          if (updateCharacter) {
-            return new HttpException(
-              {
-                message: 'Updated Successfully',
-                data: {
-                  updatedEquipmet: updatedRecord,
-                  updateCharacter: updateCharacter.data,
-                },
+      if (equipNew) {
+        const updatedRecord = await this.equipmentRepository.findOne({
+          id: newEquipmentId,
+        });
+
+        const updateCharacter =
+          await this.characterService.updateCharacterStrength(
+            updatedRecord,
+            true
+          );
+        console.log(updateCharacter);
+        if (updateCharacter) {
+          return new HttpException(
+            {
+              message: 'Updated Successfully',
+              data: {
+                updateCharacter: updateCharacter,
+                updatedEquipmet: updatedRecord,
               },
-              HttpStatus.NO_CONTENT
-            );
-          }
+            },
+            HttpStatus.NO_CONTENT
+          );
         }
       }
+
       return new HttpException('Something went wrong', HttpStatus.BAD_REQUEST);
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
