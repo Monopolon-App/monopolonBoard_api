@@ -14,6 +14,8 @@ import { UsersProfile } from '../usersprofile/usersprofile.entity';
 export enum StatusType {
   REMOVING = 'Removing',
   REMOVED = 'Removed',
+  ACTIVATED = 'Activated',
+  NULL = 'Null',
 }
 
 @Entity()
@@ -85,7 +87,7 @@ export class Character {
   @Column({
     type: 'enum',
     enum: StatusType,
-    default: null,
+    default: StatusType.ACTIVATED,
   })
   status: StatusType;
 
