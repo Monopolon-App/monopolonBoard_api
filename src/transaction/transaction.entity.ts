@@ -11,6 +11,7 @@ export enum TransactionType {
   WITHDRAWAL = 'withdrawal',
   LOOTING = 'looting',
   LOOTED = 'looted',
+  NFT_TRANSFER = 'nftTransfer',
 }
 
 @Entity()

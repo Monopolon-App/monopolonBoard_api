@@ -11,6 +11,13 @@ import {
 // this is need to be relative since after compile it will have different path: https://stackoverflow.com/questions/63865678/nestjs-test-suite-failed-to-run-cannot-find-module-src-article-article-entity
 import { UsersProfile } from '../usersprofile/usersprofile.entity';
 
+export enum StatusType {
+  REMOVING = 'Removing',
+  REMOVED = 'Removed',
+  ACTIVATED = 'Activated',
+  NULL = 'Null',
+}
+
 @Entity()
 export class Character {
   @PrimaryGeneratedColumn()
@@ -76,6 +83,13 @@ export class Character {
 
   @Column({ default: null })
   logInfo?: string;
+
+  @Column({
+    type: 'enum',
+    enum: StatusType,
+    default: StatusType.ACTIVATED,
+  })
+  status: StatusType;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

@@ -14,7 +14,7 @@ import {
   TreeRepository,
   Like,
 } from 'typeorm';
-import { Character } from './character.entity';
+import { Character, StatusType } from './character.entity';
 import { UpdateCharacterDto } from './dto/update-character.dto';
 import { Equipment } from 'src/equipment/equipment.entity';
 
@@ -139,6 +139,37 @@ export class CharacterService {
       );
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async updateStatusOfCharacter(characterId: number) {
+    try {
+      return getManager().transaction(async (transactionalEntityManager) => {
+        return await this.characterRepository
+          .findOne({
+            id: characterId,
+          })
+          .then(async (character) => {
+            await transactionalEntityManager
+              .createQueryBuilder(Character, 'character')
+              .update(Character)
+              .set({
+                status: StatusType.REMOVING,
+              })
+              .where('character.id = :id', {
+                id: character.id,
+              })
+              .execute();
+          })
+          .catch(() => {
+            throw new HttpException(
+              'No character found for this id',
+              HttpStatus.NOT_FOUND
+            );
+          });
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 }
