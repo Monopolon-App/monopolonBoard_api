@@ -22,18 +22,23 @@ export class Team {
   @Column({ default: null })
   walletAddress?: string;
 
+  // when we removed then slot should be null  from the backend side.
   @Column({ default: null })
   slot1?: number;
 
+  // when we removed then slot should be null  from the backend side.
   @Column({ default: null })
   slot2?: number;
 
+  // when we removed then slot should be null  from the backend side.
   @Column({ default: null })
   slot3?: number;
 
+  // when we removed then slot should be null  from the backend side.
   @Column({ default: null })
   slot4?: number;
 
+  // when we removed then slot should be null  from the backend side.
   @Column({ default: null })
   slot5?: number;
 

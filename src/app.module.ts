@@ -35,6 +35,7 @@ import { HttpExceptionFilter } from './errorException/allException';
     ConfigModule.forRoot({
       envFilePath: ['.env'],
       validationSchema: Joi.object({
+        ENV_TAG: Joi.string().required(),
         DATABASE_HOST: Joi.string().required(),
         DATABASE_PORT: Joi.string().required(),
         DATABASE_USER: Joi.string().required(),

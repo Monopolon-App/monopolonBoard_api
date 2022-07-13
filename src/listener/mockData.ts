@@ -30,3 +30,36 @@ export const staticEvent = {
     ],
   },
 };
+
+export const staticEventForNftTransfer = {
+  address: '0x5f8f682A9dd9dc399acBdfcf3393aff680f1F22F',
+  blockNumber: 19514059,
+  transactionHash:
+    '0xf0ed89aeb9ecb45ef4e6a7f2da78cb53b408dbf4aa7c9b37d2f70111f1b0d19b',
+  transactionIndex: 162,
+  blockHash:
+    '0x379c2761f220df71c894a505c186d375a5dadf32e794c626380cfd05aeb46988',
+  logIndex: 454,
+  removed: false,
+  id: 'log_1b84bcc3',
+  returnValues: {
+    '0': '0xCc99855481022fCc44037DC50b48e3D7415613AD',
+    '1': '0x10B942156829f2b34549bf3B0039E332a52Ba09E',
+    '2': '4259',
+    from: '0xCc99855481022fCc44037DC50b48e3D7415613AD',
+    to: '0x10B942156829f2b34549bf3B0039E332a52Ba09E',
+    tokenId: '4259',
+  },
+  event: 'Transfer',
+  signature:
+    '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+  raw: {
+    data: '0x',
+    topics: [
+      '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+      '0x00000000000000000000000010b942156829f2b34549bf3b0039e332a52ba09e',
+      '0x000000000000000000000000f916e9cae66ddc9b69a51b52f69dec578a21b6e5',
+      '0x00000000000000000000000000000000000000000000000000000000000010a3',
+    ],
+  },
+};

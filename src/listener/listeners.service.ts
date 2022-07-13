@@ -15,7 +15,7 @@ import axios from 'axios';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { UsersProfile } from 'src/usersprofile/usersprofile.entity';
-import { Character } from 'src/character/character.entity';
+import { Character, StatusType } from 'src/character/character.entity';
 import { Team } from 'src/team/team.entity';
 import { Hq } from 'src/hq/hq.entity';
 
@@ -26,7 +26,11 @@ import { Listener } from './listeners.entity';
 import { Equipment } from 'src/equipment/equipment.entity';
 import { WanderingMerchant } from 'src/WanderingMerchant/wanderingMerchant.entity';
 // mock data for testing
-// import { staticEvent } from './mockData';
+// import { staticEvent, staticEventForNftTransfer } from './mockData';
+import {
+  Transaction,
+  TransactionType,
+} from '../transaction/transaction.entity';
 
 type TrxDataType = {
   from: string;
@@ -84,6 +88,10 @@ export class ListenerService implements OnModuleInit {
 
     // if you want to test the below function then uncomment the below code.
     // this.handleEvent(staticEvent);
+
+    // if you want to test the handleCompanyToUserNft function then uncomment the below code.
+    // this is for the exit gameGame Functionality.
+    // this.handleEvent(staticEventForNftTransfer);
   }
 
   // fetch the nft metadata form the API.
@@ -137,23 +145,37 @@ export class ListenerService implements OnModuleInit {
     );
     this.logger.verbose('\n');
 
+    const companyAddress = this.configService.get('COMPANY_ADDRESS');
+
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     this.tokenContract.events
-      .Transfer({
-        filter: {
-          to: this.configService.get('COMPANY_ADDRESS'),
-        },
-        fromBlock,
-      })
+      .Transfer({})
       .on('connected', function (subscriptionId) {
         self.logger.verbose(
           'CONNECTED::event::subscriptionId::' + subscriptionId
         );
       })
       .on('data', async function (event) {
-        return self.handleEvent(event);
+        const trxData: TrxDataType = {
+          from: _.get(event, 'returnValues.0', undefined),
+          to: self.web3.utils.fromWei(
+            _.get(event, 'returnValues.1', undefined),
+            'ether'
+          ),
+          tokenId: self.web3.utils.fromWei(
+            _.get(event, 'returnValues.2', undefined),
+            'ether'
+          ),
+          transactionHash: _.get(event, 'transactionHash', undefined),
+          blockNumber: _.get(event, 'blockNumber', undefined),
+        };
+        if (trxData.to === companyAddress || trxData.from === companyAddress) {
+          return self.handleEvent(event);
+        } else {
+          self.logger.log(`There is no event for company wallet address`);
+        }
       })
       .on('changed', function (event) {
         self.logger.verbose('CHANGED::event::' + JSON.stringify(event));
@@ -165,6 +187,138 @@ export class ListenerService implements OnModuleInit {
         );
         // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
       });
+  }
+
+  async handleCompanyToUserNft(trxData: TrxDataType) {
+    const tokenId = this.web3.utils.toWei(trxData.tokenId, 'ether');
+
+    const tokenMeta = await this.getNftMetadata(
+      tokenId,
+      CONTRACT_ADDRESS[this.networkMode]
+    );
+
+    this.logger.debug(`-Listener:event:trxData:${JSON.stringify(trxData)}`);
+
+    await this.setLastBlockNumberListener(trxData.blockNumber);
+
+    return getManager().transaction(async (transactionalEntityManager) => {
+      return transactionalEntityManager
+        .createQueryBuilder(Character, 'character')
+        .setLock('pessimistic_write')
+        .where('character.tokenId = :tokenId', { tokenId: tokenId })
+        .getOne()
+        .then(async (character) => {
+          if (character) {
+            // Create transaction records
+            // when person enter game then he registers the game. when he exists the game then gameStatus will beZero
+            const transferTransaction = new Character();
+            transferTransaction.walletAddress = trxData.from;
+            transferTransaction.status = StatusType.NULL;
+            transferTransaction.erc721 = CONTRACT_ADDRESS[this.networkMode];
+            if (tokenMeta.type == 1) {
+              // this will only store when we have the character as the token
+              transferTransaction.tokenId = tokenId;
+              transferTransaction.ImageURL = tokenMeta.imgUrl;
+              transferTransaction.Luk =
+                tokenMeta.attributes.commonAttribute.luk?.toString();
+              transferTransaction.str =
+                tokenMeta.attributes.commonAttribute.str?.toString();
+              transferTransaction.dex =
+                tokenMeta.attributes.commonAttribute.dex?.toString();
+              transferTransaction.prep =
+                tokenMeta.attributes.commonAttribute.prep?.toString();
+              transferTransaction.mp =
+                tokenMeta.attributes.commonAttribute.mp?.toString();
+              transferTransaction.hp =
+                tokenMeta.attributes.commonAttribute.hp?.toString();
+            }
+            // create transaction record
+            const transactionResp = await transactionalEntityManager.save(
+              transferTransaction
+            );
+
+            // here we change the status of character as REMOVED when user exit the game
+            await transactionalEntityManager
+              .createQueryBuilder(Character, 'character')
+              .update(Character)
+              .set({
+                status: StatusType.REMOVED,
+              })
+              .where('character.id = :id', {
+                id: character.id,
+              })
+              .execute();
+
+            // here we set team slot null when NFT is transfer from company's walletAddress to user walletAddress
+            await transactionalEntityManager
+              .createQueryBuilder(Team, 'team')
+              .update(Team)
+              .set({
+                slot1: null,
+              })
+              .where('team.walletAddress = :walletAddress', {
+                walletAddress: character.walletAddress,
+              })
+              .execute();
+
+            // here if user does not have any ACTIVE nft to play then we set enterGameStatus == 0
+            await transactionalEntityManager
+              .createQueryBuilder(Character, 'character')
+              .setLock('pessimistic_write')
+              .where('character.walletAddress = :walletAddress', {
+                walletAddress: character.walletAddress,
+              })
+              .andWhere('character.status = :status', {
+                status: StatusType.ACTIVATED,
+              })
+              .getCount()
+              .then(async (count) => {
+                if (count === 0) {
+                  await transactionalEntityManager
+                    .createQueryBuilder(UsersProfile, 'users_profile')
+                    .update(UsersProfile)
+                    .set({
+                      enterGameStatus: 0,
+                    })
+                    .where('users_profile.walletAddress = :walletAddress', {
+                      walletAddress: character.walletAddress,
+                    })
+                    .execute();
+                } else {
+                  throw new HttpException(
+                    'User has other NFT to play',
+                    HttpStatus.BAD_REQUEST
+                  );
+                }
+              })
+              .catch((error) => {
+                return new HttpException(
+                  error?.message,
+                  HttpStatus.BAD_REQUEST
+                );
+              });
+
+            // here we create transaction entry for NFT Transfer event
+            const tTransferTransaction = new Transaction();
+            tTransferTransaction.type = TransactionType.NFT_TRANSFER;
+            tTransferTransaction.description =
+              'Transferring NFT from company walletAddress to User walletAddress';
+            tTransferTransaction.walletAddress = character.walletAddress;
+            tTransferTransaction.fromAddress = trxData.from;
+            await transactionalEntityManager.save(tTransferTransaction);
+          } else {
+            console.log('::LOG::ERROR::Duplicate transaction record:');
+            return new HttpException(
+              'Duplicate transaction record',
+              HttpStatus.BAD_REQUEST
+            );
+          }
+        })
+        .catch((error) => {
+          console.log(`::LOG::ERROR::${error?.message}:`);
+          return new HttpException(error?.message, HttpStatus.BAD_REQUEST);
+        });
+    });
   }
 
   async handleEvent(event) {
@@ -191,6 +345,9 @@ export class ListenerService implements OnModuleInit {
       blockNumber: _.get(event, 'blockNumber', undefined),
     };
 
+    if (trxData.from === this.configService.get('COMPANY_ADDRESS')) {
+      return await this.handleCompanyToUserNft(trxData);
+    }
     await this.setLastBlockNumberListener(trxData.blockNumber);
 
     this.logger.debug(`-Listener:event:trxData:${JSON.stringify(trxData)}`);
