@@ -145,24 +145,37 @@ export class ListenerService implements OnModuleInit {
     );
     this.logger.verbose('\n');
 
+    const companyAddress = this.configService.get('COMPANY_ADDRESS');
+
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     this.tokenContract.events
-      .Transfer({
-        filter: {
-          to: this.configService.get('COMPANY_ADDRESS'),
-          from: this.configService.get('COMPANY_ADDRESS'),
-        },
-        fromBlock,
-      })
+      .Transfer({})
       .on('connected', function (subscriptionId) {
         self.logger.verbose(
           'CONNECTED::event::subscriptionId::' + subscriptionId
         );
       })
       .on('data', async function (event) {
-        return self.handleEvent(event);
+        const trxData: TrxDataType = {
+          from: _.get(event, 'returnValues.0', undefined),
+          to: self.web3.utils.fromWei(
+            _.get(event, 'returnValues.1', undefined),
+            'ether'
+          ),
+          tokenId: self.web3.utils.fromWei(
+            _.get(event, 'returnValues.2', undefined),
+            'ether'
+          ),
+          transactionHash: _.get(event, 'transactionHash', undefined),
+          blockNumber: _.get(event, 'blockNumber', undefined),
+        };
+        if (trxData.to === companyAddress || trxData.from === companyAddress) {
+          return self.handleEvent(event);
+        } else {
+          self.logger.log(`There is no event for company wallet address`);
+        }
       })
       .on('changed', function (event) {
         self.logger.verbose('CHANGED::event::' + JSON.stringify(event));
