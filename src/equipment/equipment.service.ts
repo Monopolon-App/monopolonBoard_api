@@ -161,7 +161,7 @@ export class EquipmentService {
         );
 
         const oldEquipment = await this.equipmentRepository.findOne({
-          id: newEquipmentId,
+          id: oldEquipmentId,
         });
         await this.characterService.updateCharacterStrength(
           oldEquipment,
@@ -186,7 +186,6 @@ export class EquipmentService {
             updatedRecord,
             true
           );
-        console.log(updateCharacter);
         if (updateCharacter) {
           return new HttpException(
             {

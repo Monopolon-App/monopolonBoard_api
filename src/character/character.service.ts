@@ -133,16 +133,18 @@ export class CharacterService {
         char.mp = (+char.mp - +equipment.mp).toString();
       }
 
-      await this.characterRepository.update(
+      const updateChar = await this.characterRepository.update(
         { id: +equipment.charequiped },
         char
       );
 
-      const updatedRecord = await this.characterRepository.findOne({
-        id: +equipment.charequiped,
-      });
+      if (updateChar) {
+        const updatedRecord = await this.characterRepository.findOne({
+          id: +equipment.charequiped,
+        });
 
-      return updatedRecord;
+        return updatedRecord;
+      }
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
