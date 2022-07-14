@@ -24,7 +24,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ListenersModule } from './listener/listeners.module';
 import { DatabaseModule } from './database/database.module';
-import { WithdrawalHistoryModule } from './withdrawalHistory/withdrawalHistory.module';
 
 @Module({
   imports: [
@@ -67,7 +66,6 @@ import { WithdrawalHistoryModule } from './withdrawalHistory/withdrawalHistory.m
     CommunityModule,
     ListenersModule,
     SchedulerModule,
-    WithdrawalHistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

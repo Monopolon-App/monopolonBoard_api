@@ -9,6 +9,7 @@ import {
   Put,
   UseInterceptors,
   UploadedFiles,
+  Patch,
 } from '@nestjs/common';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -48,6 +49,15 @@ export class UsersProfileController {
     @UploadedFiles() files: Array<Express.Multer.File>
   ): Promise<any> {
     return this.usersService.createUserProfile(userprofile, files);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':walletAddress')
+  updateUserProfile(
+    @Param('walletAddress') walletAddress: string,
+    @Body() updateUserDto: UpdateUserDto
+  ) {
+    return this.usersService.updateUserProfile(walletAddress, updateUserDto);
   }
 
   @UseGuards(JwtAuthGuard)

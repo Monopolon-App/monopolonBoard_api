@@ -19,7 +19,6 @@ import {
 } from 'src/constants/constants';
 import mgmContractAbi from './constants/mgmContractAbi.json';
 import { UsersProfile } from 'src/usersprofile/usersprofile.entity';
-import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity';
 
 declare interface PromiseConstructor {
   allSettled(
@@ -27,14 +26,6 @@ declare interface PromiseConstructor {
   ): Promise<
     Array<{ status: 'fulfilled' | 'rejected'; value?: any; reason?: any }>
   >;
-}
-
-export interface WithdrawalHistoryParams {
-  userId: string;
-  amount: string;
-  status: string;
-  walletAddress: string;
-  withdrawal: Withdrawal;
 }
 
 @Injectable()
@@ -79,21 +70,6 @@ export class SchedulerService {
         from: this.account.address,
       }
     );
-  }
-
-  async createWithdrawalHistory(
-    transactionalEntityManager,
-    withdrawal: WithdrawalHistoryParams
-  ): Promise<any> {
-    const withdrawalHistory = new WithdrawalHistory();
-    withdrawalHistory.userId = withdrawal.userId;
-    withdrawalHistory.amount = withdrawal.amount;
-    withdrawalHistory.status = withdrawal.status;
-    withdrawalHistory.walletAddress = withdrawal.walletAddress;
-    withdrawalHistory.withdrawal = withdrawal.withdrawal;
-
-    //WithdrawalHistory : Create WithdrawalHistory record.
-    return await transactionalEntityManager.save(withdrawalHistory);
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
@@ -176,17 +152,6 @@ export class SchedulerService {
                             })
                             .execute();
 
-                          const history = await self.createWithdrawalHistory(
-                            transactionalEntityManager,
-                            {
-                              amount: withdrawalRecord.amount,
-                              status: 'Processing',
-                              userId: withdrawalRecord.userId,
-                              walletAddress: withdrawalRecord.walletAddress,
-                              withdrawal: withdrawalRecord,
-                            }
-                          );
-
                           self.logger.verbose(
                             `Witdrawal::transferMgmReward::Status::Proceess:${JSON.stringify(
                               withdrawalStatus
@@ -265,17 +230,6 @@ export class SchedulerService {
                             })
                             .execute();
 
-                          const history = await self.createWithdrawalHistory(
-                            transactionalEntityManager,
-                            {
-                              amount: withdrawalRecord.amount,
-                              status: 'Success',
-                              userId: withdrawalRecord.userId,
-                              walletAddress: withdrawalRecord.walletAddress,
-                              withdrawal: withdrawalRecord,
-                            }
-                          );
-
                           self.logger.log(
                             `Withdrawal::transferMgmReward::Status::Success:${JSON.stringify(
                               withdrawalStatus
@@ -325,17 +279,6 @@ export class SchedulerService {
                               id: withdrawalRecord.id,
                             })
                             .execute();
-
-                          const history = await self.createWithdrawalHistory(
-                            transactionalEntityManager,
-                            {
-                              amount: withdrawalRecord.amount,
-                              status: 'Failed',
-                              userId: withdrawalRecord.userId,
-                              walletAddress: withdrawalRecord.walletAddress,
-                              withdrawal: withdrawalRecord,
-                            }
-                          );
                         }
                       }
                     );

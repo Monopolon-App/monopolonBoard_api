@@ -4,15 +4,13 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
 } from 'typeorm';
-import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity';
 // this is need to be relative since after compile it will have different path: https://stackoverflow.com/questions/63865678/nestjs-test-suite-failed-to-run-cannot-find-module-src-article-article-entity
 
 @Entity()
 export class Withdrawal {
   @PrimaryGeneratedColumn()
-  id?: number;
+  id: number;
 
   @Column({ default: null })
   userId?: string;
@@ -35,15 +33,9 @@ export class Withdrawal {
   @Column({ default: null })
   logInfo?: string;
 
-  @OneToMany(
-    () => WithdrawalHistory,
-    (withdrawalHistory) => withdrawalHistory.withdrawal
-  )
-  withdrawalHistory?: WithdrawalHistory[];
-
   @CreateDateColumn({ type: 'timestamp' })
-  createdAt?: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt?: Date;
+  updatedAt: Date;
 }

@@ -16,7 +16,6 @@ import {
 } from 'typeorm';
 import { Withdrawal } from './withdrawal.entity';
 import { UpdateWithdrawalDto } from './dto/update-withdrawal.dto';
-import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity';
 
 @Injectable()
 export class WithdrawalService {
@@ -25,9 +24,7 @@ export class WithdrawalService {
   }
   constructor(
     @InjectRepository(Withdrawal)
-    private readonly withdrwalRepository: Repository<Withdrawal>,
-    @InjectRepository(WithdrawalHistory)
-    private readonly withdrawalHistoryRepository: Repository<WithdrawalHistory> // private readonly withdrawalHistoryService: WithdrawalHistoryService
+    private readonly withdrwalRepository: Repository<Withdrawal>
   ) {}
 
   async getById(walletAddress: string): Promise<any> {
@@ -58,16 +55,6 @@ export class WithdrawalService {
   ): Promise<any> {
     try {
       const withdrawals = await this.withdrwalRepository.save(withdrawal);
-      const withdrawalHistoryDto = {
-        userId: withdrawals.userId,
-        amount: withdrawals.amount,
-        status: withdrawals.status,
-        walletAddress: withdrawals.walletAddress,
-        withdrawal: withdrawals,
-      };
-
-      await this.withdrawalHistoryRepository.save(withdrawalHistoryDto);
-
       return {
         success: true,
         message: 'Withdrawal created successfully.',
@@ -81,7 +68,6 @@ export class WithdrawalService {
   async getUserById(walletAddress: string): Promise<any> {
     try {
       const [user, count] = await this.withdrwalRepository.findAndCount({
-        relations: ['withdrawalHistory'],
         where: { walletAddress },
       });
 
@@ -116,18 +102,6 @@ export class WithdrawalService {
       const updatesRecord = await this.withdrwalRepository.findOne({
         walletAddress: walletAddress,
       });
-
-      const withdrawalHistoryDto = {
-        userId: updatesRecord.userId,
-        amount: updatesRecord.amount,
-        status: updatesRecord.status,
-        walletAddress: updatesRecord.walletAddress,
-        withdrawal: updatesRecord,
-      };
-
-      const withdrawalHistory = await this.withdrawalHistoryRepository.save(
-        withdrawalHistoryDto
-      );
 
       return new HttpException(
         { message: 'Updated Successfully', data: updatesRecord },
