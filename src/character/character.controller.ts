@@ -51,7 +51,12 @@ export class CharacterController {
   }
 
   @Patch(':id/update')
-  updateStatusOfCharacter(@Param('id') id: number) {
-    return this.hqService.updateStatusOfCharacter(id);
+  removingNFTFromUserWallet(@Param('id') id: number) {
+    return this.hqService.removingNFTFromUserWallet(id);
+  }
+
+  @Post('game/exit/:walletAddress')
+  exitGame(@Param('walletAddress') walletAddress: string) {
+    return this.hqService.exitGame(walletAddress);
   }
 }

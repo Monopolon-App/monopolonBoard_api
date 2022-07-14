@@ -258,9 +258,14 @@ export class ListenerService implements OnModuleInit {
               })
               .where('team.walletAddress = :walletAddress', {
                 walletAddress: character.walletAddress,
+                // Or Query if character in slot 1 , slot 2 or any slot then make the slot null
+                // we need to query based on the slotno which is characterId
+                // slot1: character.id,
               })
               .execute();
-
+            // first tim enter
+            // first time exist
+            // second time enter and then exist and so on
             // here if user does not have any ACTIVE nft to play then we set enterGameStatus == 0
             await transactionalEntityManager
               .createQueryBuilder(Character, 'character')
@@ -268,9 +273,10 @@ export class ListenerService implements OnModuleInit {
               .where('character.walletAddress = :walletAddress', {
                 walletAddress: character.walletAddress,
               })
-              .andWhere('character.status = :status', {
-                status: StatusType.ACTIVATED,
-              })
+              .andWhere([
+                { status: StatusType.ACTIVATED },
+                { status: StatusType.NULL },
+              ])
               .getCount()
               .then(async (count) => {
                 if (count === 0) {
