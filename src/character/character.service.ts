@@ -150,7 +150,7 @@ export class CharacterService {
     }
   }
 
-  async updateStatusOfCharacter(characterId: number) {
+  async removingNFTFromUserWallet(characterId: number) {
     try {
       return getManager().transaction(async (transactionalEntityManager) => {
         return await this.characterRepository
@@ -168,16 +168,62 @@ export class CharacterService {
                 id: character.id,
               })
               .execute();
+            return {
+              status: true,
+              message: 'updated SuccessFully',
+            };
           })
           .catch(() => {
             throw new HttpException(
-              'No character found for this id',
+              {
+                status: false,
+                message: 'No character found for this id',
+              },
               HttpStatus.NOT_FOUND
             );
           });
       });
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        {
+          status: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
+
+  async exitGame(walletAddress: string) {
+    try {
+      return getManager().transaction(async (transactionalEntityManager) => {
+        await transactionalEntityManager
+          .createQueryBuilder(Character, 'character')
+          .where('character.walletAddress = :walletAddress', {
+            walletAddress: walletAddress,
+          })
+          .andWhere([
+            { status: StatusType.ACTIVATED },
+            { status: StatusType.NULL },
+          ])
+          .update(Character)
+          .set({
+            status: StatusType.REMOVING,
+          })
+          .execute();
+        return {
+          status: true,
+          message: 'updated SuccessFully',
+        };
+      });
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 }
