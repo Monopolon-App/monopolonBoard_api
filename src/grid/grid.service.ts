@@ -124,8 +124,8 @@ export class GridService {
         const wanderingMerchant =
           await this.wanderingMerchantService.getByStatus(1);
         if (wanderingMerchant) {
-          console.log(wanderingMerchant);
           wanderingMerchant['description'] = grid.description;
+          wanderingMerchant['gameID'] = grid.gameID;
           return wanderingMerchant;
         }
         throw new HttpException(
