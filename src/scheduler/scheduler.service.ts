@@ -110,7 +110,7 @@ export class SchedulerService {
     return await transactionalEntityManager.save(withdrawalHistory);
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  // @Cron(CronExpression.EVERY_10_SECONDS)
   handleCron() {
     this.logger.debug('Called when the current second is 5 minutes');
     this.withdrwalRepository
@@ -389,7 +389,7 @@ export class SchedulerService {
       });
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  // @Cron(CronExpression.EVERY_5_SECONDS)
   updateLastActionJob() {
     return getConnection()
       .createQueryBuilder(UsersProfile, 'userProfile')
@@ -431,7 +431,7 @@ export class SchedulerService {
       });
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  // @Cron(CronExpression.EVERY_5_SECONDS)
   updateLastRollJob() {
     return getConnection()
       .createQueryBuilder(UsersProfile, 'userProfile')
@@ -473,7 +473,7 @@ export class SchedulerService {
       });
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  // @Cron(CronExpression.EVERY_5_MINUTES)
   handleNFTTransfer() {
     this.logger.debug('Called when the current minute is 5 minutes');
     this.characterRepository
