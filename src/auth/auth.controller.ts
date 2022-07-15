@@ -42,7 +42,7 @@ export class AuthController {
     );
 
     request.res.setHeader('Set-Cookie', [
-      accessTokenCookie,
+      accessTokenCookie.cookie,
       refreshTokenCookie.cookie,
     ]);
     return {
