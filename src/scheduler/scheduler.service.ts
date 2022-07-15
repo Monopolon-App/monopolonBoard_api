@@ -14,12 +14,15 @@ import {
 } from 'src/transaction/transaction.entity';
 import { Withdrawal } from 'src/withdrawal/withdrawal.entity';
 import {
+  CONTRACT_ADDRESS,
   MGM_CONTRACT_ADDRESS,
   RPC_PROVIDER_URL,
 } from 'src/constants/constants';
 import mgmContractAbi from './constants/mgmContractAbi.json';
+import nftContractAbi from '../listener/constants/contractABI.json';
 import { UsersProfile } from 'src/usersprofile/usersprofile.entity';
 import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity';
+import { Character, StatusType } from '../character/character.entity';
 
 declare interface PromiseConstructor {
   allSettled(
@@ -41,6 +44,7 @@ export interface WithdrawalHistoryParams {
 export class SchedulerService {
   private web3;
   private mgmContract: Contract;
+  public tokenContract: Contract;
   private account;
   private hdProvider;
   public networkMode;
@@ -50,7 +54,9 @@ export class SchedulerService {
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(Withdrawal)
-    private readonly withdrwalRepository: Repository<Withdrawal>
+    private readonly withdrwalRepository: Repository<Withdrawal>,
+    @InjectRepository(Character)
+    private readonly characterRepository: Repository<Character>
   ) {
     this.networkMode =
       this.configService.get('ENV_TAG') === 'production'
@@ -75,6 +81,14 @@ export class SchedulerService {
     this.mgmContract = new this.web3.eth.Contract(
       mgmContractAbi as any,
       MGM_CONTRACT_ADDRESS[this.networkMode] as any,
+      {
+        from: this.account.address,
+      }
+    );
+
+    this.tokenContract = new this.web3.eth.Contract(
+      nftContractAbi as any,
+      CONTRACT_ADDRESS[this.networkMode] as any,
       {
         from: this.account.address,
       }
@@ -455,6 +469,161 @@ export class SchedulerService {
               );
             }
           });
+        }
+      });
+  }
+
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  handleNFTTransfer() {
+    this.logger.debug('Called when the current minute is 5 minutes');
+    this.characterRepository
+      .find({ where: { status: 'Removing' } })
+      .then((characters) => {
+        if (characters.length) {
+          this.logger.verbose(
+            `Character::findRemovingCharacter::results::Found > ${JSON.stringify(
+              characters
+            )}`
+          );
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          return Promise.allSettled(
+            characters.map(async (character) => {
+              try {
+                const characterRecord = await getConnection()
+                  .createQueryBuilder(Character, 'character')
+                  .where('character.id = :id', {
+                    id: character.id,
+                  })
+                  .getOne();
+
+                const userWalletAddress = _.get(
+                  characterRecord,
+                  'walletAddress',
+                  '0000-00-00 00:00:00'
+                );
+                const companyWalletAddress =
+                  this.configService.get('COMPANY_ADDRESS');
+
+                // eslint-disable-next-line @typescript-eslint/no-this-alias
+                const self = this;
+
+                const tokenId = character.tokenId;
+
+                self.logger.verbose(
+                  `Character:transferNFT:params:${JSON.stringify({
+                    from: companyWalletAddress,
+                    to: userWalletAddress,
+                    tokenId: tokenId,
+                  })}`
+                );
+
+                this.tokenContract.methods
+                  .safeTransferFrom(
+                    companyWalletAddress,
+                    userWalletAddress,
+                    tokenId
+                  )
+                  .send({ from: companyWalletAddress })
+                  .on('transactionHash', async function (hash) {
+                    /**
+                     * when we get the Transaction but confirmation is waiting then we will get this hash but this is not 100%correct may be
+                     * according to the blockchain. we have to wait for 3 confirmation
+                     */
+                    try {
+                      self.logger.debug(
+                        `Character::transferNFT::transactionHash:${JSON.stringify(
+                          {
+                            hash,
+                          }
+                        )}`
+                      );
+                    } catch (error) {
+                      self.logger.error(
+                        `Character::transferNFT::Error::${error?.message}:`
+                      );
+
+                      return new HttpException(
+                        error?.message,
+                        HttpStatus.BAD_REQUEST
+                      );
+                    }
+                  })
+                  .on('receipt', async function (receipt) {
+                    /**
+                     * When Transaction is Successful then we will get the Event from here
+                     */
+                    self.logger.log(
+                      `Character::transferNFT::receipt:${JSON.stringify(
+                        receipt
+                      )}`
+                    );
+
+                    await getManager().transaction(
+                      async (transactionalEntityManager) => {
+                        const tTransferTransaction = new Transaction();
+                        tTransferTransaction.type =
+                          TransactionType.NFT_TRANSFER;
+                        tTransferTransaction.hash = receipt?.transactionHash;
+                        tTransferTransaction.walletAddress = userWalletAddress;
+                        tTransferTransaction.fromAddress = companyWalletAddress;
+                        tTransferTransaction.description = `Success: Transfer NFT From ${companyWalletAddress} To ${userWalletAddress}`;
+
+                        // Transfer : Create transaction record for NFT transfer
+                        const tTransferTransactionObj =
+                          await transactionalEntityManager.save(
+                            tTransferTransaction
+                          );
+
+                        self.logger.log(
+                          `Character::transferNFT::createTrx::Success:${JSON.stringify(
+                            tTransferTransactionObj
+                          )}`
+                        );
+
+                        if (tTransferTransactionObj) {
+                          await transactionalEntityManager
+                            .createQueryBuilder(Character, 'character')
+                            .update(Character)
+                            .set({
+                              status: StatusType.REMOVED,
+                              walletAddress: null,
+                              usersProfileId: null,
+                            })
+                            .where('character.id = :id', {
+                              id: character.id,
+                            })
+                            .execute();
+                        }
+                      }
+                    );
+                  })
+                  .on('error', async function (error, receipt) {
+                    /**
+                     * when we get the Error from the Transferring the NFT
+                     */
+                    self.logger.error(
+                      `Character::transferNFTTOUser::Error:${JSON.stringify({
+                        error,
+                        receipt,
+                      })}`
+                    );
+                  });
+              } catch (error) {
+                throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+              }
+            })
+          )
+            .then((success) => {
+              this.logger.verbose(
+                `NFT::Transfer::Success: ${JSON.stringify(success)}`
+              );
+            })
+            .catch((error) => {
+              this.logger.error(
+                `NFT::Transfer::Error: ${JSON.stringify(error)}`
+              );
+            });
         }
       });
   }

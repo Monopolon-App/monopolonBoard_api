@@ -23,7 +23,8 @@ import CONTRACT_ABI from './constants/contractABI.json';
 import { CONTRACT_ADDRESS, WS_PROVIDER_URL } from 'src/constants/constants';
 import { nftMetadata, nftMetadataDTO } from './nft-metadata.dto';
 import { Listener } from './listeners.entity';
-
+import { Equipment } from 'src/equipment/equipment.entity';
+import { WanderingMerchant } from 'src/WanderingMerchant/wanderingMerchant.entity';
 // mock data for testing
 // import { staticEvent, staticEventForNftTransfer } from './mockData';
 import {
@@ -144,24 +145,37 @@ export class ListenerService implements OnModuleInit {
     );
     this.logger.verbose('\n');
 
+    const companyAddress = this.configService.get('COMPANY_ADDRESS');
+
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     this.tokenContract.events
-      .Transfer({
-        filter: {
-          to: this.configService.get('COMPANY_ADDRESS'),
-          from: this.configService.get('COMPANY_ADDRESS'),
-        },
-        fromBlock,
-      })
+      .Transfer({})
       .on('connected', function (subscriptionId) {
         self.logger.verbose(
           'CONNECTED::event::subscriptionId::' + subscriptionId
         );
       })
       .on('data', async function (event) {
-        return self.handleEvent(event);
+        const trxData: TrxDataType = {
+          from: _.get(event, 'returnValues.0', undefined),
+          to: self.web3.utils.fromWei(
+            _.get(event, 'returnValues.1', undefined),
+            'ether'
+          ),
+          tokenId: self.web3.utils.fromWei(
+            _.get(event, 'returnValues.2', undefined),
+            'ether'
+          ),
+          transactionHash: _.get(event, 'transactionHash', undefined),
+          blockNumber: _.get(event, 'blockNumber', undefined),
+        };
+        if (trxData.to === companyAddress || trxData.from === companyAddress) {
+          return self.handleEvent(event);
+        } else {
+          self.logger.log(`There is no event for company wallet address`);
+        }
       })
       .on('changed', function (event) {
         self.logger.verbose('CHANGED::event::' + JSON.stringify(event));
@@ -244,9 +258,14 @@ export class ListenerService implements OnModuleInit {
               })
               .where('team.walletAddress = :walletAddress', {
                 walletAddress: character.walletAddress,
+                // Or Query if character in slot 1 , slot 2 or any slot then make the slot null
+                // we need to query based on the slotno which is characterId
+                // slot1: character.id,
               })
               .execute();
-
+            // first tim enter
+            // first time exist
+            // second time enter and then exist and so on
             // here if user does not have any ACTIVE nft to play then we set enterGameStatus == 0
             await transactionalEntityManager
               .createQueryBuilder(Character, 'character')
@@ -254,9 +273,10 @@ export class ListenerService implements OnModuleInit {
               .where('character.walletAddress = :walletAddress', {
                 walletAddress: character.walletAddress,
               })
-              .andWhere('character.status = :status', {
-                status: StatusType.ACTIVATED,
-              })
+              .andWhere([
+                { status: StatusType.ACTIVATED },
+                { status: StatusType.NULL },
+              ])
               .getCount()
               .then(async (count) => {
                 if (count === 0) {
@@ -412,8 +432,13 @@ export class ListenerService implements OnModuleInit {
                 console.log('metadata', tokenMeta);
                 // Create transaction records
                 const transferTransaction = new Character();
-                transferTransaction.walletAddress = trxData.from;
-                transferTransaction.erc721 = CONTRACT_ADDRESS[this.networkMode];
+                const transferEquipment = new Equipment();
+                // transferTransaction.walletAddress = trxData.from;
+                // transferTransaction.erc721 = CONTRACT_ADDRESS[this.networkMode];
+                transferTransaction.walletAddress =
+                  transferEquipment.walletAddress = trxData.from;
+                transferTransaction.erc721 = transferEquipment.erc721 =
+                  CONTRACT_ADDRESS[this.networkMode];
                 transferTransaction.usersProfileId = newUserRecord.id;
                 if (tokenMeta.type == 1) {
                   // this will only store when we have the character as the token
@@ -438,6 +463,46 @@ export class ListenerService implements OnModuleInit {
                   teamRecord.totalPrep = transferTransaction.prep;
                   teamRecord.totalStr = transferTransaction.str;
                 }
+
+                if (tokenMeta.type == 2) {
+                  transferEquipment.tokenId = tokenId;
+
+                  transferEquipment.charequiped =
+                    transferTransaction.id.toString();
+
+                  transferEquipment.str =
+                    tokenMeta.attributes.commonAttribute.str?.toString();
+
+                  transferEquipment.dex =
+                    tokenMeta.attributes.commonAttribute.dex?.toString();
+
+                  transferEquipment.Luk =
+                    tokenMeta.attributes.commonAttribute.luk?.toString();
+
+                  transferEquipment.prep =
+                    tokenMeta.attributes.commonAttribute.prep?.toString();
+
+                  transferEquipment.mp =
+                    tokenMeta.attributes.commonAttribute.mp?.toString();
+
+                  transferEquipment.hp =
+                    tokenMeta.attributes.commonAttribute.hp?.toString();
+
+                  transferEquipment.status = 'equiped';
+
+                  teamRecord.totalDex = transferEquipment.dex;
+                  teamRecord.totalHp = transferEquipment.hp;
+                  teamRecord.totalLuk = transferEquipment.Luk;
+                  teamRecord.totalMp = transferEquipment.mp;
+                  teamRecord.totalPrep = transferEquipment.prep;
+                  teamRecord.totalStr = transferEquipment.str;
+
+                  const equipmentResp = await transactionalEntityManager.save(
+                    transferEquipment
+                  );
+                  return equipmentResp;
+                }
+
                 // Receiver : create transaction record (update it balance)
                 const transactionResp = await transactionalEntityManager.save(
                   transferTransaction
