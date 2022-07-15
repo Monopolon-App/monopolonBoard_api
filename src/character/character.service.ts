@@ -17,6 +17,7 @@ import {
 import { Character, StatusType } from './character.entity';
 import { UpdateCharacterDto } from './dto/update-character.dto';
 import { Equipment } from 'src/equipment/equipment.entity';
+import { UsersProfile } from '../usersprofile/usersprofile.entity';
 
 @Injectable()
 export class CharacterService {
@@ -168,6 +169,31 @@ export class CharacterService {
                 id: character.id,
               })
               .execute();
+
+            const remainingCharacter = await transactionalEntityManager
+              .createQueryBuilder(Character, 'character')
+              .where('character.walletAddress = :walletAddress', {
+                walletAddress: character.walletAddress,
+              })
+              .andWhere([
+                { status: StatusType.ACTIVATED },
+                { status: StatusType.NULL },
+              ])
+              .getCount();
+
+            if (remainingCharacter === 0) {
+              await transactionalEntityManager
+                .createQueryBuilder(UsersProfile, 'users_profile')
+                .setLock('pessimistic_write')
+                .update(UsersProfile)
+                .set({
+                  enterGameStatus: 0,
+                })
+                .where('users_profile.walletAddress = :walletAddress', {
+                  walletAddress: character.walletAddress,
+                })
+                .execute();
+            }
             return {
               status: true,
               message: 'updated SuccessFully',
@@ -211,6 +237,19 @@ export class CharacterService {
             status: StatusType.REMOVING,
           })
           .execute();
+
+        await transactionalEntityManager
+          .createQueryBuilder(UsersProfile, 'users_profile')
+          .setLock('pessimistic_write')
+          .update(UsersProfile)
+          .set({
+            enterGameStatus: 0,
+          })
+          .where('users_profile.walletAddress = :walletAddress', {
+            walletAddress: walletAddress,
+          })
+          .execute();
+
         return {
           status: true,
           message: 'updated SuccessFully',

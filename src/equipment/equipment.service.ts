@@ -104,7 +104,7 @@ export class EquipmentService {
         for (let i = 0; i < equipments.length; i++) {
           diffEquipments[equipments[i].category] =
             await this.equipmentRepository.find({
-              where: { category: equipments[i].category },
+              where: { category: equipments[i].category, tokenId: tokenId },
             });
         }
         return new HttpException(
