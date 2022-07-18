@@ -152,7 +152,7 @@ export class EquipmentService {
     newEquipmentId: number
   ): Promise<any> {
     try {
-      if (oldEquipmentId) {
+      if (oldEquipmentId && !newEquipmentId) {
         await this.equipmentRepository.update(
           {
             id: oldEquipmentId,
@@ -163,44 +163,76 @@ export class EquipmentService {
         const oldEquipment = await this.equipmentRepository.findOne({
           id: oldEquipmentId,
         });
-        await this.characterService.updateCharacterStrength(
-          oldEquipment,
-          false
-        );
-      }
 
-      const equipNew = await this.equipmentRepository.update(
-        {
-          id: newEquipmentId,
-        },
-        { status: 'Equiped' }
-      );
-
-      if (equipNew) {
-        const updatedRecord = await this.equipmentRepository.findOne({
-          id: newEquipmentId,
-        });
-
-        const updateCharacter =
+        const unEquipFromChar =
           await this.characterService.updateCharacterStrength(
-            updatedRecord,
-            true
+            oldEquipment,
+            false
           );
-        if (updateCharacter) {
-          return new HttpException(
-            {
-              message: 'Updated Successfully',
-              data: {
-                updateCharacter: updateCharacter,
-                updatedEquipmet: updatedRecord,
-              },
+        return new HttpException(
+          {
+            message: 'Unequiped Successfully',
+            data: {
+              updateCharacter: unEquipFromChar,
+              updatedEquipmet: oldEquipment,
             },
-            HttpStatus.NO_CONTENT
+          },
+          HttpStatus.NO_CONTENT
+        );
+      } else {
+        if (oldEquipmentId) {
+          await this.equipmentRepository.update(
+            {
+              id: oldEquipmentId,
+            },
+            { status: 'Unequiped' }
+          );
+
+          const oldEquipment = await this.equipmentRepository.findOne({
+            id: oldEquipmentId,
+          });
+          await this.characterService.updateCharacterStrength(
+            oldEquipment,
+            false
           );
         }
-      }
 
-      return new HttpException('Something went wrong', HttpStatus.BAD_REQUEST);
+        const equipNew = await this.equipmentRepository.update(
+          {
+            id: newEquipmentId,
+          },
+          { status: 'Equiped' }
+        );
+
+        if (equipNew) {
+          const updatedRecord = await this.equipmentRepository.findOne({
+            id: newEquipmentId,
+          });
+
+          const updateCharacter =
+            await this.characterService.updateCharacterStrength(
+              updatedRecord,
+              true
+            );
+          if (updateCharacter) {
+            return new HttpException(
+              {
+                message: 'Updated Successfully',
+                data: {
+                  updateCharacter: updateCharacter,
+                  updatedEquipmet: updatedRecord,
+                },
+              },
+              HttpStatus.NO_CONTENT
+            );
+          }
+        }
+
+        return new HttpException(
+          'Something went wrong',
+          HttpStatus.BAD_REQUEST
+        );
+      }
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
