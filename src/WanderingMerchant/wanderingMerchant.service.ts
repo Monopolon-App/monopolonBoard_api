@@ -61,10 +61,35 @@ export class WanderingMerchantService {
           walletAddress: wanderingMerchantData.walletAddress,
         })
         .getOne();
+      if (!user) {
+        throw new HttpException('User Does not Exist', HttpStatus.BAD_REQUEST);
+      }
 
       const wanderingMerchant = await this.wanderingMerchantRepository.findOne({
         id: id,
       });
+
+      if (!wanderingMerchant) {
+        throw new HttpException(
+          'Equipment does not exist',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      if (wanderingMerchant.status === 0) {
+        throw new HttpException(
+          'This equipment is already purchased',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      const userMgmRewards = user.mgmRewardsAccumulated;
+      const equipmentDiscountedPrice = wanderingMerchant.discountedPrice;
+      if (userMgmRewards < equipmentDiscountedPrice) {
+        throw new HttpException(
+          'User does not have sufficient balance to buy this equipment',
+          HttpStatus.BAD_REQUEST
+        );
+      }
 
       const tokenId = parseInt(wanderingMerchant.tokenId);
 
@@ -73,85 +98,71 @@ export class WanderingMerchantService {
         CONTRACT_ADDRESS[this.networkMode]
       );
 
-      const userMgmRewards = user.mgmRewardsAccumulated;
-      const equipmentDiscountedPrice = wanderingMerchant.discountedPrice;
-
-      if (wanderingMerchant.status === 0) {
+      if (!tokenMeta) {
         throw new HttpException(
-          'This equipment is already purchased',
+          `Token MetaData does not Exist for the token ${tokenId}`,
           HttpStatus.BAD_REQUEST
         );
       }
 
-      if (userMgmRewards > equipmentDiscountedPrice) {
-        return getManager().transaction(async (transactionalEntityManager) => {
-          await transactionalEntityManager
-            .createQueryBuilder(UsersProfile, 'users_profile')
-            .setLock('pessimistic_write')
-            .update(UsersProfile)
-            .set({
-              mgmRewardsAccumulated: (
-                parseFloat(userMgmRewards) -
-                parseFloat(equipmentDiscountedPrice)
-              ).toString(),
-            })
-            .where('users_profile.walletAddress = :walletAddress', {
-              walletAddress: wanderingMerchantData.walletAddress,
-            })
-            .execute();
+      return getManager().transaction(async (transactionalEntityManager) => {
+        await transactionalEntityManager
+          .createQueryBuilder(UsersProfile, 'users_profile')
+          .setLock('pessimistic_write')
+          .update(UsersProfile)
+          .set({
+            mgmRewardsAccumulated: (
+              parseFloat(userMgmRewards) - parseFloat(equipmentDiscountedPrice)
+            ).toString(),
+          })
+          .where('users_profile.walletAddress = :walletAddress', {
+            walletAddress: wanderingMerchantData.walletAddress,
+          })
+          .execute();
 
-          await transactionalEntityManager
-            .createQueryBuilder(WanderingMerchant, 'wandering_merchant')
-            .setLock('pessimistic_write')
-            .update(WanderingMerchant)
-            .set({
-              status: 0,
-            })
-            .where('wandering_merchant.id = :id', {
-              id: id,
-            })
-            .execute();
+        await transactionalEntityManager
+          .createQueryBuilder(WanderingMerchant, 'wandering_merchant')
+          .setLock('pessimistic_write')
+          .update(WanderingMerchant)
+          .set({
+            status: 0,
+          })
+          .where('wandering_merchant.id = :id', {
+            id: id,
+          })
+          .execute();
 
-          const equipment = new Equipment();
-          equipment.walletAddress = user.walletAddress;
-          equipment.tokenId = wanderingMerchant.tokenId;
-          equipment.charequiped = user.id.toString();
-          equipment.erc721 = CONTRACT_ADDRESS[this.networkMode];
-          equipment.Luk = tokenMeta.attributes.commonAttribute.luk?.toString();
-          equipment.str = tokenMeta.attributes.commonAttribute.str?.toString();
-          equipment.dex = tokenMeta.attributes.commonAttribute.dex?.toString();
-          equipment.prep =
-            tokenMeta.attributes.commonAttribute.prep?.toString();
-          equipment.mp = tokenMeta.attributes.commonAttribute.mp?.toString();
-          equipment.hp = tokenMeta.attributes.commonAttribute.hp?.toString();
-          equipment.category = tokenMeta.attributes.category;
-          equipment.thumburl = wanderingMerchant.imageURL;
-          equipment.status = EquipmentStatusType.EQUIPPED;
+        const equipment = new Equipment();
+        equipment.walletAddress = user.walletAddress;
+        equipment.tokenId = wanderingMerchant.tokenId;
+        equipment.charequiped = user.id.toString();
+        equipment.erc721 = CONTRACT_ADDRESS[this.networkMode];
+        equipment.Luk = tokenMeta.attributes.commonAttribute.luk?.toString();
+        equipment.str = tokenMeta.attributes.commonAttribute.str?.toString();
+        equipment.dex = tokenMeta.attributes.commonAttribute.dex?.toString();
+        equipment.prep = tokenMeta.attributes.commonAttribute.prep?.toString();
+        equipment.mp = tokenMeta.attributes.commonAttribute.mp?.toString();
+        equipment.hp = tokenMeta.attributes.commonAttribute.hp?.toString();
+        equipment.category = tokenMeta.attributes.category;
+        equipment.thumburl = wanderingMerchant.imageURL;
+        equipment.status = EquipmentStatusType.EQUIPPED;
 
-          const equipmentResp = await transactionalEntityManager.save(
-            equipment
-          );
+        const equipmentResp = await transactionalEntityManager.save(equipment);
 
-          const transaction = new Transaction();
-          transaction.walletAddress = user.walletAddress;
-          transaction.description = 'Transfer Equipment to User WalletAddress';
-          transaction.userId = user.id;
-          transaction.type = TransactionType.EQUIPMENT_TRANSFER;
+        const transaction = new Transaction();
+        transaction.walletAddress = user.walletAddress;
+        transaction.description = 'Transfer Equipment to User WalletAddress';
+        transaction.userId = user.id;
+        transaction.type = TransactionType.EQUIPMENT_TRANSFER;
 
-          await transactionalEntityManager.save(transaction);
+        await transactionalEntityManager.save(transaction);
 
-          return {
-            status: true,
-            message: 'Equipment Received SuccessFully',
-            data: equipmentResp,
-          };
-        });
-      } else {
-        throw new HttpException(
-          'User does not have sufficient balance to buy this equipment',
-          HttpStatus.BAD_REQUEST
-        );
-      }
+        return {
+          status: true,
+          message: 'Equipment Received SuccessFully',
+          data: equipmentResp,
+        };
+      });
     } catch (error) {
       throw new HttpException(
         {
