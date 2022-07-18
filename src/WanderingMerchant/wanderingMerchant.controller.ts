@@ -17,10 +17,26 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 
 import { WanderingMerchant } from './wanderingMerchant.entity';
 
-import { WanderingMerchantService } from './wanderingMerchant.service';
+import {
+  WanderingMerchantBody,
+  WanderingMerchantService,
+} from './wanderingMerchant.service';
 
 @ApiTags('wanderingMerchant')
 @Controller('wanderingMerchant')
 export class WanderingMerchantController {
-  constructor(private readonly equipmentService: WanderingMerchantService) {}
+  constructor(
+    private readonly wanderingMerchantService: WanderingMerchantService
+  ) {}
+
+  @Post(':id/purchaseEquipment')
+  purchaseEquipment(
+    @Param('id') id: number,
+    @Body() wanderingMerchantData: WanderingMerchantBody
+  ) {
+    return this.wanderingMerchantService.purchaseEquipment(
+      id,
+      wanderingMerchantData
+    );
+  }
 }

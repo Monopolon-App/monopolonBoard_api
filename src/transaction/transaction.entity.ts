@@ -12,6 +12,7 @@ export enum TransactionType {
   LOOTING = 'looting',
   LOOTED = 'looted',
   NFT_TRANSFER = 'nftTransfer',
+  EQUIPMENT_TRANSFER = 'equipmentTransfer',
 }
 
 @Entity()
