@@ -1,17 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { getConnection, getManager, Repository } from 'typeorm';
+import { Column, getConnection, getManager, Repository } from 'typeorm';
 import { WanderingMerchant } from './wanderingMerchant.entity';
 import { UsersProfile } from '../usersprofile/usersprofile.entity';
 import { Equipment, EquipmentStatusType } from '../equipment/equipment.entity';
 import { CONTRACT_ADDRESS } from '../constants/constants';
 import { ListenerService } from '../listener/listeners.service';
-import { ApiProperty } from '@nestjs/swagger';
 import {
   Transaction,
   TransactionType,
 } from '../transaction/transaction.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class WanderingMerchantBody {
   @ApiProperty()
@@ -84,7 +84,8 @@ export class WanderingMerchantService {
       }
       const userMgmRewards = user.mgmRewardsAccumulated;
       const equipmentDiscountedPrice = wanderingMerchant.discountedPrice;
-      if (userMgmRewards < equipmentDiscountedPrice) {
+
+      if (parseFloat(userMgmRewards) < parseFloat(equipmentDiscountedPrice)) {
         throw new HttpException(
           'User does not have sufficient balance to buy this equipment',
           HttpStatus.BAD_REQUEST

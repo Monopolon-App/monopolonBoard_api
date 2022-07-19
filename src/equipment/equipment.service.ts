@@ -1,23 +1,10 @@
-import {
-  Injectable,
-  HttpException,
-  HttpStatus,
-  NotFoundException,
-  Logger,
-  Inject,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
-import {
-  Repository,
-  getConnection,
-  getManager,
-  TreeRepository,
-  Like,
-} from 'typeorm';
-import { Equipment } from './equipment.entity';
+import { getManager, Repository } from 'typeorm';
+import { Equipment, EquipmentStatusType } from './equipment.entity';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { CharacterService } from 'src/character/character.service';
+import { Character } from '../character/character.entity';
 
 @Injectable()
 export class EquipmentService {
@@ -157,7 +144,7 @@ export class EquipmentService {
           {
             id: oldEquipmentId,
           },
-          { status: 'Unequiped' }
+          { status: EquipmentStatusType.UNEQUIPPED }
         );
 
         const oldEquipment = await this.equipmentRepository.findOne({
@@ -185,7 +172,7 @@ export class EquipmentService {
             {
               id: oldEquipmentId,
             },
-            { status: 'Unequiped' }
+            { status: EquipmentStatusType.UNEQUIPPED }
           );
 
           const oldEquipment = await this.equipmentRepository.findOne({
@@ -201,7 +188,7 @@ export class EquipmentService {
           {
             id: newEquipmentId,
           },
-          { status: 'Equiped' }
+          { status: EquipmentStatusType.EQUIPPED }
         );
 
         if (equipNew) {
@@ -235,6 +222,143 @@ export class EquipmentService {
       }
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async removeEquipment(id: number) {
+    try {
+      const equipment = await this.equipmentRepository.findOne({
+        id: id,
+      });
+
+      if (!equipment) {
+        throw new HttpException(
+          'Equipment Does not Exist',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      if (equipment.status === EquipmentStatusType.REMOVED) {
+        throw new HttpException(
+          'Equipment is already Removed',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      return getManager().transaction(async (transactionalEntityManager) => {
+        // here if equipment status is Equipped then we decrease character str, dex, Luk, prep, hp, mp
+        if (equipment.status === EquipmentStatusType.EQUIPPED) {
+          const character = await transactionalEntityManager
+            .createQueryBuilder(Character, 'character')
+            .setLock('pessimistic_write')
+            .where('character.walletAddress = :walletAddress', {
+              walletAddress: equipment.walletAddress,
+            })
+            .getOne();
+
+          if (!character) {
+            throw new HttpException(
+              'Character does not Exist',
+              HttpStatus.BAD_REQUEST
+            );
+          }
+
+          if (character.str < equipment.str) {
+            throw new HttpException(
+              'Character does not have sufficient str',
+              HttpStatus.BAD_REQUEST
+            );
+          } else if (character.dex < equipment.dex) {
+            throw new HttpException(
+              'Character does not have sufficient dex',
+              HttpStatus.BAD_REQUEST
+            );
+          } else if (character.Luk < equipment.Luk) {
+            throw new HttpException(
+              'Character does not have sufficient Luk',
+              HttpStatus.BAD_REQUEST
+            );
+          } else if (character.prep < equipment.prep) {
+            throw new HttpException(
+              'Character does not have sufficient prep',
+              HttpStatus.BAD_REQUEST
+            );
+          } else if (character.hp < equipment.hp) {
+            throw new HttpException(
+              'Character does not have sufficient hp',
+              HttpStatus.BAD_REQUEST
+            );
+          } else if (character.mp < equipment.mp) {
+            throw new HttpException(
+              'Character does not have sufficient mp',
+              HttpStatus.BAD_REQUEST
+            );
+          }
+
+          character.str = (
+            parseFloat(character.str) - parseFloat(equipment.str)
+          ).toString();
+
+          character.dex = (
+            parseFloat(character.dex) - parseFloat(equipment.dex)
+          ).toString();
+
+          character.Luk = (
+            parseFloat(character.Luk) - parseFloat(equipment.Luk)
+          ).toString();
+
+          character.prep = (
+            parseFloat(character.prep) - parseFloat(equipment.prep)
+          ).toString();
+
+          character.hp = (
+            parseFloat(character.hp) - parseFloat(equipment.hp)
+          ).toString();
+
+          character.mp = (
+            parseFloat(character.mp) - parseFloat(equipment.mp)
+          ).toString();
+
+          await transactionalEntityManager.save(character);
+        }
+
+        // then we set status as Removed for that character
+        return transactionalEntityManager
+          .createQueryBuilder(Equipment, 'equipment')
+          .setLock('pessimistic_write')
+          .update(Equipment)
+          .set({
+            status: EquipmentStatusType.REMOVED,
+          })
+          .where('equipment.id = :id', {
+            id: id,
+          })
+          .execute()
+          .then((equipment) => {
+            return {
+              status: true,
+              message: 'Equipment Removed SuccessFully',
+              data: equipment,
+            };
+          })
+          .catch((error) => {
+            throw new HttpException(
+              {
+                status: false,
+                message: error.message,
+              },
+              HttpStatus.BAD_REQUEST
+            );
+          });
+      });
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 }

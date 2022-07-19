@@ -11,6 +11,7 @@ import {
 export enum EquipmentStatusType {
   EQUIPPED = 'Equipped',
   UNEQUIPPED = 'Unequipped',
+  REMOVED = 'Removed',
 }
 
 @Entity()
