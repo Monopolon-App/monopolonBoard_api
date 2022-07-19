@@ -121,17 +121,22 @@ export class GridService {
         );
       }
       if (grid.description === 'Wandering Merchant') {
+        // const wanderingMerchant =
+        //   await this.wanderingMerchantService.getByStatus(1);
+
         const wanderingMerchant =
-          await this.wanderingMerchantService.getByStatus(1);
-        if (wanderingMerchant) {
-          wanderingMerchant['description'] = grid.description;
-          wanderingMerchant['gameID'] = grid.gameID;
-          return wanderingMerchant;
+          await this.wanderingMerchantService.getAllWanderingMerchant();
+
+        if (!wanderingMerchant) {
+          throw new HttpException(
+            'wandering merchant does not exist for this id',
+            HttpStatus.NOT_FOUND
+          );
         }
-        throw new HttpException(
-          'wandering merchant does not exist for this id',
-          HttpStatus.NOT_FOUND
-        );
+
+        wanderingMerchant['description'] = grid.description;
+        wanderingMerchant['gameID'] = grid.gameID;
+        return wanderingMerchant;
       } else {
         return grid;
       }

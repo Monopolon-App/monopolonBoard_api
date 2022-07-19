@@ -39,13 +39,34 @@ export class WanderingMerchantService {
       const wanderingMerchant = await this.wanderingMerchantRepository.findOne({
         status: status,
       });
-      if (wanderingMerchant) {
-        return wanderingMerchant;
+
+      if (!wanderingMerchant) {
+        return new HttpException(
+          'Equipment does not Found',
+          HttpStatus.NOT_FOUND
+        );
       }
-      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+
+      return wanderingMerchant;
     } catch (error) {
       throw error;
     }
+  }
+
+  async getAllWanderingMerchant(): Promise<any> {
+    try {
+      const wanderingMerchant =
+        await this.wanderingMerchantRepository.findOne();
+
+      if (!wanderingMerchant) {
+        return new HttpException(
+          'Equipment does not Found',
+          HttpStatus.NOT_FOUND
+        );
+      }
+
+      return wanderingMerchant;
+    } catch (error) {}
   }
 
   async purchaseEquipment(
