@@ -30,6 +30,8 @@ export class WanderingMerchantController {
   ) {}
 
   @Post(':id/purchaseEquipment')
+  @ApiConsumes('multipart/form-data', 'application/json')
+  @UseInterceptors(FilesInterceptor('file'))
   purchaseEquipment(
     @Param('id') id: number,
     @Body() wanderingMerchantData: WanderingMerchantBody

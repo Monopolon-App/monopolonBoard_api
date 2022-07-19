@@ -78,4 +78,9 @@ export class EquipmentController {
       newEquipmentId
     );
   }
+
+  @Post(':id/removeEquipment')
+  removeEquipment(@Param('id') id: number) {
+    return this.equipmentService.removeEquipment(id);
+  }
 }
