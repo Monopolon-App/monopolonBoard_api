@@ -40,6 +40,10 @@ type TrxDataType = {
   blockNumber: number;
 };
 
+function equalsIgnoringCase(text, other) {
+  return text.localeCompare(other, undefined, { sensitivity: 'base' }) === 0;
+}
+
 @Injectable()
 export class ListenerService implements OnModuleInit {
   private readonly logger = new Logger(ListenerService.name);
@@ -160,10 +164,7 @@ export class ListenerService implements OnModuleInit {
       .on('data', async function (event) {
         const trxData: TrxDataType = {
           from: _.get(event, 'returnValues.0', undefined),
-          to: self.web3.utils.fromWei(
-            _.get(event, 'returnValues.1', undefined),
-            'ether'
-          ),
+          to: _.get(event, 'returnValues.1', undefined),
           tokenId: self.web3.utils.fromWei(
             _.get(event, 'returnValues.2', undefined),
             'ether'
@@ -171,10 +172,19 @@ export class ListenerService implements OnModuleInit {
           transactionHash: _.get(event, 'transactionHash', undefined),
           blockNumber: _.get(event, 'blockNumber', undefined),
         };
-        if (trxData.to === companyAddress || trxData.from === companyAddress) {
+
+        if (
+          equalsIgnoringCase(trxData.to, companyAddress) ||
+          equalsIgnoringCase(trxData.from, companyAddress) ||
+          trxData.to === companyAddress ||
+          trxData.from === companyAddress
+        ) {
           return self.handleEvent(event);
         } else {
-          self.logger.log(`There is no event for company wallet address`);
+          self.logger.log(
+            `There is no event for company wallet address` +
+              JSON.stringify(event)
+          );
         }
       })
       .on('changed', function (event) {
