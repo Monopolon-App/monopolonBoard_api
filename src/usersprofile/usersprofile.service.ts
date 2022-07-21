@@ -38,13 +38,29 @@ export class UsersProfileService {
   async getByWalletAddress(walletAddress: string): Promise<any> {
     try {
       const user = await this.usersRepository.findOne({
-        walletAddress: walletAddress,
+        relations: ['character'],
+        where: {
+          walletAddress: walletAddress,
+        },
       });
-      if (user) {
-        return user;
+      if (!user) {
+        return new HttpException(
+          {
+            status: HttpStatus.OK,
+            message: 'USer Not Found',
+          },
+          HttpStatus.OK
+        );
       }
 
-      throw new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+      return new HttpException(
+        {
+          status: HttpStatus.OK,
+          message: 'Success',
+          data: user,
+        },
+        HttpStatus.OK
+      );
     } catch (error) {
       throw new HttpException(error?.message, HttpStatus.BAD_REQUEST);
     }
