@@ -263,32 +263,32 @@ export class EquipmentService {
             );
           }
 
-          if (character.str < equipment.str) {
+          if (parseFloat(character.str) < parseFloat(equipment.str)) {
             throw new HttpException(
               'Character does not have sufficient str',
               HttpStatus.BAD_REQUEST
             );
-          } else if (character.dex < equipment.dex) {
+          } else if (parseFloat(character.dex) < parseFloat(equipment.dex)) {
             throw new HttpException(
               'Character does not have sufficient dex',
               HttpStatus.BAD_REQUEST
             );
-          } else if (character.Luk < equipment.Luk) {
+          } else if (parseFloat(character.Luk) < parseFloat(equipment.Luk)) {
             throw new HttpException(
               'Character does not have sufficient Luk',
               HttpStatus.BAD_REQUEST
             );
-          } else if (character.prep < equipment.prep) {
+          } else if (parseFloat(character.prep) < parseFloat(equipment.prep)) {
             throw new HttpException(
               'Character does not have sufficient prep',
               HttpStatus.BAD_REQUEST
             );
-          } else if (character.hp < equipment.hp) {
+          } else if (parseFloat(character.hp) < parseFloat(equipment.hp)) {
             throw new HttpException(
               'Character does not have sufficient hp',
               HttpStatus.BAD_REQUEST
             );
-          } else if (character.mp < equipment.mp) {
+          } else if (parseFloat(character.mp) < parseFloat(equipment.mp)) {
             throw new HttpException(
               'Character does not have sufficient mp',
               HttpStatus.BAD_REQUEST

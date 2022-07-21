@@ -55,8 +55,10 @@ export class WanderingMerchantService {
 
   async getAllWanderingMerchant(): Promise<any> {
     try {
-      const wanderingMerchant =
-        await this.wanderingMerchantRepository.findOne();
+      const wanderingMerchant = getConnection()
+        .createQueryBuilder(WanderingMerchant, 'wandering_merchant')
+        .orderBy('RAND()')
+        .getOne();
 
       if (!wanderingMerchant) {
         return new HttpException(
@@ -167,7 +169,7 @@ export class WanderingMerchantService {
         equipment.hp = tokenMeta.attributes.commonAttribute.hp?.toString();
         equipment.category = tokenMeta.attributes.category;
         equipment.thumburl = wanderingMerchant.imageURL;
-        equipment.status = EquipmentStatusType.EQUIPPED;
+        equipment.status = EquipmentStatusType.UNEQUIPPED;
 
         const equipmentResp = await transactionalEntityManager.save(equipment);
 
