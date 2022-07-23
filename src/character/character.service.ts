@@ -114,6 +114,7 @@ export class CharacterService {
     equip: boolean
   ): Promise<any> {
     try {
+      console.log(equipment);
       const char = await this.characterRepository.findOne({
         id: +equipment.charequiped,
       });
@@ -126,12 +127,20 @@ export class CharacterService {
         char.hp = (+char.hp + +equipment.hp).toString();
         char.mp = (+char.mp + +equipment.mp).toString();
       } else {
-        char.str = (+char.str - +equipment.str).toString();
-        char.dex = (+char.dex - +equipment.dex).toString();
-        char.Luk = (+char.Luk - +equipment.Luk).toString();
-        char.prep = (+char.prep - +equipment.prep).toString();
-        char.hp = (+char.hp - +equipment.hp).toString();
-        char.mp = (+char.mp - +equipment.mp).toString();
+        char.str =
+          char.str && +char.str > 0 && (+char.str - +equipment.str).toString();
+        char.dex =
+          char.dex && +char.dex > 0 && (+char.dex - +equipment.dex).toString();
+        char.Luk =
+          char.Luk && +char.Luk > 0 && (+char.Luk - +equipment.Luk).toString();
+        char.prep =
+          char.prep &&
+          +char.prep > 0 &&
+          (+char.prep - +equipment.prep).toString();
+        char.hp =
+          char.hp && +char.hp > 0 && (+char.hp - +equipment.hp).toString();
+        char.mp =
+          char.mp && +char.mp > 0 && (+char.mp - +equipment.mp).toString();
       }
 
       const updateChar = await this.characterRepository.update(
