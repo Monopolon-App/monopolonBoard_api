@@ -82,6 +82,12 @@ export class UsersProfile {
   @OneToMany(() => Character, (character) => character.usersProfile)
   character: Character[];
 
+  @Column({
+    nullable: true,
+    default: null,
+  })
+  public currentHashedRefreshToken?: string;
+
   @Column({ default: null })
   logInfo?: string;
 
@@ -99,4 +105,10 @@ export class UsersProfile {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  @Column({
+    nullable: true,
+    default: null,
+  })
+  public lastLoginAttemptToken?: string;
 }

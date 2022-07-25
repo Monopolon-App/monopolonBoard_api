@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import {
   Repository,
@@ -40,17 +41,31 @@ export class UsersProfileService {
         : 'TESTNET';
   }
 
-  async getById(walletAddress: string): Promise<any> {
+  async getById(id: number): Promise<any> {
     try {
       const user = await this.usersRepository.findOne({
-        walletAddress: walletAddress,
+        id,
       });
-      if (user) {
-        return 'data';
+      if (!user) {
+        return new HttpException(
+          {
+            status: HttpStatus.OK,
+            message: 'USer Not Found',
+          },
+          HttpStatus.OK
+        );
       }
-      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+
+      return new HttpException(
+        {
+          status: HttpStatus.OK,
+          message: 'Success',
+          data: user,
+        },
+        HttpStatus.OK
+      );
     } catch (error) {
-      throw error;
+      throw new HttpException(error?.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -138,6 +153,40 @@ export class UsersProfileService {
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const currentHashedRefreshToken = await bcrypt.hashSync(refreshToken, 10);
+    await this.usersRepository.update(
+      { id: userId },
+      {
+        currentHashedRefreshToken,
+      }
+    );
+  }
+
+  async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
+    const user = await this.usersRepository.findOne({ id: userId });
+
+    const isRefreshTokenMatching = await bcrypt.compare(
+      refreshToken,
+      user.currentHashedRefreshToken
+    );
+
+    if (!isRefreshTokenMatching) {
+      throw new HttpException('Incorrect refresh token!', HttpStatus.FORBIDDEN);
+    }
+
+    return user;
+  }
+
+  async removeRefreshToken(userId: number) {
+    return this.usersRepository.update(
+      { id: userId },
+      {
+        currentHashedRefreshToken: null,
+      }
+    );
   }
 
   async rollingDice(walletAddress: string, rollDice: number): Promise<any> {
