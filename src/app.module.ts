@@ -6,6 +6,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { MulterModule } from '@nestjs/platform-express';
 
 // Modules
+import { AuthModule } from './auth/auth.module';
 import { FortuneCardModule } from './fortunecard/fortune-card.module';
 import { PlayEarningModule } from './playerearning/playerearning.module';
 import { WithdrawalModule } from './withdrawal/withdrawal.module';
@@ -55,6 +56,7 @@ import { HttpExceptionFilter } from './errorException/allException';
     MulterModule.register({
       dest: './uploads',
     }),
+    AuthModule,
     UsersModule,
     FortuneCardModule,
     TransactionModule,
