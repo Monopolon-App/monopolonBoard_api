@@ -20,13 +20,22 @@ import { Team } from 'src/team/team.entity';
 import { Hq } from 'src/hq/hq.entity';
 
 import CONTRACT_ABI from './constants/contractABI.json';
-import { CONTRACT_ADDRESS, WS_PROVIDER_URL } from 'src/constants/constants';
+import CONTRACT_MGM_ABI from './constants/contractMgmTokenForNewAddress.json';
+import {
+  CONTRACT_ADDRESS,
+  MGM_CONTRACT_ADDRESS_FOR_NEW_COMPANY_ADDRESS,
+  WS_PROVIDER_URL,
+} from 'src/constants/constants';
 import { nftMetadata, nftMetadataDTO } from './nft-metadata.dto';
 import { Listener } from './listeners.entity';
 import { Equipment } from 'src/equipment/equipment.entity';
 import { WanderingMerchant } from 'src/WanderingMerchant/wanderingMerchant.entity';
 // mock data for testing
-// import { staticEvent, staticEventForNftTransfer } from './mockData';
+import {
+  staticEvent,
+  staticEventForNftTransfer,
+  mgmTransferEvent,
+} from './mockData';
 import {
   Transaction,
   TransactionType,
@@ -50,6 +59,7 @@ export class ListenerService implements OnModuleInit {
 
   public web3;
   public tokenContract: Contract; // nft
+  public mgmContractX: Contract; // mgmReward
   public networkMode;
 
   constructor(
@@ -77,6 +87,11 @@ export class ListenerService implements OnModuleInit {
       CONTRACT_ABI as any,
       CONTRACT_ADDRESS[this.networkMode]
     );
+
+    this.mgmContractX = new this.web3.eth.Contract(
+      CONTRACT_MGM_ABI as any,
+      MGM_CONTRACT_ADDRESS_FOR_NEW_COMPANY_ADDRESS[this.networkMode]
+    );
   }
 
   async onModuleInit(): Promise<void> {
@@ -92,6 +107,10 @@ export class ListenerService implements OnModuleInit {
 
     // if you want to test the below function then uncomment the below code.
     // this.handleEvent(staticEvent);
+
+    // if you want to test the below function then uncomment the below code.
+    // this is for transferring mgm to user walletAddress from mgmContractX
+    this.handleEventForMgmContractX(mgmTransferEvent);
 
     // if you want to test the handleCompanyToUserNft function then uncomment the below code.
     // this is for the exit gameGame Functionality.
@@ -151,6 +170,9 @@ export class ListenerService implements OnModuleInit {
 
     const companyAddress = this.configService.get('COMPANY_ADDRESS');
 
+    const companyAddressForMgmTransfer =
+      '0x7d6ccb5a4c212498ae46563492033c9903e96a5e';
+
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
@@ -194,6 +216,58 @@ export class ListenerService implements OnModuleInit {
       .on('error', function (error, receipt) {
         self.logger.log(
           'ERROR::error/receipt:' + JSON.stringify({ error, receipt })
+        );
+        // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
+      });
+
+    // listen from 0x7d6ccb5a4c212498ae46563492033c9903e96a5e to any User Address
+    // this is the token address : 0x45aB600606AfbE64EcF41a45E29fD3cf3eB13Dbe
+    // 20% of the transfer amount will goes and all below API with the wallet address will be user or any User address
+    // an amount will be 20% of the what amount we get in the Transaction from the event
+    // call the MGM reward Payout API https://prod-api-mgmreward.monopolon.io/api/#/users/UsersController_mgmRewardPayout
+
+    this.mgmContractX.events
+      .Transfer({})
+      .on('connected', function (subscriptionId) {
+        self.logger.verbose(
+          'CONNECTED::event::For::MGMContractX::subscriptionId::' +
+            subscriptionId
+        );
+      })
+      .on('data', async function (event) {
+        const trxData = {
+          from: _.get(event, 'returnValues.0', undefined),
+          to: _.get(event, 'returnValues.1', undefined),
+          value: self.web3.utils.fromWei(
+            _.get(event, 'returnValues.2', undefined),
+            'ether'
+          ),
+          transactionHash: _.get(event, 'transactionHash', undefined),
+          blockNumber: _.get(event, 'blockNumber', undefined),
+        };
+
+        if (
+          trxData.from === companyAddressForMgmTransfer ||
+          equalsIgnoringCase(trxData.from, companyAddressForMgmTransfer)
+        ) {
+          return self.handleEventForMgmContractX(event);
+        } else {
+          self.logger.log(
+            `There is no mgm Transfer event for company wallet address` +
+              JSON.stringify(event)
+          );
+        }
+      })
+      .on('changed', function (event) {
+        self.logger.verbose(
+          'CHANGED::event::For::MGMContractX::' + JSON.stringify(event)
+        );
+        // remove event from local database
+      })
+      .on('error', function (error, receipt) {
+        self.logger.log(
+          'ERROR::error/receipt:For::MGMContractX::' +
+            JSON.stringify({ error, receipt })
         );
         // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
       });
@@ -549,6 +623,33 @@ export class ListenerService implements OnModuleInit {
           return new HttpException(error?.message, HttpStatus.BAD_REQUEST);
         });
     });
+  }
+
+  async handleEventForMgmContractX(event) {
+    const base_url = 'https://prod-api-mgmreward.monopolon.io';
+    const trxData = {
+      from: _.get(event, 'returnValues.0', undefined),
+      to: _.get(event, 'returnValues.1', undefined),
+      amount: this.web3.utils.fromWei(
+        _.get(event, 'returnValues.2', undefined),
+        'ether'
+      ),
+      transactionHash: _.get(event, 'transactionHash', undefined),
+      blockNumber: _.get(event, 'blockNumber', undefined),
+    };
+
+    if (!trxData.to || !trxData.amount) {
+      return new HttpException(
+        'walletAddress or amount is not found',
+        HttpStatus.NOT_FOUND
+      );
+    }
+    // here we send 2/3 of amount to user walletAddress
+    const updatedAmount = trxData.amount * 0.666666666667;
+
+    return await axios.post(
+      `${base_url}/users/mgmRewardPayout?walletAddress=${trxData.to}&mgmTokenAmount=${updatedAmount}`
+    );
   }
 
   async getLastBlockNumberListener(): Promise<Listener> {
