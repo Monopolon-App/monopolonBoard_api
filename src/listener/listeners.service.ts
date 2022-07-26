@@ -31,11 +31,11 @@ import { Listener } from './listeners.entity';
 import { Equipment } from 'src/equipment/equipment.entity';
 import { WanderingMerchant } from 'src/WanderingMerchant/wanderingMerchant.entity';
 // mock data for testing
-import {
-  staticEvent,
-  staticEventForNftTransfer,
-  mgmTransferEvent,
-} from './mockData';
+// import {
+//   staticEvent,
+//   staticEventForNftTransfer,
+//   mgmTransferEvent,
+// } from './mockData';
 import {
   Transaction,
   TransactionType,
@@ -110,7 +110,7 @@ export class ListenerService implements OnModuleInit {
 
     // if you want to test the below function then uncomment the below code.
     // this is for transferring mgm to user walletAddress from mgmContractX
-    this.handleEventForMgmContractX(mgmTransferEvent);
+    // this.handleEventForMgmContractX(mgmTransferEvent);
 
     // if you want to test the handleCompanyToUserNft function then uncomment the below code.
     // this is for the exit gameGame Functionality.
