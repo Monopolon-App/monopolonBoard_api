@@ -45,7 +45,9 @@ import { HttpExceptionFilter } from './errorException/allException';
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION_TIME: Joi.number().required(),
         JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
+        JWT_SESSION_TOKEN_SECRET: Joi.string(),
         JWT_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+        JWT_SESSION_TOKEN_EXPIRATION_TIME: Joi.string(),
         JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
         JWT_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         COMPANY_PRIVATE_KEY: Joi.string().required(), // company private key for withdrawal
