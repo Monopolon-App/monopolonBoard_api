@@ -8,6 +8,11 @@ export const MGM_CONTRACT_ADDRESS = {
   MAINNET: '0x41f58f03A085d6E6d4e6c23D104C5F69787890e1',
 };
 
+export const MGM_CONTRACT_ADDRESS_FOR_NEW_COMPANY_ADDRESS = {
+  TESTNET: '0x45aB600606AfbE64EcF41a45E29fD3cf3eB13Dbe',
+  MAINNET: '0x45aB600606AfbE64EcF41a45E29fD3cf3eB13Dbe',
+};
+
 export const WS_PROVIDER_URL = {
   TESTNET:
     'wss://speedy-nodes-nyc.moralis.io/3a710cfda2add248cf5f780c/bsc/testnet/ws',
