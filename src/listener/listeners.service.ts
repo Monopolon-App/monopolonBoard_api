@@ -290,6 +290,9 @@ export class ListenerService implements OnModuleInit {
         .createQueryBuilder(Character, 'character')
         .setLock('pessimistic_write')
         .where('character.tokenId = :tokenId', { tokenId: tokenId })
+        .andWhere('character.walletAddress = :walletAddress', {
+          walletAddress: trxData.to,
+        })
         .getOne()
         .then(async (character) => {
           if (character) {
@@ -515,6 +518,7 @@ export class ListenerService implements OnModuleInit {
     };
 
     if (trxData.from === this.configService.get('COMPANY_ADDRESS')) {
+      trxData.to = _.get(event, 'returnValues.1', undefined);
       return await this.handleCompanyToUserNft(trxData);
     }
     await this.setLastBlockNumberListener(trxData.blockNumber);
@@ -535,9 +539,12 @@ export class ListenerService implements OnModuleInit {
               .createQueryBuilder(Character, 'character')
               .setLock('pessimistic_write')
               .where('character.tokenId = :tokenId', { tokenId: tokenId })
+              .andWhere('character.walletAddress = :walletAddress', {
+                walletAddress: trxData.from,
+              })
               .getCount()
               .then(async (trxCount) => {
-                if (trxCount) {
+                if (trxCount * 1 === 0) {
                   const user = await transactionalEntityManager
                     .createQueryBuilder(UsersProfile, 'users_profile')
                     .setLock('pessimistic_write')
