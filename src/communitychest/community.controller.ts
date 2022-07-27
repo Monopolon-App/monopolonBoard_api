@@ -26,13 +26,13 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class CommunityController {
   constructor(private readonly communityService: CommunityService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/getcommunityById')
   getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
     return this.communityService.getUserById(walletAddress);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -43,7 +43,7 @@ export class CommunityController {
     return this.communityService.createCommunity(userprofile, files);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateCommunity(
     @Param('walletAddress') walletAddress: string,

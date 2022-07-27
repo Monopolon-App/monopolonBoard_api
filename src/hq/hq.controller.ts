@@ -27,13 +27,13 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class HqController {
   constructor(private readonly hqService: HqService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getHqById(@Query('wallwtAddress') wallwtAddress: string): Promise<any> {
     return this.hqService.getHqById(wallwtAddress);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -44,7 +44,7 @@ export class HqController {
     return this.hqService.createHq(userprofile, files);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Patch(':wallwtAddress')
   updateHq(
     @Param('wallwtAddress') wallwtAddress: string,
@@ -57,7 +57,7 @@ export class HqController {
    * Api for get all the Hq which is present in given GridPosition.
    * @param hqGridPosition
    */
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/getHqByGrid')
   getHqByGridPosition(
     @Query('gridPosition') hqGridPosition: number
@@ -65,7 +65,7 @@ export class HqController {
     return this.hqService.getHqByGridPosition(hqGridPosition);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('/looting/create')
   createLooting(
     @Body()
@@ -74,7 +74,7 @@ export class HqController {
     return this.hqService.createLooting(looting);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Put('/looting/update/:id')
   updateLooting(
     @Param('id') lootingId: number,

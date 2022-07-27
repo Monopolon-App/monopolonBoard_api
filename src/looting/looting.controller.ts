@@ -18,13 +18,13 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class LootingController {
   constructor(private readonly lootingService: LootingService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/getLootingByWalletAddress')
   getLootingById(@Query('walletAddress') walletAddress: string): Promise<any> {
     return this.lootingService.getLootingByWalletAddress(walletAddress);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('/create')
   createLooting(@Body() looting: Looting): Promise<any> {
     return this.lootingService.createLooting(looting);

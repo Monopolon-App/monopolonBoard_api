@@ -31,13 +31,13 @@ export class EquipmentController {
 
   constructor(private readonly equipmentService: EquipmentService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
     return this.equipmentService.getUserById(walletAddress);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -48,7 +48,7 @@ export class EquipmentController {
     return this.equipmentService.createEquipment(equipment, files);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateEquipmentl(
     @Param('walletAddress') walletAddress: string,
@@ -60,19 +60,19 @@ export class EquipmentController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get(':walletAddress')
   getEquipmentByWalledtAddress(@Param('walletAddress') walletAddress: string) {
     return this.equipmentService.getById(walletAddress);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('getEquipmentByTokenId/:tokenId')
   getEquipmentByTokenId(@Param('tokenId') tokenId: string) {
     return this.equipmentService.getEquipmentByTokenId(tokenId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Put('equipNew')
   equipeNew(
     @Query('oldEquipmentId') oldEquipmentId: number,
@@ -84,7 +84,7 @@ export class EquipmentController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post(':id/removeEquipment')
   removeEquipment(@Param('id') id: number) {
     return this.equipmentService.removeEquipment(id);
