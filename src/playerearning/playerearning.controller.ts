@@ -26,7 +26,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class UsersController {
   constructor(private readonly playerearningService: PlayerEarningService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getPlayearningById(
     @Query('walletAddress') walletAddress: string
@@ -34,7 +34,7 @@ export class UsersController {
     return this.playerearningService.getPlayearningById(walletAddress);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -45,7 +45,7 @@ export class UsersController {
     return this.playerearningService.createPlayearning(userprofile, files);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updatPlayseEarning(
     @Param('walletAddress') walletAddress: string,

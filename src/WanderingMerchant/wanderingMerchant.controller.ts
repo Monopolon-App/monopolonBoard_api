@@ -30,7 +30,7 @@ export class WanderingMerchantController {
     private readonly wanderingMerchantService: WanderingMerchantService
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post(':id/purchaseEquipment')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))

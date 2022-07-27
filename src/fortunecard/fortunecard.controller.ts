@@ -26,13 +26,13 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class FortuneCardController {
   constructor(private readonly FortuneService: FortuneService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
     return this.FortuneService.getUserById(walletAddress);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -43,7 +43,7 @@ export class FortuneCardController {
     return this.FortuneService.createFortune(userprofile, files);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateFortune(
     @Param('walletAddress') walletAddress: string,

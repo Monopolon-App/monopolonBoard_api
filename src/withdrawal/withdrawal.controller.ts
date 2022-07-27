@@ -26,13 +26,13 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class WithdrawalController {
   constructor(private readonly withdrawalService: WithdrawalService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
     return this.withdrawalService.getUserById(walletAddress);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -43,7 +43,7 @@ export class WithdrawalController {
     return this.withdrawalService.createWithdrawal(withdrawal, files);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateWithdrawal(
     @Param('walletAddress') walletAddress: string,
