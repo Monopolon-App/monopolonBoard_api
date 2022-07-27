@@ -170,8 +170,9 @@ export class ListenerService implements OnModuleInit {
 
     const companyAddress = this.configService.get('COMPANY_ADDRESS');
 
-    const companyAddressForMgmTransfer =
-      '0x7d6ccb5a4c212498ae46563492033c9903e96a5e';
+    const companyAddressForMgmTransfer = this.configService.get(
+      'COMPANY_ADDRESS_FOR_MGMC'
+    );
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
