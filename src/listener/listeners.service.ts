@@ -606,29 +606,65 @@ export class ListenerService implements OnModuleInit {
                     character.hp =
                       tokenMeta.attributes.commonAttribute.hp?.toString();
 
-                    team.totalDex = (
-                      parseFloat(character.dex) + parseFloat(team.totalDex)
-                    ).toString();
+                    if (team.totalDex === null) {
+                      team.totalDex = (
+                        team.totalDex + parseFloat(character.dex)
+                      ).toString();
+                    } else {
+                      team.totalDex = (
+                        parseFloat(character.dex) + parseFloat(team.totalDex)
+                      ).toString();
+                    }
 
-                    team.totalHp = (
-                      parseFloat(character.hp) + parseFloat(team.totalHp)
-                    ).toString();
+                    if (team.totalHp === null) {
+                      team.totalHp = (
+                        team.totalHp + parseFloat(character.hp)
+                      ).toString();
+                    } else {
+                      team.totalHp = (
+                        parseFloat(character.hp) + parseFloat(team.totalHp)
+                      ).toString();
+                    }
 
-                    team.totalLuk = (
-                      parseFloat(character.Luk) + parseFloat(team.totalLuk)
-                    ).toString();
+                    if (team.totalLuk === null) {
+                      team.totalLuk = (
+                        team.totalLuk + parseFloat(character.Luk)
+                      ).toString();
+                    } else {
+                      team.totalLuk = (
+                        parseFloat(character.Luk) + parseFloat(team.totalLuk)
+                      ).toString();
+                    }
 
-                    team.totalMp = (
-                      parseFloat(character.mp) + parseFloat(team.totalMp)
-                    ).toString();
+                    if (team.totalPrep === null) {
+                      team.totalPrep = (
+                        team.totalPrep + parseFloat(character.prep)
+                      ).toString();
+                    } else {
+                      team.totalPrep = (
+                        parseFloat(character.prep) + parseFloat(team.totalPrep)
+                      ).toString();
+                    }
 
-                    team.totalPrep = (
-                      parseFloat(character.prep) + parseFloat(team.totalPrep)
-                    ).toString();
+                    if (team.totalMp === null) {
+                      team.totalMp = (
+                        team.totalMp + parseFloat(character.mp)
+                      ).toString();
+                    } else {
+                      team.totalMp = (
+                        parseFloat(character.mp) + parseFloat(team.totalMp)
+                      ).toString();
+                    }
 
-                    team.totalStr = (
-                      parseFloat(character.str) + parseFloat(team.totalStr)
-                    ).toString();
+                    if (team.totalStr === null) {
+                      team.totalStr = (
+                        team.totalStr + parseFloat(character.str)
+                      ).toString();
+                    } else {
+                      team.totalStr = (
+                        parseFloat(character.str) + parseFloat(team.totalStr)
+                      ).toString();
+                    }
                   }
 
                   if (tokenMeta.type == 2) {
@@ -655,30 +691,6 @@ export class ListenerService implements OnModuleInit {
                       tokenMeta.attributes.commonAttribute.hp?.toString();
 
                     equipment.status = EquipmentStatusType.UNEQUIPPED;
-
-                    team.totalDex = (
-                      parseFloat(equipment.dex) + parseFloat(team.totalDex)
-                    ).toString();
-
-                    team.totalHp = (
-                      parseFloat(equipment.hp) + parseFloat(team.totalHp)
-                    ).toString();
-
-                    team.totalLuk = (
-                      parseFloat(equipment.Luk) + parseFloat(team.totalLuk)
-                    ).toString();
-
-                    team.totalMp = (
-                      parseFloat(equipment.mp) + parseFloat(team.totalMp)
-                    ).toString();
-
-                    team.totalPrep = (
-                      parseFloat(equipment.prep) + parseFloat(team.totalPrep)
-                    ).toString();
-
-                    team.totalStr = (
-                      parseFloat(equipment.str) + parseFloat(team.totalStr)
-                    ).toString();
 
                     const equipmentResp = await transactionalEntityManager.save(
                       equipment
