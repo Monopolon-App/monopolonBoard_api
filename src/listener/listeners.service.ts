@@ -312,6 +312,8 @@ export class ListenerService implements OnModuleInit {
               );
             }
 
+            // here in all the condition we are checking that user has sufficient amount of all the stuff
+            // like totalStr, totalStr, totalStr, etc...
             if (parseFloat(team.totalStr) < parseFloat(character.str)) {
               throw new HttpException(
                 'Team does not have sufficient str',
@@ -404,6 +406,8 @@ export class ListenerService implements OnModuleInit {
               );
             }
 
+            // if user remove the character then we reduce the team's total stuff
+            // like totalStr, totalPrep, etc..
             team.totalStr = (
               parseFloat(team.totalStr) - parseFloat(character.str)
             ).toString();
@@ -536,6 +540,9 @@ export class ListenerService implements OnModuleInit {
         .getOne()
         .then(async (walletUser) => {
           if (walletUser) {
+            // when user is already exist and user wants to transfer another nft then
+            // we create new character for that nft and
+            // we add that character based on slots availability
             return transactionalEntityManager
               .createQueryBuilder(Character, 'character')
               .setLock('pessimistic_write')
@@ -545,6 +552,8 @@ export class ListenerService implements OnModuleInit {
               })
               .getCount()
               .then(async (trxCount) => {
+                // if user try to add nft which has same tokenId then it throws an error that
+                // Duplicate transaction record
                 if (trxCount * 1 === 0) {
                   const user = await transactionalEntityManager
                     .createQueryBuilder(UsersProfile, 'users_profile')
@@ -607,6 +616,7 @@ export class ListenerService implements OnModuleInit {
                     character.hp =
                       tokenMeta.attributes.commonAttribute.hp?.toString();
 
+                    // here we add character's all the stuff like dex, str, hp, etc.. to team's all the stuff
                     if (team.totalDex === null) {
                       team.totalDex = (
                         team.totalDex + parseFloat(character.dex)
