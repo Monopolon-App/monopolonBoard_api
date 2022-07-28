@@ -540,6 +540,9 @@ export class ListenerService implements OnModuleInit {
               .createQueryBuilder(Character, 'character')
               .setLock('pessimistic_write')
               .where('character.tokenId = :tokenId', { tokenId: tokenId })
+              .andWhere('character.walletAddress = :walletAddress', {
+                walletAddress: walletUser.walletAddress,
+              })
               .getCount()
               .then(async (trxCount) => {
                 if (trxCount * 1 === 0) {
