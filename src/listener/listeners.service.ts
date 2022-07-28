@@ -28,7 +28,7 @@ import {
 } from 'src/constants/constants';
 import { nftMetadata, nftMetadataDTO } from './nft-metadata.dto';
 import { Listener } from './listeners.entity';
-import { Equipment } from 'src/equipment/equipment.entity';
+import { Equipment, EquipmentStatusType } from 'src/equipment/equipment.entity';
 import { WanderingMerchant } from 'src/WanderingMerchant/wanderingMerchant.entity';
 // mock data for testing
 // import {
@@ -291,9 +291,62 @@ export class ListenerService implements OnModuleInit {
         .createQueryBuilder(Character, 'character')
         .setLock('pessimistic_write')
         .where('character.tokenId = :tokenId', { tokenId: tokenId })
+        .andWhere('character.walletAddress = :walletAddress', {
+          walletAddress: trxData.to,
+        })
         .getOne()
         .then(async (character) => {
           if (character) {
+            const team = await transactionalEntityManager
+              .createQueryBuilder(Team, 'team')
+              .setLock('pessimistic_write')
+              .where('team.walletAddress = :walletAddress', {
+                walletAddress: character.walletAddress,
+              })
+              .getOne();
+
+            if (!team) {
+              throw new HttpException(
+                'Team Does not Exist',
+                HttpStatus.BAD_REQUEST
+              );
+            }
+
+            // here in all the condition we are checking that user has sufficient amount of all the stuff
+            // like totalStr, totalStr, totalStr, etc...
+            if (parseFloat(team.totalStr) < parseFloat(character.str)) {
+              throw new HttpException(
+                'Team does not have sufficient str',
+                HttpStatus.BAD_REQUEST
+              );
+            } else if (parseFloat(team.totalDex) < parseFloat(character.dex)) {
+              throw new HttpException(
+                'Team does not have sufficient dex',
+                HttpStatus.BAD_REQUEST
+              );
+            } else if (parseFloat(team.totalLuk) < parseFloat(character.Luk)) {
+              throw new HttpException(
+                'Team does not have sufficient Luk',
+                HttpStatus.BAD_REQUEST
+              );
+            } else if (
+              parseFloat(team.totalPrep) < parseFloat(character.prep)
+            ) {
+              throw new HttpException(
+                'Team does not have sufficient prep',
+                HttpStatus.BAD_REQUEST
+              );
+            } else if (parseFloat(team.totalHp) < parseFloat(character.hp)) {
+              throw new HttpException(
+                'Team does not have sufficient hp',
+                HttpStatus.BAD_REQUEST
+              );
+            } else if (parseFloat(team.totalMp) < parseFloat(character.mp)) {
+              throw new HttpException(
+                'Team does not have sufficient mp',
+                HttpStatus.BAD_REQUEST
+              );
+            }
             // Create transaction records
             // when person enter game then he registers the game. when he exists the game then gameStatus will beZero
             const transferTransaction = new Character();
@@ -334,20 +387,53 @@ export class ListenerService implements OnModuleInit {
               })
               .execute();
 
-            // here we set team slot null when NFT is transfer from company's walletAddress to user walletAddress
-            await transactionalEntityManager
-              .createQueryBuilder(Team, 'team')
-              .update(Team)
-              .set({
-                slot1: null,
-              })
-              .where('team.walletAddress = :walletAddress', {
-                walletAddress: character.walletAddress,
-                // Or Query if character in slot 1 , slot 2 or any slot then make the slot null
-                // we need to query based on the slotno which is characterId
-                // slot1: character.id,
-              })
-              .execute();
+            // here we are checking that user's character is in which slot
+            // based on characterId we update the slot as null
+            if (team.slot1 === character.id) {
+              team.slot1 = null;
+            } else if (team.slot2 === character.id) {
+              team.slot2 = null;
+            } else if (team.slot3 === character.id) {
+              team.slot3 = null;
+            } else if (team.slot4 === character.id) {
+              team.slot4 = null;
+            } else if (team.slot5 === character.id) {
+              team.slot5 = null;
+            } else {
+              throw new HttpException(
+                'No slot found with character id',
+                HttpStatus.BAD_REQUEST
+              );
+            }
+
+            // if user remove the character then we reduce the team's total stuff
+            // like totalStr, totalPrep, etc..
+            team.totalStr = (
+              parseFloat(team.totalStr) - parseFloat(character.str)
+            ).toString();
+
+            team.totalPrep = (
+              parseFloat(team.totalPrep) - parseFloat(character.prep)
+            ).toString();
+
+            team.totalMp = (
+              parseFloat(team.totalMp) - parseFloat(character.mp)
+            ).toString();
+
+            team.totalHp = (
+              parseFloat(team.totalHp) - parseFloat(character.hp)
+            ).toString();
+
+            team.totalLuk = (
+              parseFloat(team.totalLuk) - parseFloat(character.Luk)
+            ).toString();
+
+            team.totalDex = (
+              parseFloat(team.totalDex) - parseFloat(character.dex)
+            ).toString();
+
+            await transactionalEntityManager.save(team);
+
             // first tim enter
             // first time exist
             // second time enter and then exist and so on
@@ -437,6 +523,7 @@ export class ListenerService implements OnModuleInit {
     };
 
     if (trxData.from === this.configService.get('COMPANY_ADDRESS')) {
+      trxData.to = _.get(event, 'returnValues.1', undefined);
       return await this.handleCompanyToUserNft(trxData);
     }
     await this.setLastBlockNumberListener(trxData.blockNumber);
@@ -453,9 +540,224 @@ export class ListenerService implements OnModuleInit {
         .getOne()
         .then(async (walletUser) => {
           if (walletUser) {
-            throw new UnauthorizedException(
-              'wallet address already registered'
-            );
+            // when user is already exist and user wants to transfer another nft then
+            // we create new character for that nft and
+            // we add that character based on slots availability
+            return transactionalEntityManager
+              .createQueryBuilder(Character, 'character')
+              .setLock('pessimistic_write')
+              .where('character.tokenId = :tokenId', { tokenId: tokenId })
+              .andWhere('character.walletAddress = :walletAddress', {
+                walletAddress: walletUser.walletAddress,
+              })
+              .getCount()
+              .then(async (trxCount) => {
+                // if user try to add nft which has same tokenId then it throws an error that
+                // Duplicate transaction record
+                if (trxCount * 1 === 0) {
+                  const user = await transactionalEntityManager
+                    .createQueryBuilder(UsersProfile, 'users_profile')
+                    .setLock('pessimistic_write')
+                    .where('users_profile.walletAddress = :walletAddress', {
+                      walletAddress: walletUser.walletAddress,
+                    })
+                    .getOne();
+
+                  if (!user) {
+                    throw new HttpException(
+                      'User Does not Exist',
+                      HttpStatus.BAD_REQUEST
+                    );
+                  }
+
+                  const team = await transactionalEntityManager
+                    .createQueryBuilder(Team, 'team')
+                    .setLock('pessimistic_write')
+                    .where('team.walletAddress = :walletAddress', {
+                      walletAddress: walletUser.walletAddress,
+                    })
+                    .getOne();
+
+                  if (!team) {
+                    throw new HttpException(
+                      'Team Does not Exist',
+                      HttpStatus.BAD_REQUEST
+                    );
+                  }
+
+                  // Create character records
+                  const character = new Character();
+                  const equipment = new Equipment();
+                  character.walletAddress = equipment.walletAddress =
+                    trxData.from;
+                  character.erc721 = equipment.erc721 =
+                    CONTRACT_ADDRESS[this.networkMode];
+                  character.usersProfileId = user.id;
+                  if (tokenMeta.type == 1) {
+                    // this will only store when we have the character as the token
+                    character.tokenId = tokenId;
+                    character.ImageURL = tokenMeta.imgUrl;
+
+                    character.Luk =
+                      tokenMeta.attributes.commonAttribute.luk?.toString();
+
+                    character.str =
+                      tokenMeta.attributes.commonAttribute.str?.toString();
+
+                    character.dex =
+                      tokenMeta.attributes.commonAttribute.dex?.toString();
+
+                    character.prep =
+                      tokenMeta.attributes.commonAttribute.prep?.toString();
+
+                    character.mp =
+                      tokenMeta.attributes.commonAttribute.mp?.toString();
+
+                    character.hp =
+                      tokenMeta.attributes.commonAttribute.hp?.toString();
+
+                    // here we add character's all the stuff like dex, str, hp, etc.. to team's all the stuff
+                    if (team.totalDex === null) {
+                      team.totalDex = (
+                        team.totalDex + parseFloat(character.dex)
+                      ).toString();
+                    } else {
+                      team.totalDex = (
+                        parseFloat(character.dex) + parseFloat(team.totalDex)
+                      ).toString();
+                    }
+
+                    if (team.totalHp === null) {
+                      team.totalHp = (
+                        team.totalHp + parseFloat(character.hp)
+                      ).toString();
+                    } else {
+                      team.totalHp = (
+                        parseFloat(character.hp) + parseFloat(team.totalHp)
+                      ).toString();
+                    }
+
+                    if (team.totalLuk === null) {
+                      team.totalLuk = (
+                        team.totalLuk + parseFloat(character.Luk)
+                      ).toString();
+                    } else {
+                      team.totalLuk = (
+                        parseFloat(character.Luk) + parseFloat(team.totalLuk)
+                      ).toString();
+                    }
+
+                    if (team.totalPrep === null) {
+                      team.totalPrep = (
+                        team.totalPrep + parseFloat(character.prep)
+                      ).toString();
+                    } else {
+                      team.totalPrep = (
+                        parseFloat(character.prep) + parseFloat(team.totalPrep)
+                      ).toString();
+                    }
+
+                    if (team.totalMp === null) {
+                      team.totalMp = (
+                        team.totalMp + parseFloat(character.mp)
+                      ).toString();
+                    } else {
+                      team.totalMp = (
+                        parseFloat(character.mp) + parseFloat(team.totalMp)
+                      ).toString();
+                    }
+
+                    if (team.totalStr === null) {
+                      team.totalStr = (
+                        team.totalStr + parseFloat(character.str)
+                      ).toString();
+                    } else {
+                      team.totalStr = (
+                        parseFloat(character.str) + parseFloat(team.totalStr)
+                      ).toString();
+                    }
+                  }
+
+                  if (tokenMeta.type == 2) {
+                    equipment.tokenId = tokenId;
+
+                    equipment.charequiped = character.id.toString();
+
+                    equipment.str =
+                      tokenMeta.attributes.commonAttribute.str?.toString();
+
+                    equipment.dex =
+                      tokenMeta.attributes.commonAttribute.dex?.toString();
+
+                    equipment.Luk =
+                      tokenMeta.attributes.commonAttribute.luk?.toString();
+
+                    equipment.prep =
+                      tokenMeta.attributes.commonAttribute.prep?.toString();
+
+                    equipment.mp =
+                      tokenMeta.attributes.commonAttribute.mp?.toString();
+
+                    equipment.hp =
+                      tokenMeta.attributes.commonAttribute.hp?.toString();
+
+                    equipment.status = EquipmentStatusType.UNEQUIPPED;
+
+                    const equipmentResp = await transactionalEntityManager.save(
+                      equipment
+                    );
+                    return equipmentResp;
+                  }
+
+                  // Receiver : create transaction record (update it balance)
+                  const characterResponse =
+                    await transactionalEntityManager.save(character);
+
+                  // here based on availability of the slot we are adding user's character id in that
+                  if (team.slot1 === null) {
+                    team.slot1 = characterResponse.id;
+                  } else if (team.slot2 === null) {
+                    team.slot2 = characterResponse.id;
+                  } else if (team.slot3 === null) {
+                    team.slot3 = characterResponse.id;
+                  } else if (team.slot4 === null) {
+                    team.slot4 = characterResponse.id;
+                  } else if (team.slot5 === null) {
+                    team.slot5 = characterResponse.id;
+                  } else {
+                    throw new HttpException(
+                      'all the team slots are full',
+                      HttpStatus.BAD_REQUEST
+                    );
+                  }
+
+                  const teamRecord = await transactionalEntityManager.save(
+                    team
+                  );
+
+                  console.log(
+                    '::LOG::SUCCESS::Transaction Result:',
+                    characterResponse
+                  );
+
+                  console.log('::LOG::SUCCESS::teamReord Result:', teamRecord);
+                  return characterResponse;
+                } else {
+                  console.log('::LOG::ERROR::Duplicate transaction record:');
+                  return new HttpException(
+                    'Duplicate transaction record',
+                    HttpStatus.BAD_REQUEST
+                  );
+                }
+              })
+              .catch((error) => {
+                // get trx count
+                console.log(`::LOG::ERROR::${error?.message}:`);
+                return new HttpException(
+                  error?.message,
+                  HttpStatus.BAD_REQUEST
+                );
+              });
           }
 
           // if user not found with wallet address then register new user
@@ -571,7 +873,7 @@ export class ListenerService implements OnModuleInit {
                   transferEquipment.hp =
                     tokenMeta.attributes.commonAttribute.hp?.toString();
 
-                  transferEquipment.status = 'equiped';
+                  transferEquipment.status = EquipmentStatusType.UNEQUIPPED;
 
                   teamRecord.totalDex = transferEquipment.dex;
                   teamRecord.totalHp = transferEquipment.hp;
