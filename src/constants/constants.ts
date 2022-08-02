@@ -16,8 +16,9 @@ export const WS_PROVIDER_URL = {
 };
 
 export const RPC_PROVIDER_URL = {
-  MAINNET:
-    'https://speedy-nodes-nyc.moralis.io/3a710cfda2add248cf5f780c/bsc/mainnet',
+  // MAINNET:
+  //   'https://speedy-nodes-nyc.moralis.io/3a710cfda2add248cf5f780c/bsc/mainnet',
+  MAINNET: 'https://bsc-dataseed1.binance.org/',
   TESTNET:
     'https://speedy-nodes-nyc.moralis.io/3a710cfda2add248cf5f780c/bsc/testnet',
 };
