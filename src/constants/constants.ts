@@ -10,15 +10,12 @@ export const MGM_CONTRACT_ADDRESS = {
 
 export const WS_PROVIDER_URL = {
   TESTNET:
-    'wss://speedy-nodes-nyc.moralis.io/3a710cfda2add248cf5f780c/bsc/testnet/ws',
+    'wss://ws-nd-598-068-522.p2pify.com/787c188bc7cf0bf9797204b6b11ec0cc',
   MAINNET:
-    'wss://speedy-nodes-nyc.moralis.io/3a710cfda2add248cf5f780c/bsc/mainnet/ws',
+    'wss://ws-nd-731-442-828.p2pify.com/939137935cdae3b5e1c59d530a1a1dab',
 };
 
 export const RPC_PROVIDER_URL = {
-  // MAINNET:
-  //   'https://speedy-nodes-nyc.moralis.io/3a710cfda2add248cf5f780c/bsc/mainnet',
-  MAINNET: 'https://bsc-dataseed1.binance.org/',
-  TESTNET:
-    'https://speedy-nodes-nyc.moralis.io/3a710cfda2add248cf5f780c/bsc/testnet',
+  MAINNET: 'https://nd-731-442-828.p2pify.com/939137935cdae3b5e1c59d530a1a1dab',
+  TESTNET: 'https://nd-598-068-522.p2pify.com/787c188bc7cf0bf9797204b6b11ec0cc',
 };
