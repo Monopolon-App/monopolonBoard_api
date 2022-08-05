@@ -193,9 +193,203 @@ export class ListenerService implements OnModuleInit {
         .getOne()
         .then(async (walletUser) => {
           if (walletUser) {
-            throw new UnauthorizedException(
-              'wallet address already registered'
-            );
+            // when user is already exist and user wants to transfer another nft then
+            // we create new character for that nft and
+            // we add that character based on slots availability
+            return transactionalEntityManager
+              .createQueryBuilder(Character, 'character')
+              .setLock('pessimistic_write')
+              .where('character.tokenId = :tokenId', { tokenId: tokenId })
+              .andWhere('character.walletAddress = :walletAddress', {
+                walletAddress: walletUser.walletAddress,
+              })
+              .getCount()
+              .then(async (trxCount) => {
+                // if user try to add nft which has same tokenId then it throws an error that
+                // Duplicate transaction record
+                if (trxCount * 1 === 0) {
+                  const user = await transactionalEntityManager
+                    .createQueryBuilder(UsersProfile, 'users_profile')
+                    .setLock('pessimistic_write')
+                    .where('users_profile.walletAddress = :walletAddress', {
+                      walletAddress: walletUser.walletAddress,
+                    })
+                    .getOne();
+
+                  if (!user) {
+                    throw new HttpException(
+                      'User Does not Exist',
+                      HttpStatus.BAD_REQUEST
+                    );
+                  }
+
+                  const team = await transactionalEntityManager
+                    .createQueryBuilder(Team, 'team')
+                    .setLock('pessimistic_write')
+                    .where('team.walletAddress = :walletAddress', {
+                      walletAddress: walletUser.walletAddress,
+                    })
+                    .getOne();
+
+                  if (!team) {
+                    throw new HttpException(
+                      'Team Does not Exist',
+                      HttpStatus.BAD_REQUEST
+                    );
+                  }
+
+                  // Create character records
+                  const character = new Character();
+                  character.walletAddress = trxData.from;
+                  character.erc721 = CONTRACT_ADDRESS[this.networkMode];
+                  character.usersProfileId = user.id;
+                  if (tokenMeta.type == 1) {
+                    // this will only store when we have the character as the token
+                    character.tokenId = tokenId;
+                    character.ImageURL = tokenMeta.imgUrl;
+
+                    character.Luk =
+                      tokenMeta.attributes.commonAttribute.luk?.toString();
+
+                    character.str =
+                      tokenMeta.attributes.commonAttribute.str?.toString();
+
+                    character.dex =
+                      tokenMeta.attributes.commonAttribute.dex?.toString();
+
+                    character.prep =
+                      tokenMeta.attributes.commonAttribute.prep?.toString();
+
+                    character.mp =
+                      tokenMeta.attributes.commonAttribute.mp?.toString();
+
+                    character.hp =
+                      tokenMeta.attributes.commonAttribute.hp?.toString();
+
+                    // here we add character's all the stuff like dex, str, hp, etc.. to team's all the stuff
+                    if (team.totalDex === null) {
+                      team.totalDex = (
+                        team.totalDex + parseFloat(character.dex)
+                      ).toString();
+                    } else {
+                      team.totalDex = (
+                        parseFloat(character.dex) + parseFloat(team.totalDex)
+                      ).toString();
+                    }
+
+                    if (team.totalHp === null) {
+                      team.totalHp = (
+                        team.totalHp + parseFloat(character.hp)
+                      ).toString();
+                    } else {
+                      team.totalHp = (
+                        parseFloat(character.hp) + parseFloat(team.totalHp)
+                      ).toString();
+                    }
+
+                    if (team.totalLuk === null) {
+                      team.totalLuk = (
+                        team.totalLuk + parseFloat(character.Luk)
+                      ).toString();
+                    } else {
+                      team.totalLuk = (
+                        parseFloat(character.Luk) + parseFloat(team.totalLuk)
+                      ).toString();
+                    }
+
+                    if (team.totalPrep === null) {
+                      team.totalPrep = (
+                        team.totalPrep + parseFloat(character.prep)
+                      ).toString();
+                    } else {
+                      team.totalPrep = (
+                        parseFloat(character.prep) + parseFloat(team.totalPrep)
+                      ).toString();
+                    }
+
+                    if (team.totalMp === null) {
+                      team.totalMp = (
+                        team.totalMp + parseFloat(character.mp)
+                      ).toString();
+                    } else {
+                      team.totalMp = (
+                        parseFloat(character.mp) + parseFloat(team.totalMp)
+                      ).toString();
+                    }
+
+                    if (team.totalStr === null) {
+                      team.totalStr = (
+                        team.totalStr + parseFloat(character.str)
+                      ).toString();
+                    } else {
+                      team.totalStr = (
+                        parseFloat(character.str) + parseFloat(team.totalStr)
+                      ).toString();
+                    }
+                  }
+
+                  // Receiver : create transaction record (update it balance)
+                  const characterResponse =
+                    await transactionalEntityManager.save(character);
+
+                  // here based on availability of the slot we are adding user's character id in that
+                  if (team.slot1 === null) {
+                    team.slot1 = characterResponse.id;
+                  } else if (team.slot2 === null) {
+                    team.slot2 = characterResponse.id;
+                  } else if (team.slot3 === null) {
+                    team.slot3 = characterResponse.id;
+                  } else if (team.slot4 === null) {
+                    team.slot4 = characterResponse.id;
+                  } else if (team.slot5 === null) {
+                    team.slot5 = characterResponse.id;
+                  } else {
+                    throw new HttpException(
+                      'all the team slots are full',
+                      HttpStatus.BAD_REQUEST
+                    );
+                  }
+
+                  const teamRecord = await transactionalEntityManager.save(
+                    team
+                  );
+
+                  console.log(
+                    '::LOG::SUCCESS::Transaction Result:',
+                    characterResponse
+                  );
+
+                  console.log('::LOG::SUCCESS::teamReord Result:', teamRecord);
+                  if (characterResponse && walletUser.enterGameStatus === 0) {
+                    await transactionalEntityManager
+                      .createQueryBuilder(UsersProfile, 'users_profile')
+                      .update(UsersProfile)
+                      .set({
+                        enterGameStatus: 1,
+                      })
+                      .where('users_profile.walletAddress = :walletAddress', {
+                        walletAddress: walletUser.walletAddress,
+                      })
+                      .execute();
+                  }
+
+                  return characterResponse;
+                } else {
+                  console.log('::LOG::ERROR::Duplicate transaction record:');
+                  return new HttpException(
+                    'Duplicate transaction record',
+                    HttpStatus.BAD_REQUEST
+                  );
+                }
+              })
+              .catch((error) => {
+                // get trx count
+                console.log(`::LOG::ERROR::${error?.message}:`);
+                return new HttpException(
+                  error?.message,
+                  HttpStatus.BAD_REQUEST
+                );
+              });
           }
 
           // if user not found with wallet address then register new user
