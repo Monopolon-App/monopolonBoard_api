@@ -741,6 +741,18 @@ export class ListenerService implements OnModuleInit {
                   );
 
                   console.log('::LOG::SUCCESS::teamReord Result:', teamRecord);
+                  if (characterResponse && walletUser.enterGameStatus === 0) {
+                    await transactionalEntityManager
+                      .createQueryBuilder(UsersProfile, 'users_profile')
+                      .update(UsersProfile)
+                      .set({
+                        enterGameStatus: 1,
+                      })
+                      .where('users_profile.walletAddress = :walletAddress', {
+                        walletAddress: walletUser.walletAddress,
+                      })
+                      .execute();
+                  }
                   return characterResponse;
                 } else {
                   console.log('::LOG::ERROR::Duplicate transaction record:');
