@@ -16,6 +16,7 @@ import { WithdrawalHistory } from './withdrawalHistory.entity';
 import { UpdateWithdrawalHistoryDto } from './dto/update-withdrawalHistory.dto';
 
 import { WithdrawalHistoryService } from './withdrawalHistory.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('withdrawalHistory')
 @Controller('withdrawalHistory')
@@ -24,7 +25,7 @@ export class WithdrawalHistoryController {
     private readonly withdrawalHistoryService: WithdrawalHistoryService
   ) {}
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
     return this.withdrawalHistoryService.getWithdrawalHistoryByWalletAddress(
@@ -32,7 +33,7 @@ export class WithdrawalHistoryController {
     );
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('/create')
   createWithdrawal(@Body() withdrawalHistory: WithdrawalHistory): Promise<any> {
     return this.withdrawalHistoryService.createWithdrawalHistory(
@@ -40,7 +41,7 @@ export class WithdrawalHistoryController {
     );
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateWithdrawal(
     @Param('walletAddress') walletAddress: string,
