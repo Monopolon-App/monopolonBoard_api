@@ -11,6 +11,7 @@ import {
   Patch,
   UseInterceptors,
   UploadedFiles,
+  Inject,
 } from '@nestjs/common';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -19,10 +20,14 @@ import { Equipment } from './equipment.entity';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 
 import { EquipmentService } from './equipment.service';
+import { CharacterService } from 'src/character/character.service';
 
 @ApiTags('equipment')
 @Controller('equipment')
 export class EquipmentController {
+  @Inject(CharacterService)
+  private characterService: CharacterService;
+
   constructor(private readonly equipmentService: EquipmentService) {}
 
   // @UseGuards(JwtAuthGuard)
@@ -42,6 +47,7 @@ export class EquipmentController {
     return this.equipmentService.createEquipment(equipment, files);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateEquipmentl(
     @Param('walletAddress') walletAddress: string,
@@ -51,5 +57,35 @@ export class EquipmentController {
       walletAddress,
       updateEquipmentDto
     );
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  @Get(':walletAddress')
+  getEquipmentByWalledtAddress(@Param('walletAddress') walletAddress: string) {
+    return this.equipmentService.getById(walletAddress);
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  @Get('getEquipmentByTokenId/:tokenId')
+  getEquipmentByTokenId(@Param('tokenId') tokenId: string) {
+    return this.equipmentService.getEquipmentByTokenId(tokenId);
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  @Put('equipNew')
+  equipeNew(
+    @Query('oldEquipmentId') oldEquipmentId: number,
+    @Query('newEquipmentId') newEquipmentId: number
+  ) {
+    return this.equipmentService.updateEquipmentStatus(
+      oldEquipmentId,
+      newEquipmentId
+    );
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  @Post(':id/removeEquipment')
+  removeEquipment(@Param('id') id: number) {
+    return this.equipmentService.removeEquipment(id);
   }
 }

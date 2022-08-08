@@ -5,7 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Double,
+  ManyToOne,
 } from 'typeorm';
+import { Hq } from '../hq/hq.entity';
 // this is need to be relative since after compile it will have different path: https://stackoverflow.com/questions/63865678/nestjs-test-suite-failed-to-run-cannot-find-module-src-article-article-entity
 
 @Entity()
@@ -20,18 +22,23 @@ export class Team {
   @Column({ default: null })
   walletAddress?: string;
 
+  // when we removed then slot should be null  from the backend side.
   @Column({ default: null })
   slot1?: number;
 
+  // when we removed then slot should be null  from the backend side.
   @Column({ default: null })
   slot2?: number;
 
+  // when we removed then slot should be null  from the backend side.
   @Column({ default: null })
   slot3?: number;
 
+  // when we removed then slot should be null  from the backend side.
   @Column({ default: null })
   slot4?: number;
 
+  // when we removed then slot should be null  from the backend side.
   @Column({ default: null })
   slot5?: number;
 
@@ -55,6 +62,9 @@ export class Team {
 
   @Column({ default: null })
   logInfo?: string;
+
+  @ManyToOne(() => Hq, (hq) => hq.team)
+  hq?: Hq;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

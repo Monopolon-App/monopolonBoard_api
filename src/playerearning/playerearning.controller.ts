@@ -44,6 +44,7 @@ export class UsersController {
     return this.playerearningService.createPlayearning(userprofile, files);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updatPlayseEarning(
     @Param('walletAddress') walletAddress: string,

@@ -10,16 +10,12 @@ import { UsersProfile } from '../usersprofile/usersprofile.entity';
 import { SchedulerService } from './scheduler.service';
 import { Withdrawal } from '../withdrawal/withdrawal.entity';
 import { WithdrawalModule } from '../withdrawal/withdrawal.module';
+import { ListenersModule } from 'src/listener/listeners.module';
+import { Character } from '../character/character.entity';
 
 @Module({
-  imports: [
-    ConfigModule,
-    UsersModule,
-    TransactionModule,
-    WithdrawalModule,
-    TypeOrmModule.forFeature([UsersProfile, Transaction, Withdrawal]),
-  ],
-  providers: [SchedulerService, ListenerService],
+  imports: [ConfigModule, TypeOrmModule.forFeature([Withdrawal, Character])],
+  providers: [SchedulerService],
   exports: [],
 })
 export class SchedulerModule {}

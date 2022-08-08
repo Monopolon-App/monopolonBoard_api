@@ -42,6 +42,7 @@ export class TransactionController {
     return this.hqService.createTransaction(userprofile, files);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateTransaction(
     @Param('walletAddress') walletAddress: string,

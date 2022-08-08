@@ -43,6 +43,7 @@ export class UsersProfileController {
     return this.usersService.createUser(userprofile, files);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateUserProfile(
     @Param('walletAddress') walletAddress: string,
@@ -51,11 +52,13 @@ export class UsersProfileController {
     return this.usersService.updateUserProfile(walletAddress, updateUserDto);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Put('/enterMining/:walletAddress')
   enterMining(@Param('walletAddress') walletAddress: string) {
     return this.usersService.enterMining(walletAddress);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Put('/rollingDice/:walletAddress')
   rollingDice(
     @Param('walletAddress') walletAddress: string,
@@ -64,6 +67,7 @@ export class UsersProfileController {
     return this.usersService.rollingDice(walletAddress, rollDice);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Post('/registerUser/:walletAddress/tokenId/:tokenId')
   registerUser(
     @Param() { walletAddress, tokenId }: registerUserParams
@@ -71,6 +75,7 @@ export class UsersProfileController {
     return this.usersService.registerUser(walletAddress, tokenId);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Get('/getCurrentTime')
   getCurrentTime() {
     return {

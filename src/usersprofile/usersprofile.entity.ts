@@ -14,6 +14,7 @@ import {
 } from 'typeorm';
 // this is need to be relative since after compile it will have different path: https://stackoverflow.com/questions/63865678/nestjs-test-suite-failed-to-run-cannot-find-module-src-article-article-entity
 import { Character } from '../character/character.entity';
+import { Hq } from '../hq/hq.entity';
 
 @Entity()
 export class UsersProfile {
@@ -81,12 +82,33 @@ export class UsersProfile {
   @OneToMany(() => Character, (character) => character.usersProfile)
   character: Character[];
 
+  @Column({
+    nullable: true,
+    default: null,
+  })
+  public currentHashedRefreshToken?: string;
+
   @Column({ default: null })
   logInfo?: string;
+
+  @ManyToOne(() => Hq, (hq) => hq.team)
+  hq?: Hq;
+
+  @Column({ default: null })
+  gameType?: string;
+
+  @Column({ default: 0 })
+  noOfLooting?: number;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  @Column({
+    nullable: true,
+    default: null,
+  })
+  public lastLoginAttemptToken?: string;
 }

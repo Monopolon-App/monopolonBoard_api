@@ -42,6 +42,7 @@ export class WithdrawalController {
     return this.withdrawalService.createWithdrawal(withdrawal, files);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateWithdrawal(
     @Param('walletAddress') walletAddress: string,

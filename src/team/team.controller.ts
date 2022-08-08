@@ -42,6 +42,7 @@ export class TeamController {
     return this.teamService.createTeam(team, files);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateTeam(
     @Param('walletAddress') walletAddress: string,

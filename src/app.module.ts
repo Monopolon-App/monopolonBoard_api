@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MulterModule } from '@nestjs/platform-express';
 
 // Modules
 import { FortuneCardModule } from './fortunecard/fortune-card.module';
-
 import { PlayEarningModule } from './playerearning/playerearning.module';
 import { WithdrawalModule } from './withdrawal/withdrawal.module';
 import { EquipmentModule } from './equipment/equipment.module';
@@ -22,9 +21,13 @@ import { SchedulerModule } from './scheduler/scheduler.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MulterModule } from '@nestjs/platform-express';
 import { ListenersModule } from './listener/listeners.module';
 import { DatabaseModule } from './database/database.module';
+import { WithdrawalHistoryModule } from './withdrawalHistory/withdrawalHistory.module';
+import { LootingModule } from './looting/looting.module';
+import { ErrorModule } from './errorException/error.module';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './errorException/allException';
 
 @Module({
   imports: [
@@ -32,6 +35,7 @@ import { DatabaseModule } from './database/database.module';
     ConfigModule.forRoot({
       envFilePath: ['.env.production'],
       validationSchema: Joi.object({
+        ENV_TAG: Joi.string(),
         DATABASE_HOST: Joi.string().required(),
         DATABASE_PORT: Joi.string().required(),
         DATABASE_USER: Joi.string().required(),
@@ -40,11 +44,14 @@ import { DatabaseModule } from './database/database.module';
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION_TIME: Joi.number().required(),
         JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
+        JWT_SESSION_TOKEN_SECRET: Joi.string(),
         JWT_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+        JWT_SESSION_TOKEN_EXPIRATION_TIME: Joi.string(),
         JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
         JWT_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         COMPANY_PRIVATE_KEY: Joi.string().required(), // company private key for withdrawal
         COMPANY_ADDRESS: Joi.string().required(), // company nft wallet address for listener
+        COMPANY_ADDRESS_FOR_MGMC: Joi.string(), // company nft wallet address for listener
       }),
     }),
     DatabaseModule,
@@ -64,9 +71,18 @@ import { DatabaseModule } from './database/database.module';
     CommunityModule,
     ListenersModule,
     SchedulerModule,
+    WithdrawalHistoryModule,
+    LootingModule,
+    ErrorModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
 })
 export class AppModule {
   constructor(private connection: Connection) {}
