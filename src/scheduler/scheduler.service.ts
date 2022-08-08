@@ -473,7 +473,7 @@ export class SchedulerService {
       });
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  // @Cron(CronExpression.EVERY_5_MINUTES)
   handleNFTTransfer() {
     this.logger.debug('Called when the current minute is 5 minutes');
     this.characterRepository
