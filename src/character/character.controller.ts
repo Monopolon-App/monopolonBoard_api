@@ -19,20 +19,20 @@ import { Character } from './character.entity';
 import { UpdateCharacterDto } from './dto/update-character.dto';
 
 import { CharacterService } from './character.service';
-// import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Character')
 @Controller('Character')
 export class CharacterController {
   constructor(private readonly hqService: CharacterService) {}
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
     return this.hqService.getUserById(walletAddress);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('/create')
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FilesInterceptor('file'))
@@ -43,7 +43,7 @@ export class CharacterController {
     return this.hqService.createCharacter(character, files);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateCharacter(
     @Param('walletAddress') walletAddress: string,
@@ -52,13 +52,13 @@ export class CharacterController {
     return this.hqService.updateCharacter(walletAddress, updategridDto);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Patch(':id/update')
   removingNFTFromUserWallet(@Param('id') id: number) {
     return this.hqService.removingNFTFromUserWallet(id);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('game/exit/:walletAddress')
   exitGame(@Param('walletAddress') walletAddress: string) {
     return this.hqService.exitGame(walletAddress);
