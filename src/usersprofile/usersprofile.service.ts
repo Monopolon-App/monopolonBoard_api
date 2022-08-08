@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import {
   Repository,
@@ -40,17 +41,31 @@ export class UsersProfileService {
         : 'TESTNET';
   }
 
-  async getById(walletAddress: string): Promise<any> {
+  async getById(id: number): Promise<any> {
     try {
       const user = await this.usersRepository.findOne({
-        walletAddress: walletAddress,
+        id,
       });
-      if (user) {
-        return 'data';
+      if (!user) {
+        return new HttpException(
+          {
+            status: HttpStatus.OK,
+            message: 'USer Not Found',
+          },
+          HttpStatus.OK
+        );
       }
-      return new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+
+      return new HttpException(
+        {
+          status: HttpStatus.OK,
+          message: 'Success',
+          data: user,
+        },
+        HttpStatus.OK
+      );
     } catch (error) {
-      throw error;
+      throw new HttpException(error?.message, HttpStatus.BAD_REQUEST);
     }
   }
 

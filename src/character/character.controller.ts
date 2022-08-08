@@ -19,6 +19,7 @@ import { Character } from './character.entity';
 import { UpdateCharacterDto } from './dto/update-character.dto';
 
 import { CharacterService } from './character.service';
+// import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Character')
 @Controller('Character')
@@ -42,11 +43,24 @@ export class CharacterController {
     return this.hqService.createCharacter(character, files);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateCharacter(
     @Param('walletAddress') walletAddress: string,
     @Body() updategridDto: UpdateCharacterDto
   ) {
     return this.hqService.updateCharacter(walletAddress, updategridDto);
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  @Patch(':id/update')
+  removingNFTFromUserWallet(@Param('id') id: number) {
+    return this.hqService.removingNFTFromUserWallet(id);
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  @Post('game/exit/:walletAddress')
+  exitGame(@Param('walletAddress') walletAddress: string) {
+    return this.hqService.exitGame(walletAddress);
   }
 }

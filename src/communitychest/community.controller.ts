@@ -42,6 +42,7 @@ export class CommunityController {
     return this.communityService.createCommunity(userprofile, files);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateCommunity(
     @Param('walletAddress') walletAddress: string,

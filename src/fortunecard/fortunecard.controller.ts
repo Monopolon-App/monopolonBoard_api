@@ -42,6 +42,7 @@ export class FortuneCardController {
     return this.FortuneService.createFortune(userprofile, files);
   }
 
+  // @UseGuards(JwtAuthGuard)
   @Patch(':walletAddress')
   updateFortune(
     @Param('walletAddress') walletAddress: string,
