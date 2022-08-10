@@ -21,6 +21,7 @@ import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity
 import { WanderingMerchant } from 'src/WanderingMerchant/wanderingMerchant.entity';
 import { Looting } from '../looting/looting.entity';
 import { ErrorEntity } from '../errorException/error.entity';
+import { TransferLogs } from '../transferLogs/transferLogs.entity';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ErrorEntity } from '../errorException/error.entity';
           WanderingMerchant,
           Looting,
           ErrorEntity,
+          TransferLogs,
         ],
         synchronize: true,
       }),
