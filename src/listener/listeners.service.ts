@@ -40,6 +40,10 @@ import {
   Transaction,
   TransactionType,
 } from '../transaction/transaction.entity';
+import {
+  TransferLogs,
+  TransferType,
+} from '../transferLogs/transferLogs.entity';
 
 type TrxDataType = {
   from: string;
@@ -483,6 +487,14 @@ export class ListenerService implements OnModuleInit {
             tTransferTransaction.walletAddress = character.walletAddress;
             tTransferTransaction.fromAddress = trxData.from;
             await transactionalEntityManager.save(tTransferTransaction);
+
+            const transferLogs = new TransferLogs();
+            transferLogs.type = TransferType.NFT_TRANSFER;
+            transferLogs.description =
+              'Transferring NFT from company walletAddress to User walletAddress';
+            transferLogs.walletAddress = character.walletAddress;
+            transferLogs.fromAddress = trxData.from;
+            await transactionalEntityManager.save(transferLogs);
           } else {
             console.log('::LOG::ERROR::Duplicate transaction record:');
             return new HttpException(

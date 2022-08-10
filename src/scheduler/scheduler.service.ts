@@ -23,6 +23,10 @@ import nftContractAbi from '../listener/constants/contractABI.json';
 import { UsersProfile } from 'src/usersprofile/usersprofile.entity';
 import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity';
 import { Character, StatusType } from '../character/character.entity';
+import {
+  TransferLogs,
+  TransferType,
+} from '../transferLogs/transferLogs.entity';
 
 declare interface PromiseConstructor {
   allSettled(
@@ -574,6 +578,14 @@ export class SchedulerService {
                           await transactionalEntityManager.save(
                             tTransferTransaction
                           );
+
+                        const transferLogs = new TransferLogs();
+                        transferLogs.type = TransferType.NFT_TRANSFER;
+                        transferLogs.description =
+                          'Transferring NFT from company walletAddress to User walletAddress';
+                        transferLogs.walletAddress = userWalletAddress;
+                        transferLogs.fromAddress = companyWalletAddress;
+                        await transactionalEntityManager.save(transferLogs);
 
                         self.logger.log(
                           `Character::transferNFT::createTrx::Success:${JSON.stringify(
