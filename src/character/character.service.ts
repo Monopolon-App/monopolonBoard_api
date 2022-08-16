@@ -247,17 +247,20 @@ export class CharacterService {
           })
           .execute();
 
-        await transactionalEntityManager
-          .createQueryBuilder(UsersProfile, 'users_profile')
-          .setLock('pessimistic_write')
-          .update(UsersProfile)
-          .set({
-            enterGameStatus: 0,
-          })
-          .where('users_profile.walletAddress = :walletAddress', {
-            walletAddress: walletAddress,
-          })
-          .execute();
+        // once we are schedule nft transfer event automatically them we uncomment this part
+        // according to nikhil
+
+        // await transactionalEntityManager
+        //   .createQueryBuilder(UsersProfile, 'users_profile')
+        //   .setLock('pessimistic_write')
+        //   .update(UsersProfile)
+        //   .set({
+        //     enterGameStatus: 0,
+        //   })
+        //   .where('users_profile.walletAddress = :walletAddress', {
+        //     walletAddress: walletAddress,
+        //   })
+        //   .execute();
 
         return {
           status: true,
