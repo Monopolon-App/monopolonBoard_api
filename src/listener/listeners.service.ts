@@ -755,11 +755,30 @@ export class ListenerService implements OnModuleInit {
                   }
                   return characterResponse;
                 } else {
-                  console.log('::LOG::ERROR::Duplicate transaction record:');
-                  return new HttpException(
-                    'Duplicate transaction record',
-                    HttpStatus.BAD_REQUEST
-                  );
+                  const character = await transactionalEntityManager
+                    .createQueryBuilder(Character, 'character')
+                    .setLock('pessimistic_write')
+                    .update(Character)
+                    .set({
+                      status: StatusType.ACTIVATED,
+                    })
+                    .where('character.tokenId = :tokenId', {
+                      tokenId: tokenId,
+                    })
+                    .execute();
+
+                  if (character && walletUser.enterGameStatus === 0) {
+                    await transactionalEntityManager
+                      .createQueryBuilder(UsersProfile, 'users_profile')
+                      .update(UsersProfile)
+                      .set({
+                        enterGameStatus: 1,
+                      })
+                      .where('users_profile.walletAddress = :walletAddress', {
+                        walletAddress: walletUser.walletAddress,
+                      })
+                      .execute();
+                  }
                 }
               })
               .catch((error) => {
@@ -825,6 +844,9 @@ export class ListenerService implements OnModuleInit {
             .createQueryBuilder(Character, 'character')
             .setLock('pessimistic_write')
             .where('character.tokenId = :tokenId', { tokenId: tokenId })
+            .andWhere('character.walletAddress = :walletAddress', {
+              walletAddress: newUser.walletAddress,
+            })
             .getCount()
             .then(async (trxCount) => {
               if (trxCount * 1 === 0) {
