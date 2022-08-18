@@ -15,7 +15,7 @@ import {
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
-import { Transaction } from './transaction.entity';
+import { Transaction, TransactionType } from './transaction.entity';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 
 import { TeamService } from './transaction.service';
@@ -53,5 +53,14 @@ export class TransactionController {
       walletAddress,
       updatetransactionDto
     );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/getLootingHistoryByWalletAddress')
+  getLootingHistoryByWalletAddress(
+    @Query('walletAddress') walletAddress: string,
+    @Query('type') type: TransactionType
+  ): Promise<any> {
+    return this.hqService.getLootingHistoryByWalletAddress(walletAddress, type);
   }
 }
