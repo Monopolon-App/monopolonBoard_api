@@ -108,7 +108,10 @@ export class WanderingMerchantService {
       const userMgmRewards = user.mgmRewardsAccumulated;
       const equipmentDiscountedPrice = wanderingMerchant.discountedPrice;
 
-      if (parseFloat(userMgmRewards) < parseFloat(equipmentDiscountedPrice)) {
+      if (
+        isNaN(parseFloat(userMgmRewards)) ||
+        parseFloat(userMgmRewards) < parseFloat(equipmentDiscountedPrice)
+      ) {
         throw new HttpException(
           'User does not have sufficient balance to buy this equipment',
           HttpStatus.BAD_REQUEST
