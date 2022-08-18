@@ -133,7 +133,14 @@ export class TeamService {
         );
       }
 
-      return lootingHistory;
+      return new HttpException(
+        {
+          status: HttpStatus.OK,
+          message: 'Success',
+          data: lootingHistory,
+        },
+        HttpStatus.OK
+      );
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
