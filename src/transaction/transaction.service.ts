@@ -14,7 +14,7 @@ import {
   TreeRepository,
   Like,
 } from 'typeorm';
-import { Transaction } from './transaction.entity';
+import { Transaction, TransactionType } from './transaction.entity';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 
 @Injectable()
@@ -101,6 +101,39 @@ export class TeamService {
         { message: 'Updated Successfully', data: updatesRecord },
         HttpStatus.NO_CONTENT
       );
+    } catch (error) {
+      return new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async getLootingHistoryByWalletAddress(
+    walletAddress: string,
+    type: TransactionType
+  ): Promise<any> {
+    try {
+      const lootingHistory = await getManager().transaction(
+        async (transactionalEntityManager) => {
+          return await transactionalEntityManager
+            .createQueryBuilder(Transaction, 'transaction')
+            .setLock('pessimistic_write')
+            .where('transaction.walletAddress = :walletAddress', {
+              walletAddress: walletAddress,
+            })
+            .andWhere('transaction.type = :type', {
+              type: type,
+            })
+            .getMany();
+        }
+      );
+
+      if (!lootingHistory.length) {
+        throw new HttpException(
+          'No looting History found for this walletAddress',
+          HttpStatus.NOT_FOUND
+        );
+      }
+
+      return lootingHistory;
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
