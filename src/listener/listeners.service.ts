@@ -808,6 +808,7 @@ export class ListenerService implements OnModuleInit {
           newUser.walletAddress = trxData.from;
           newUser.lastRollTimeStamp = lastRollActionTimeStamp; // 6 h before
           newUser.lastActionTimeStamp = lastRollActionTimeStamp;
+          newUser.mgmRewardsAccumulated = '0';
           newUser.gridPosition = 0;
           newUser.noOfRoll = 1;
           newUser.enterGameStatus = 1;

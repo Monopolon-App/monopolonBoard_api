@@ -271,6 +271,7 @@ export class UsersProfileService {
             newUser.walletAddress = walletAddress;
             newUser.lastRollTimeStamp = lastRollActionTimeStamp; // 6 h before
             newUser.lastActionTimeStamp = lastRollActionTimeStamp;
+            newUser.mgmRewardsAccumulated = '0';
             newUser.gridPosition = 0;
             newUser.noOfRoll = 1;
             newUser.enterGameStatus = 1;
