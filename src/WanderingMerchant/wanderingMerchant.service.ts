@@ -57,6 +57,7 @@ export class WanderingMerchantService {
     try {
       const wanderingMerchant = getConnection()
         .createQueryBuilder(WanderingMerchant, 'wandering_merchant')
+        .where('wandering_merchant.status = :status', { status: 1 })
         .orderBy('RAND()')
         .getOne();
 
