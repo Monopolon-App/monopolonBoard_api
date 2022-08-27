@@ -681,7 +681,7 @@ export class ListenerService implements OnModuleInit {
                   if (tokenMeta.type == 2) {
                     equipment.tokenId = tokenId;
 
-                    equipment.charequiped = character.id.toString();
+                    equipment.charequiped = user.id.toString();
 
                     equipment.str =
                       tokenMeta.attributes.commonAttribute.str?.toString();
@@ -887,8 +887,7 @@ export class ListenerService implements OnModuleInit {
                 if (tokenMeta.type == 2) {
                   transferEquipment.tokenId = tokenId;
 
-                  transferEquipment.charequiped =
-                    transferTransaction.id.toString();
+                  transferEquipment.charequiped = newUser.id.toString();
 
                   transferEquipment.str =
                     tokenMeta.attributes.commonAttribute.str?.toString();
