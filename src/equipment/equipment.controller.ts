@@ -34,7 +34,7 @@ export class EquipmentController {
   // @UseGuards(JwtAuthGuard)
   @Get('/getUserById')
   getUserById(@Query('walletAddress') walletAddress: string): Promise<any> {
-    return this.equipmentService.getUserById(walletAddress);
+    return this.equipmentService.getEquipmentByWalletAddress(walletAddress);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -76,11 +76,13 @@ export class EquipmentController {
   @Put('equipNew')
   equipeNew(
     @Query('oldEquipmentId') oldEquipmentId: number,
-    @Query('newEquipmentId') newEquipmentId: number
+    @Query('newEquipmentId') newEquipmentId: number,
+    @Query('characterId') characterId: number
   ) {
     return this.equipmentService.updateEquipmentStatus(
       oldEquipmentId,
-      newEquipmentId
+      newEquipmentId,
+      characterId
     );
   }
 

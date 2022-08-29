@@ -61,6 +61,9 @@ export class Equipment {
   @Column({ default: null })
   logInfo?: string;
 
+  @Column({ default: null })
+  characterId?: number;
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

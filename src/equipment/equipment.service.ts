@@ -57,18 +57,29 @@ export class EquipmentService {
     }
   }
 
-  async getUserById(walletAddress: string): Promise<any> {
+  async getEquipmentByWalletAddress(walletAddress: string): Promise<any> {
     try {
-      const [user, count] = await this.equipmentRepository.findAndCount({
-        where: { walletAddress },
+      const equipments = await this.equipmentRepository.find({
+        select: ['category'],
+        where: { walletAddress: walletAddress },
       });
 
-      if (count > 0) {
+      if (equipments) {
+        const diffEquipments = {};
+        for (let i = 0; i < equipments.length; i++) {
+          diffEquipments[equipments[i].category] =
+            await this.equipmentRepository.find({
+              where: {
+                category: equipments[i].category,
+                walletAddress: walletAddress,
+              },
+            });
+        }
         return new HttpException(
           {
             status: HttpStatus.OK,
             message: 'Success',
-            data: user,
+            data: diffEquipments,
           },
           HttpStatus.OK
         );
@@ -136,7 +147,8 @@ export class EquipmentService {
 
   async updateEquipmentStatus(
     oldEquipmentId: number,
-    newEquipmentId: number
+    newEquipmentId: number,
+    characterId: number
   ): Promise<any> {
     try {
       if (oldEquipmentId && !newEquipmentId) {
@@ -144,7 +156,7 @@ export class EquipmentService {
           {
             id: oldEquipmentId,
           },
-          { status: EquipmentStatusType.UNEQUIPPED }
+          { status: EquipmentStatusType.UNEQUIPPED, characterId: null }
         );
 
         const oldEquipment = await this.equipmentRepository.findOne({
@@ -172,7 +184,7 @@ export class EquipmentService {
             {
               id: oldEquipmentId,
             },
-            { status: EquipmentStatusType.UNEQUIPPED }
+            { status: EquipmentStatusType.UNEQUIPPED, characterId: null }
           );
 
           const oldEquipment = await this.equipmentRepository.findOne({
@@ -188,7 +200,7 @@ export class EquipmentService {
           {
             id: newEquipmentId,
           },
-          { status: EquipmentStatusType.EQUIPPED }
+          { status: EquipmentStatusType.EQUIPPED, characterId: characterId }
         );
 
         if (equipNew) {
