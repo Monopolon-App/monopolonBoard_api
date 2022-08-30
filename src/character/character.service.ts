@@ -114,43 +114,97 @@ export class CharacterService {
     equip: boolean
   ): Promise<any> {
     try {
-      console.log(equipment);
       const char = await this.characterRepository.findOne({
-        id: +equipment.charequiped,
+        id: equipment.characterId,
       });
 
       if (equip) {
-        char.str = (+char.str + +equipment.str).toString();
-        char.dex = (+char.dex + +equipment.dex).toString();
-        char.Luk = (+char.Luk + +equipment.Luk).toString();
-        char.prep = (+char.prep + +equipment.prep).toString();
-        char.hp = (+char.hp + +equipment.hp).toString();
-        char.mp = (+char.mp + +equipment.mp).toString();
+        char.str = (
+          parseFloat(char.str) + parseFloat(equipment.str)
+        ).toString();
+        char.dex = (
+          parseFloat(char.dex) + parseFloat(equipment.dex)
+        ).toString();
+        char.Luk = (
+          parseFloat(char.Luk) + parseFloat(equipment.Luk)
+        ).toString();
+        char.prep = (
+          parseFloat(char.prep) + parseFloat(equipment.prep)
+        ).toString();
+        char.hp = (parseFloat(char.hp) + parseFloat(equipment.hp)).toString();
+        char.mp = (parseFloat(char.mp) + parseFloat(equipment.mp)).toString();
+        if (equipment.category === 'Weapon') {
+          char.weapon = equipment.id;
+        } else if (equipment.category === 'Helmet') {
+          char.helmet = equipment.id;
+        } else if (equipment.category === 'Armour') {
+          char.armor = equipment.id;
+        } else if (equipment.category === 'Wing') {
+          char.wings = equipment.id;
+        } else if (equipment.category === 'Shoes') {
+          char.shoes = equipment.id;
+        }
       } else {
-        char.str =
-          char.str && +char.str > 0 && (+char.str - +equipment.str).toString();
-        char.dex =
-          char.dex && +char.dex > 0 && (+char.dex - +equipment.dex).toString();
-        char.Luk =
-          char.Luk && +char.Luk > 0 && (+char.Luk - +equipment.Luk).toString();
-        char.prep =
-          char.prep &&
-          +char.prep > 0 &&
-          (+char.prep - +equipment.prep).toString();
-        char.hp =
-          char.hp && +char.hp > 0 && (+char.hp - +equipment.hp).toString();
-        char.mp =
-          char.mp && +char.mp > 0 && (+char.mp - +equipment.mp).toString();
+        if (parseFloat(char.str) < parseFloat(equipment.str)) {
+          throw new HttpException(
+            'Character does not have sufficient str',
+            HttpStatus.BAD_REQUEST
+          );
+        } else if (parseFloat(char.dex) < parseFloat(equipment.dex)) {
+          throw new HttpException(
+            'Character does not have sufficient dex',
+            HttpStatus.BAD_REQUEST
+          );
+        } else if (parseFloat(char.Luk) < parseFloat(equipment.Luk)) {
+          throw new HttpException(
+            'Character does not have sufficient Luk',
+            HttpStatus.BAD_REQUEST
+          );
+        } else if (parseFloat(char.prep) < parseFloat(equipment.prep)) {
+          throw new HttpException(
+            'Character does not have sufficient prep',
+            HttpStatus.BAD_REQUEST
+          );
+        } else if (parseFloat(char.hp) < parseFloat(equipment.hp)) {
+          throw new HttpException(
+            'Character does not have sufficient hp',
+            HttpStatus.BAD_REQUEST
+          );
+        } else if (parseFloat(char.mp) < parseFloat(equipment.mp)) {
+          throw new HttpException(
+            'Character does not have sufficient mp',
+            HttpStatus.BAD_REQUEST
+          );
+        }
+        char.str = (
+          parseFloat(char.str) - parseFloat(equipment.str)
+        ).toString();
+
+        char.prep = (
+          parseFloat(char.prep) - parseFloat(equipment.prep)
+        ).toString();
+
+        char.mp = (parseFloat(char.mp) - parseFloat(equipment.mp)).toString();
+
+        char.hp = (parseFloat(char.hp) - parseFloat(equipment.hp)).toString();
+
+        char.Luk = (
+          parseFloat(char.Luk) - parseFloat(equipment.Luk)
+        ).toString();
+
+        char.dex = (
+          parseFloat(char.dex) - parseFloat(equipment.dex)
+        ).toString();
       }
 
       const updateChar = await this.characterRepository.update(
-        { id: +equipment.charequiped },
+        { id: equipment.characterId },
         char
       );
 
       if (updateChar) {
         const updatedRecord = await this.characterRepository.findOne({
-          id: +equipment.charequiped,
+          id: equipment.characterId,
         });
 
         return updatedRecord;

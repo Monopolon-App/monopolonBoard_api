@@ -152,13 +152,6 @@ export class EquipmentService {
   ): Promise<any> {
     try {
       if (oldEquipmentId && !newEquipmentId) {
-        await this.equipmentRepository.update(
-          {
-            id: oldEquipmentId,
-          },
-          { status: EquipmentStatusType.UNEQUIPPED, characterId: null }
-        );
-
         const oldEquipment = await this.equipmentRepository.findOne({
           id: oldEquipmentId,
         });
@@ -168,6 +161,13 @@ export class EquipmentService {
             oldEquipment,
             false
           );
+
+        await this.equipmentRepository.update(
+          {
+            id: oldEquipmentId,
+          },
+          { status: EquipmentStatusType.UNEQUIPPED, characterId: null }
+        );
         return new HttpException(
           {
             message: 'Unequiped Successfully',
@@ -180,19 +180,19 @@ export class EquipmentService {
         );
       } else {
         if (oldEquipmentId) {
-          await this.equipmentRepository.update(
-            {
-              id: oldEquipmentId,
-            },
-            { status: EquipmentStatusType.UNEQUIPPED, characterId: null }
-          );
-
           const oldEquipment = await this.equipmentRepository.findOne({
             id: oldEquipmentId,
           });
           await this.characterService.updateCharacterStrength(
             oldEquipment,
             false
+          );
+
+          await this.equipmentRepository.update(
+            {
+              id: oldEquipmentId,
+            },
+            { status: EquipmentStatusType.UNEQUIPPED, characterId: null }
           );
         }
 
