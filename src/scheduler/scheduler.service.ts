@@ -15,10 +15,10 @@ import {
 import { Withdrawal } from 'src/withdrawal/withdrawal.entity';
 import {
   CONTRACT_ADDRESS,
-  MGM_CONTRACT_ADDRESS,
+  MLON_CONTRACT_ADDRESS,
   RPC_PROVIDER_URL,
 } from 'src/constants/constants';
-import mgmContractAbi from './constants/mgmContractAbi.json';
+import mlonContractAbi from './constants/mlonContractAbi.json';
 import nftContractAbi from '../listener/constants/contractABI.json';
 import { UsersProfile } from 'src/usersprofile/usersprofile.entity';
 import { WithdrawalHistory } from '../withdrawalHistory/withdrawalHistory.entity';
@@ -47,7 +47,7 @@ export interface WithdrawalHistoryParams {
 @Injectable()
 export class SchedulerService {
   private web3;
-  private mgmContract: Contract;
+  private mlonContract: Contract;
   public tokenContract: Contract;
   private account;
   private hdProvider;
@@ -82,9 +82,9 @@ export class SchedulerService {
       this.companyPrivateKey
     );
 
-    this.mgmContract = new this.web3.eth.Contract(
-      mgmContractAbi as any,
-      MGM_CONTRACT_ADDRESS[this.networkMode] as any,
+    this.mlonContract = new this.web3.eth.Contract(
+      mlonContractAbi as any,
+      MLON_CONTRACT_ADDRESS[this.networkMode] as any,
       {
         from: this.account.address,
       }
@@ -152,7 +152,7 @@ export class SchedulerService {
 
                 // transferring the withdrawal amount to user wallet address from company address
                 this.logger.verbose(
-                  `Withdrawal:transferMgmReward:params:${JSON.stringify({
+                  `Withdrawal:transferMlonReward:params:${JSON.stringify({
                     to: toWalletAddress,
                     amount: amountWei,
                     from: this.account.address,
@@ -162,7 +162,7 @@ export class SchedulerService {
                 // eslint-disable-next-line @typescript-eslint/no-this-alias
                 const self = this;
 
-                this.mgmContract.methods
+                this.mlonContract.methods
                   .transfer(toWalletAddress, amountWei)
                   .send({ from: this.account.address })
                   .on('transactionHash', async function (hash) {
@@ -173,7 +173,7 @@ export class SchedulerService {
 
                     try {
                       self.logger.debug(
-                        `Withdrawal::transferMgmReward::transactionHash:${JSON.stringify(
+                        `Withdrawal::transferMlonReward::transactionHash:${JSON.stringify(
                           {
                             hash,
                           }
@@ -206,7 +206,7 @@ export class SchedulerService {
                           );
 
                           self.logger.verbose(
-                            `Witdrawal::transferMgmReward::Status::Proceess:${JSON.stringify(
+                            `Witdrawal::transferMlonReward::Status::Proceess:${JSON.stringify(
                               withdrawalStatus
                             )}:`
                           );
@@ -214,7 +214,7 @@ export class SchedulerService {
                       );
                     } catch (error) {
                       self.logger.error(
-                        `Witdrawal::transferMgmReward::Error::${error?.message}:`
+                        `Witdrawal::transferMlonReward::Error::${error?.message}:`
                       );
 
                       return new HttpException(
@@ -227,7 +227,7 @@ export class SchedulerService {
                   //   'confirmation',
                   //   async function (confirmationNumber, receipt) {
                   //     self.logger.warn(
-                  //       `Witdrawal::transferMgmReward::confirmation:${JSON.stringify(
+                  //       `Witdrawal::transferMlonReward::confirmation:${JSON.stringify(
                   //         {
                   //           confirmationNumber,
                   //           receipt,
@@ -241,7 +241,7 @@ export class SchedulerService {
                      * When Transaction is Successful then we will get the Event from here
                      */
                     self.logger.log(
-                      `Withdrawal::transferMgmReward::receipt:${JSON.stringify(
+                      `Withdrawal::transferMlonReward::receipt:${JSON.stringify(
                         receipt
                       )}`
                     );
@@ -267,7 +267,7 @@ export class SchedulerService {
                           );
 
                         self.logger.log(
-                          `Withdrawal::transferMgmReward::createTrx::Success:${JSON.stringify(
+                          `Withdrawal::transferMlonReward::createTrx::Success:${JSON.stringify(
                             tTransferTransactionObj
                           )}`
                         );
@@ -295,7 +295,7 @@ export class SchedulerService {
                           );
 
                           self.logger.log(
-                            `Withdrawal::transferMgmReward::Status::Success:${JSON.stringify(
+                            `Withdrawal::transferMlonReward::Status::Success:${JSON.stringify(
                               withdrawalStatus
                             )}`
                           );
@@ -305,10 +305,10 @@ export class SchedulerService {
                   })
                   .on('error', async function (error, receipt) {
                     /**
-                     * when we get the Error from the Transfering the MGM reward
+                     * when we get the Error from the Transfering the MLON reward
                      */
                     self.logger.error(
-                      `Withdrawal::transferMgmReward::Error:${JSON.stringify({
+                      `Withdrawal::transferMlonReward::Error:${JSON.stringify({
                         error,
                         receipt,
                       })}`
@@ -360,7 +360,7 @@ export class SchedulerService {
                   })
                   .then((result) => {
                     this.logger.verbose(
-                      `Withdrawal::transferMgmReward::Status::Success:${JSON.stringify(
+                      `Withdrawal::transferMlonReward::Status::Success:${JSON.stringify(
                         withdrawal
                       )}`
                     );

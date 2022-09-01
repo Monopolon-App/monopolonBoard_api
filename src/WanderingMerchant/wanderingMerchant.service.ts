@@ -106,10 +106,10 @@ export class WanderingMerchantService {
           HttpStatus.BAD_REQUEST
         );
       }
-      const userMgmRewards = user.mgmRewardsAccumulated;
+      const userMlonRewards = user.mlonRewardsAccumulated;
       const equipmentDiscountedPrice = wanderingMerchant.discountedPrice;
 
-      if (parseFloat(userMgmRewards) < parseFloat(equipmentDiscountedPrice)) {
+      if (parseFloat(userMlonRewards) < parseFloat(equipmentDiscountedPrice)) {
         throw new HttpException(
           'User does not have sufficient balance to buy this equipment',
           HttpStatus.BAD_REQUEST
@@ -136,8 +136,8 @@ export class WanderingMerchantService {
           .setLock('pessimistic_write')
           .update(UsersProfile)
           .set({
-            mgmRewardsAccumulated: (
-              parseFloat(userMgmRewards) - parseFloat(equipmentDiscountedPrice)
+            mlonRewardsAccumulated: (
+              parseFloat(userMlonRewards) - parseFloat(equipmentDiscountedPrice)
             ).toString(),
           })
           .where('users_profile.walletAddress = :walletAddress', {

@@ -26,7 +26,7 @@ export class UpdateUserDto {
   teamID?: number;
 
   @ApiProperty({ required: false })
-  mgmRewardsAccumulated?: string;
+  mlonRewardsAccumulated?: string;
 
   @ApiProperty({ required: false })
   lastRollTimeStamp?: Date;
