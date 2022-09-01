@@ -46,8 +46,8 @@ export class UsersProfile {
   @Column()
   teamId?: number;
 
-  @Column({ default: null })
-  mgmRewardsAccumulated?: string;
+  @Column({ default: 0 })
+  mlonRewardsAccumulated?: string;
 
   @Column({ type: 'timestamp' })
   lastRollTimeStamp?: Date;

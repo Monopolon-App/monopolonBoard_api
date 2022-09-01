@@ -271,14 +271,14 @@ export class HqService {
           })
           .execute();
 
-        // this update looting user's mgmRewardsAccumulated
+        // this update looting user's mlonRewardsAccumulated
         await transactionalEntityManager
           .createQueryBuilder(UsersProfile, 'users_profile')
           .setLock('pessimistic_write')
           .update(UsersProfile)
           .set({
-            mgmRewardsAccumulated: (
-              parseFloat(user.mgmRewardsAccumulated) +
+            mlonRewardsAccumulated: (
+              parseFloat(user.mlonRewardsAccumulated) +
               parseFloat(looting.amount)
             ).toString(),
           })
@@ -297,14 +297,14 @@ export class HqService {
           })
           .getOne();
 
-        // this update looted user's mgmRewardsAccumulated
+        // this update looted user's mlonRewardsAccumulated
         await transactionalEntityManager
           .createQueryBuilder(UsersProfile, 'users_profile')
           .setLock('pessimistic_write')
           .update(UsersProfile)
           .set({
-            mgmRewardsAccumulated: (
-              parseFloat(hqUser.mgmRewardsAccumulated) -
+            mlonRewardsAccumulated: (
+              parseFloat(hqUser.mlonRewardsAccumulated) -
               parseFloat(looting.amount)
             ).toString(),
           })

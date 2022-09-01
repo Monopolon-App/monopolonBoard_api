@@ -52,7 +52,7 @@ import { HttpExceptionFilter } from './errorException/allException';
         JWT_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
         COMPANY_PRIVATE_KEY: Joi.string().required(), // company private key for withdrawal
         COMPANY_ADDRESS: Joi.string().required(), // company nft wallet address for listener
-        COMPANY_ADDRESS_FOR_MGMC: Joi.string(), // company nft wallet address for listener
+        COMPANY_ADDRESS_FOR_MLONC: Joi.string(), // company nft wallet address for listener
       }),
     }),
     DatabaseModule,

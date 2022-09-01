@@ -64,7 +64,7 @@ export const staticEventForNftTransfer = {
   },
 };
 
-export const mgmTransferEvent = {
+export const mlonTransferEvent = {
   address: '0x45aB600606AfbE64EcF41a45E29fD3cf3eB13Dbe',
   blockNumber: 19879348,
   transactionHash:

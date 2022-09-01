@@ -20,10 +20,10 @@ import { Team } from 'src/team/team.entity';
 import { Hq } from 'src/hq/hq.entity';
 
 import CONTRACT_ABI from './constants/contractABI.json';
-import CONTRACT_MGM_ABI from './constants/contractMgmTokenForNewAddress.json';
+import CONTRACT_MLON_ABI from './constants/contractMlonTokenForNewAddress.json';
 import {
   CONTRACT_ADDRESS,
-  MGM_CONTRACT_ADDRESS_FOR_NEW_COMPANY_ADDRESS,
+  MLON_CONTRACT_ADDRESS_FOR_NEW_COMPANY_ADDRESS,
   WS_PROVIDER_URL,
 } from 'src/constants/constants';
 import { nftMetadata, nftMetadataDTO } from './nft-metadata.dto';
@@ -34,7 +34,7 @@ import { WanderingMerchant } from 'src/WanderingMerchant/wanderingMerchant.entit
 // import {
 //   staticEvent,
 //   staticEventForNftTransfer,
-//   mgmTransferEvent,
+//   mlonTransferEvent,
 // } from './mockData';
 import {
   Transaction,
@@ -63,7 +63,7 @@ export class ListenerService implements OnModuleInit {
 
   public web3;
   public tokenContract: Contract; // nft
-  public mgmContractX: Contract; // mgmReward
+  public mlonContractX: Contract; // mlonReward
   public networkMode;
 
   constructor(
@@ -92,9 +92,9 @@ export class ListenerService implements OnModuleInit {
       CONTRACT_ADDRESS[this.networkMode]
     );
 
-    this.mgmContractX = new this.web3.eth.Contract(
-      CONTRACT_MGM_ABI as any,
-      MGM_CONTRACT_ADDRESS_FOR_NEW_COMPANY_ADDRESS[this.networkMode]
+    this.mlonContractX = new this.web3.eth.Contract(
+      CONTRACT_MLON_ABI as any,
+      MLON_CONTRACT_ADDRESS_FOR_NEW_COMPANY_ADDRESS[this.networkMode]
     );
   }
 
@@ -113,8 +113,8 @@ export class ListenerService implements OnModuleInit {
     // this.handleEvent(staticEvent);
 
     // if you want to test the below function then uncomment the below code.
-    // this is for transferring mgm to user walletAddress from mgmContractX
-    // this.handleEventForMgmContractX(mgmTransferEvent);
+    // this is for transferring mlon to user walletAddress from mlonContractX
+    // this.handleEventForMlonContractX(mlonTransferEvent);
 
     // if you want to test the handleCompanyToUserNft function then uncomment the below code.
     // this is for the exit gameGame Functionality.
@@ -174,8 +174,8 @@ export class ListenerService implements OnModuleInit {
 
     const companyAddress = this.configService.get('COMPANY_ADDRESS');
 
-    const companyAddressForMgmTransfer = this.configService.get(
-      'COMPANY_ADDRESS_FOR_MGMC'
+    const companyAddressForMlonTransfer = this.configService.get(
+      'COMPANY_ADDRESS_FOR_MLONC'
     );
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -229,13 +229,13 @@ export class ListenerService implements OnModuleInit {
     // this is the token address : 0x45aB600606AfbE64EcF41a45E29fD3cf3eB13Dbe
     // 20% of the transfer amount will goes and all below API with the wallet address will be user or any User address
     // an amount will be 20% of the what amount we get in the Transaction from the event
-    // call the MGM reward Payout API https://prod-api-mgmreward.monopolon.io/api/#/users/UsersController_mgmRewardPayout
+    // call the MLON reward Payout API https://prod-api-mgmreward.monopolon.io/api/#/users/UsersController_mgmRewardPayout
 
-    this.mgmContractX.events
+    this.mlonContractX.events
       .Transfer({})
       .on('connected', function (subscriptionId) {
         self.logger.verbose(
-          'CONNECTED::event::For::MGMContractX::subscriptionId::' +
+          'CONNECTED::event::For::MLONContractX::subscriptionId::' +
             subscriptionId
         );
       })
@@ -252,26 +252,26 @@ export class ListenerService implements OnModuleInit {
         };
 
         if (
-          trxData.from === companyAddressForMgmTransfer ||
-          equalsIgnoringCase(trxData.from, companyAddressForMgmTransfer)
+          trxData.from === companyAddressForMlonTransfer ||
+          equalsIgnoringCase(trxData.from, companyAddressForMlonTransfer)
         ) {
-          return self.handleEventForMgmContractX(event);
+          return self.handleEventForMlonContractX(event);
         } else {
           self.logger.log(
-            `There is no mgm Transfer event for company wallet address` +
+            `There is no mlon Transfer event for company wallet address` +
               JSON.stringify(event)
           );
         }
       })
       .on('changed', function (event) {
         self.logger.verbose(
-          'CHANGED::event::For::MGMContractX::' + JSON.stringify(event)
+          'CHANGED::event::For::MLONContractX::' + JSON.stringify(event)
         );
         // remove event from local database
       })
       .on('error', function (error, receipt) {
         self.logger.log(
-          'ERROR::error/receipt:For::MGMContractX::' +
+          'ERROR::error/receipt:For::MLONContractX::' +
             JSON.stringify({ error, receipt })
         );
         // If the transaction was rejected by the network with a receipt, the second parameter will be the receipt.
@@ -801,6 +801,7 @@ export class ListenerService implements OnModuleInit {
           newUser.walletAddress = trxData.from;
           newUser.lastRollTimeStamp = lastRollActionTimeStamp; // 6 h before
           newUser.lastActionTimeStamp = lastRollActionTimeStamp;
+          newUser.mlonRewardsAccumulated = '0';
           newUser.gridPosition = 0;
           newUser.noOfRoll = 1;
           newUser.enterGameStatus = 1;
@@ -952,7 +953,7 @@ export class ListenerService implements OnModuleInit {
     });
   }
 
-  async handleEventForMgmContractX(event) {
+  async handleEventForMlonContractX(event) {
     const base_url = 'https://prod-api-mgmreward.monopolon.io';
     const trxData = {
       from: _.get(event, 'returnValues.0', undefined),
