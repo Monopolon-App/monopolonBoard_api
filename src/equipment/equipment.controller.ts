@@ -75,9 +75,9 @@ export class EquipmentController {
   // @UseGuards(JwtAuthGuard)
   @Put('equipNew')
   equipeNew(
-    @Query('oldEquipmentId') oldEquipmentId: number,
-    @Query('newEquipmentId') newEquipmentId: number,
-    @Query('characterId') characterId: number
+    @Query('oldEquipmentId') oldEquipmentId?: number,
+    @Query('newEquipmentId') newEquipmentId?: number,
+    @Query('characterId') characterId?: number
   ) {
     return this.equipmentService.updateEquipmentStatus(
       oldEquipmentId,
