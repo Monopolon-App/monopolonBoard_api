@@ -146,9 +146,9 @@ export class EquipmentService {
   }
 
   async updateEquipmentStatus(
-    oldEquipmentId: number,
-    newEquipmentId: number,
-    characterId: number
+    oldEquipmentId?: number,
+    newEquipmentId?: number,
+    characterId?: number
   ): Promise<any> {
     try {
       if (oldEquipmentId && !newEquipmentId) {
@@ -170,7 +170,7 @@ export class EquipmentService {
         );
         return new HttpException(
           {
-            message: 'Unequiped Successfully',
+            message: 'Unequipped Successfully',
             data: {
               updateCharacter: unEquipFromChar,
               updatedEquipmet: oldEquipment,
@@ -178,24 +178,7 @@ export class EquipmentService {
           },
           HttpStatus.NO_CONTENT
         );
-      } else {
-        if (oldEquipmentId) {
-          const oldEquipment = await this.equipmentRepository.findOne({
-            id: oldEquipmentId,
-          });
-          await this.characterService.updateCharacterStrength(
-            oldEquipment,
-            false
-          );
-
-          await this.equipmentRepository.update(
-            {
-              id: oldEquipmentId,
-            },
-            { status: EquipmentStatusType.UNEQUIPPED, characterId: null }
-          );
-        }
-
+      } else if (!oldEquipmentId && newEquipmentId) {
         const equipNew = await this.equipmentRepository.update(
           {
             id: newEquipmentId,
@@ -226,11 +209,141 @@ export class EquipmentService {
             );
           }
         }
-
-        return new HttpException(
-          'Something went wrong',
-          HttpStatus.BAD_REQUEST
+      } else {
+        const oldEquipment = await this.equipmentRepository.findOne({
+          id: oldEquipmentId,
+        });
+        const character = await this.characterService.getCharacterByCharacterId(
+          characterId
         );
+        if (oldEquipment.characterId === characterId) {
+          const oldEquipment = await this.equipmentRepository.findOne({
+            id: oldEquipmentId,
+          });
+          await this.characterService.updateCharacterStrength(
+            oldEquipment,
+            false
+          );
+
+          await this.equipmentRepository.update(
+            {
+              id: oldEquipmentId,
+            },
+            { status: EquipmentStatusType.UNEQUIPPED, characterId: null }
+          );
+
+          const equipNew = await this.equipmentRepository.update(
+            {
+              id: newEquipmentId,
+            },
+            { status: EquipmentStatusType.EQUIPPED, characterId: characterId }
+          );
+
+          if (equipNew) {
+            const updatedRecord = await this.equipmentRepository.findOne({
+              id: newEquipmentId,
+            });
+
+            const updateCharacter =
+              await this.characterService.updateCharacterStrength(
+                updatedRecord,
+                true
+              );
+            if (updateCharacter) {
+              return new HttpException(
+                {
+                  message: 'Updated Successfully',
+                  data: {
+                    updateCharacter: updateCharacter,
+                    updatedEquipmet: updatedRecord,
+                  },
+                },
+                HttpStatus.NO_CONTENT
+              );
+            }
+          }
+        } else {
+          if (
+            oldEquipment.status === EquipmentStatusType.EQUIPPED &&
+            oldEquipment.characterId === character.id
+          ) {
+            const oldEquipment = await this.equipmentRepository.findOne({
+              id: oldEquipmentId,
+            });
+            await this.characterService.updateCharacterStrength(
+              oldEquipment,
+              false
+            );
+
+            await this.equipmentRepository.update(
+              {
+                id: oldEquipmentId,
+              },
+              { status: EquipmentStatusType.UNEQUIPPED, characterId: null }
+            );
+            const equipNew = await this.equipmentRepository.update(
+              {
+                id: newEquipmentId,
+              },
+              { status: EquipmentStatusType.EQUIPPED, characterId: characterId }
+            );
+
+            if (equipNew) {
+              const updatedRecord = await this.equipmentRepository.findOne({
+                id: newEquipmentId,
+              });
+
+              const updateCharacter =
+                await this.characterService.updateCharacterStrength(
+                  updatedRecord,
+                  true
+                );
+              if (updateCharacter) {
+                return new HttpException(
+                  {
+                    message: 'Updated Successfully',
+                    data: {
+                      updateCharacter: updateCharacter,
+                      updatedEquipmet: updatedRecord,
+                    },
+                  },
+                  HttpStatus.NO_CONTENT
+                );
+              }
+            }
+          } else {
+            const equipNew = await this.equipmentRepository.update(
+              {
+                id: newEquipmentId,
+              },
+              { status: EquipmentStatusType.EQUIPPED, characterId: characterId }
+            );
+
+            if (equipNew) {
+              const updatedRecord = await this.equipmentRepository.findOne({
+                id: newEquipmentId,
+              });
+
+              const updateCharacter =
+                await this.characterService.updateCharacterStrength(
+                  updatedRecord,
+                  true
+                );
+              if (updateCharacter) {
+                return new HttpException(
+                  {
+                    message: 'Updated Successfully',
+                    data: {
+                      updateCharacter: updateCharacter,
+                      updatedEquipmet: updatedRecord,
+                    },
+                  },
+                  HttpStatus.NO_CONTENT
+                );
+              }
+            }
+          }
+        }
       }
     } catch (error) {
       return new HttpException(error.message, HttpStatus.BAD_REQUEST);

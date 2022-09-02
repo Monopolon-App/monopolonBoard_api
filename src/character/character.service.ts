@@ -46,6 +46,25 @@ export class CharacterService {
     }
   }
 
+  async getCharacterByCharacterId(characterId: number): Promise<any> {
+    try {
+      const character = await this.characterRepository.findOne({
+        id: characterId,
+      });
+
+      if (!character) {
+        return new HttpException(
+          'character does not exist',
+          HttpStatus.NOT_FOUND
+        );
+      }
+
+      return character;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async createCharacter(
     characters: Character,
     files: Array<Express.Multer.File>
