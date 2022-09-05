@@ -112,12 +112,23 @@ export class HqService {
       // we have to update there status is available and we have to add the code comment here so we can understand
       where: { hqGridPosition, status: 1 },
     });
+
+    const availableUser = [];
+    const lootedUser = [];
+
+    const checkUser = hq.map((hqUser) => {
+      if (hqUser.user[0].looted !== 'true') {
+        availableUser.push(hqUser);
+      } else {
+        lootedUser.push(hqUser);
+      }
+    });
     // here we get All the Hqs for particular gridPosition
     return new HttpException(
       {
         status: HttpStatus.OK,
         message: 'Success',
-        data: hq,
+        data: availableUser,
       },
       HttpStatus.OK
     );
@@ -268,6 +279,19 @@ export class HqService {
           })
           .where('looting.id = :id', {
             id: lootingId,
+          })
+          .execute();
+
+        // here we set looted true for the opponent user who looted once by the user on the same grid
+        await transactionalEntityManager
+          .createQueryBuilder(UsersProfile, 'users_profile')
+          .setLock('pessimistic_write')
+          .update(UsersProfile)
+          .set({
+            looted: 'true',
+          })
+          .where('users_profile.walletAddress = :walletAddress', {
+            walletAddress: hqWalletAddress,
           })
           .execute();
 
