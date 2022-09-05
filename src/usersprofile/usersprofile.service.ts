@@ -201,6 +201,8 @@ export class UsersProfileService {
         user.noOfRoll = Number.parseInt(user.noOfRoll) - 1;
       }
 
+      user.looted = 'false';
+
       const updatesRecord = await this.usersRepository.save(user);
 
       return new HttpException(

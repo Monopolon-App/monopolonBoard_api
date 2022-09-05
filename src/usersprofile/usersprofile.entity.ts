@@ -49,6 +49,9 @@ export class UsersProfile {
   @Column({ default: 0 })
   mlonRewardsAccumulated?: string;
 
+  @Column({ default: null })
+  looted?: string;
+
   @Column({ type: 'timestamp' })
   lastRollTimeStamp?: Date;
 
