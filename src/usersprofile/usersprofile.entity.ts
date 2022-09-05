@@ -49,6 +49,9 @@ export class UsersProfile {
   @Column({ default: 0 })
   mlonRewardsAccumulated?: string;
 
+  @Column({ default: 0 })
+  lastMinedMLON?: number;
+
   @Column({ default: null })
   looted?: string;
 

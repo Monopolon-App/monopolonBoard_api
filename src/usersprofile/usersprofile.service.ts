@@ -202,6 +202,7 @@ export class UsersProfileService {
       }
 
       user.looted = 'false';
+      user.lastMinedMLON = 0;
 
       const updatesRecord = await this.usersRepository.save(user);
 

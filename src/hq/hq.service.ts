@@ -331,6 +331,7 @@ export class HqService {
               parseFloat(hqUser.mlonRewardsAccumulated) -
               parseFloat(looting.amount)
             ).toString(),
+            lastMinedMLON: hqUser.lastMinedMLON - parseFloat(looting.amount),
           })
           .where('users_profile.walletAddress = :walletAddress', {
             walletAddress: hqWalletAddress,
