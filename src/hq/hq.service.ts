@@ -295,16 +295,13 @@ export class HqService {
           })
           .execute();
 
-        // this update looting user's mlonRewardsAccumulated
+        // this update looting user's lastMinedMLON
         await transactionalEntityManager
           .createQueryBuilder(UsersProfile, 'users_profile')
           .setLock('pessimistic_write')
           .update(UsersProfile)
           .set({
-            mlonRewardsAccumulated: (
-              parseFloat(user.mlonRewardsAccumulated) +
-              parseFloat(looting.amount)
-            ).toString(),
+            lastMinedMLON: user.lastMinedMLON + parseFloat(looting.amount),
           })
           .where('users_profile.walletAddress = :walletAddress', {
             walletAddress: createdLooting.walletAddress,
@@ -321,16 +318,12 @@ export class HqService {
           })
           .getOne();
 
-        // this update looted user's mlonRewardsAccumulated
+        // this update looted user's lastMinedMLON
         await transactionalEntityManager
           .createQueryBuilder(UsersProfile, 'users_profile')
           .setLock('pessimistic_write')
           .update(UsersProfile)
           .set({
-            mlonRewardsAccumulated: (
-              parseFloat(hqUser.mlonRewardsAccumulated) -
-              parseFloat(looting.amount)
-            ).toString(),
             lastMinedMLON: hqUser.lastMinedMLON - parseFloat(looting.amount),
           })
           .where('users_profile.walletAddress = :walletAddress', {
