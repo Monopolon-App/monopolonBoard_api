@@ -18,7 +18,10 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { UsersProfile } from './usersprofile.entity';
 import { UpdateUserDto } from './dto/update-user-profile.dto';
 
-import { UsersProfileService } from './usersprofile.service';
+import {
+  PurchaseShieldBody,
+  UsersProfileService,
+} from './usersprofile.service';
 import { registerUserParams } from './interfaces/params.interface';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
@@ -82,5 +85,12 @@ export class UsersProfileController {
     return {
       currentTime: new Date(),
     };
+  }
+
+  @Post('/purchaseShield')
+  @ApiConsumes('multipart/form-data', 'application/json')
+  @UseInterceptors(FilesInterceptor('file'))
+  purchaseShield(@Body() purchaseShieldBody: PurchaseShieldBody): Promise<any> {
+    return this.usersService.purchaseShield(purchaseShieldBody);
   }
 }
