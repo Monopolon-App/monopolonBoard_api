@@ -29,6 +29,9 @@ export class UpdateUserDto {
   mlonRewardsAccumulated?: string;
 
   @ApiProperty({ required: false })
+  lastMinedMLON?: number;
+
+  @ApiProperty({ required: false })
   lastRollTimeStamp?: Date;
 
   @ApiProperty({ required: false })
