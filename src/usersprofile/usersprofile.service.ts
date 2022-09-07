@@ -215,9 +215,9 @@ export class UsersProfileService {
 
       user.looted = 'false';
       user.mlonRewardsAccumulated = (
-        parseFloat(user.mlonRewardsAccumulated) + user.lastMinedMLON
+        parseFloat(user.mlonRewardsAccumulated) + parseFloat(user.lastMinedMLON)
       ).toString();
-      user.lastMinedMLON = 0;
+      user.lastMinedMLON = '0';
 
       const updatesRecord = await this.usersRepository.save(user);
 

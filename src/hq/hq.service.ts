@@ -308,7 +308,9 @@ export class HqService {
           .setLock('pessimistic_write')
           .update(UsersProfile)
           .set({
-            lastMinedMLON: user.lastMinedMLON + parseFloat(looting.amount),
+            lastMinedMLON: (
+              parseFloat(user.lastMinedMLON) + parseFloat(looting.amount)
+            ).toString(),
           })
           .where('users_profile.walletAddress = :walletAddress', {
             walletAddress: createdLooting.walletAddress,
@@ -331,7 +333,9 @@ export class HqService {
           .setLock('pessimistic_write')
           .update(UsersProfile)
           .set({
-            lastMinedMLON: hqUser.lastMinedMLON - parseFloat(looting.amount),
+            lastMinedMLON: (
+              parseFloat(hqUser.lastMinedMLON) - parseFloat(looting.amount)
+            ).toString(),
           })
           .where('users_profile.walletAddress = :walletAddress', {
             walletAddress: hqWalletAddress,

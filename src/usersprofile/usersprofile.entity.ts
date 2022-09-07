@@ -50,7 +50,7 @@ export class UsersProfile {
   mlonRewardsAccumulated?: string;
 
   @Column({ default: 0 })
-  lastMinedMLON?: number;
+  lastMinedMLON?: string;
 
   @Column({ type: 'timestamp' })
   untilShieldOver?: Date;
