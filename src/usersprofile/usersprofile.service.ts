@@ -23,6 +23,18 @@ import { Hq } from '../hq/hq.entity';
 import { Character } from '../character/character.entity';
 import { CONTRACT_ADDRESS } from '../constants/constants';
 import { ListenerService } from '../listener/listeners.service';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class PurchaseShieldBody {
+  @ApiProperty()
+  walletAddress: string;
+
+  @ApiProperty()
+  shieldType: number;
+
+  @ApiProperty()
+  amount: number;
+}
 
 @Injectable()
 export class UsersProfileService {
@@ -383,6 +395,59 @@ export class UsersProfileService {
       });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async addHours(numOfHours, date) {
+    date.setTime(date.getTime() + numOfHours * 60 * 60 * 1000);
+
+    return date;
+  }
+
+  async purchaseShield(purchaseShieldBody: PurchaseShieldBody): Promise<any> {
+    try {
+      const user = await this.getByWalletAddress(
+        purchaseShieldBody.walletAddress
+      );
+
+      if (!user) {
+        throw new HttpException(
+          'User does not exist for this walletAddress',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      if (purchaseShieldBody.amount > parseFloat(user.mlonRewardsAccumulated)) {
+        throw new HttpException(
+          'user does not have sufficient mlon to buy this shield',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      const date = new Date();
+
+      const shieldType = purchaseShieldBody.shieldType;
+
+      user.untilShieldOver = await this.addHours(shieldType, date);
+
+      user.mlonRewardsAccumulated = (
+        parseFloat(user.mlonRewardsAccumulated) - purchaseShieldBody.amount
+      ).toString();
+
+      const updatesRecord = await this.usersRepository.save(user);
+
+      return {
+        status: true,
+        message: 'Shield Purchase SuccessFully',
+        data: updatesRecord,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: false,
+          message: error.message,
+        },
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 }

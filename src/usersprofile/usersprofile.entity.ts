@@ -52,6 +52,9 @@ export class UsersProfile {
   @Column({ default: 0 })
   lastMinedMLON?: number;
 
+  @Column({ type: 'timestamp' })
+  untilShieldOver?: Date;
+
   @Column({ default: null })
   looted?: string;
 

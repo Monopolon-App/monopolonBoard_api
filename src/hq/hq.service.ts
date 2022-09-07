@@ -113,14 +113,21 @@ export class HqService {
       where: { hqGridPosition, status: 1 },
     });
 
+    const date = new Date();
+
     const availableUser = [];
     const lootedUser = [];
 
+    // here we are checking 2 conditions
+    // 1. if one user loot on another user then that looted user can not be available to loot till looted user can not roll dice.
+    // 2. if user purchase any anti looting shield then user is not available for looting till the shield is not over.
     const checkUser = hq.map((hqUser) => {
       if (hqUser.user[0].looted !== 'true') {
-        availableUser.push(hqUser);
-      } else {
-        lootedUser.push(hqUser);
+        if (hqUser.user[0].untilShieldOver > date) {
+          lootedUser.push(hqUser);
+        } else {
+          availableUser.push(hqUser);
+        }
       }
     });
     // here we get All the Hqs for particular gridPosition
