@@ -64,6 +64,9 @@ export class Character {
   hp?: string;
 
   @Column({ default: null })
+  rarity?: string;
+
+  @Column({ default: null })
   MarektPlaceID?: string;
 
   @Column({ default: null })
