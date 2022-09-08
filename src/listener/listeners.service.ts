@@ -609,6 +609,7 @@ export class ListenerService implements OnModuleInit {
                     // this will only store when we have the character as the token
                     character.tokenId = tokenId;
                     character.ImageURL = tokenMeta.imgUrl;
+                    character.rarity = tokenMeta.attributes.rarity;
 
                     character.Luk =
                       tokenMeta.attributes.commonAttribute.luk?.toString();
@@ -854,6 +855,7 @@ export class ListenerService implements OnModuleInit {
                   // this will only store when we have the character as the token
                   transferTransaction.tokenId = tokenId;
                   transferTransaction.ImageURL = tokenMeta.imgUrl;
+                  transferTransaction.rarity = tokenMeta.attributes.rarity;
                   transferTransaction.Luk =
                     tokenMeta.attributes.commonAttribute.luk?.toString();
                   transferTransaction.str =
