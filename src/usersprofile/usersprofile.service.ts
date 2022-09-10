@@ -433,6 +433,8 @@ export class UsersProfileService {
         parseFloat(user.mlonRewardsAccumulated) - purchaseShieldBody.amount
       ).toString();
 
+      user.shieldType = shieldType;
+
       const updatesRecord = await this.usersRepository.save(user);
 
       return {

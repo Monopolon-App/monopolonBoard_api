@@ -55,6 +55,9 @@ export class UsersProfile {
   @Column({ type: 'timestamp' })
   untilShieldOver?: Date;
 
+  @Column({ default: 0 })
+  shieldType?: number;
+
   @Column({ default: null })
   looted?: string;
 
